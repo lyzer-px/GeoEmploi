@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: push_to_mirror
 
 on:
   pull_request:
@@ -10,7 +10,6 @@ on:
 
 jobs:
   push_to_mirror:
-    needs: [check_memory_leak]
     if: ${{ github.repository_owner == vars.USERNAME }}
     runs-on: ubuntu-latest
     steps:

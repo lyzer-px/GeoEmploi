@@ -4,3 +4,4 @@ sqlalchemy
 pyjwt
 pwdlib[argon2]
 werkzeug
+pymysql==1.0.2

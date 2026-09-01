@@ -1,5 +1,5 @@
 from enum import Enum
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timezone
 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -176,10 +176,16 @@ class Offer(Base):
     employer: Mapped["User"] = relationship(back_populates="offers_created")
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=datetime.timezone.utc)
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
+
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=datetime.timezone.utc), onupdate=datetime.now(tz=datetime.timezone.utc)
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     applications: Mapped[list["Application"]] = relationship(back_populates="offer")

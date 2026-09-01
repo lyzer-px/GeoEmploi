@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.schemas.user import UserCreate, UserIn, Location
+from app.schemas.user import UserCreate, UserIn, Localisation
 
 router: APIRouter = APIRouter()
 
@@ -16,11 +16,11 @@ async def root():
     }
 
 @router.post("/api/localisation")
-async def save_user_location(payload: Location):
+async def save_user_location(local: Localisation):
     return {
         "message": "Localisation received",
-        "latitude": payload.latitude,
-        "longitude": payload.longitude
+        "latitude": local.latitude,
+        "longitude": local.longitude
     }
 
 

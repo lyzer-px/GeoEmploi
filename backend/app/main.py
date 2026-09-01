@@ -5,11 +5,13 @@ from contextlib import asynccontextmanager
 
 from backend.app.api.routes import rooter
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Startup...")
     yield
     logging.info("Shutting down...")
+
 
 app = FastAPI(
     title="efficient token workflow engine API",

@@ -2,9 +2,11 @@ from fastapi import APIRouter
 
 rooter: APIRouter = APIRouter()
 
+
 @rooter.get("/health")
 def get_health():
     return {"status": "ok"}
+
 
 @rooter.get("/")
 def root():

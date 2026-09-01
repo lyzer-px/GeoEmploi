@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 from app.schemas.user import UserCreate, UserIn, Localisation
+from starlette import status
+from auth import db_dependency, bcrypt_context
 
 router: APIRouter = APIRouter()
 
@@ -21,21 +23,4 @@ async def save_user_location(local: Localisation):
         "message": "Localisation received",
         "latitude": local.latitude,
         "longitude": local.longitude
-    }
-
-
-@router.post("/api/create-user")
-async def create_user(user: UserCreate):
-    return {
-        "message": "User created",
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "email": user.email
-    }
-
-@router.post("/api/login")
-async def login_user(user: UserIn):
-    return {
-        "message": "User logged in",
-        "email": user.email
     }

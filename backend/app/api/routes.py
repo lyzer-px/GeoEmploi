@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends
-from typing import Annotated
+from fastapi import APIRouter
 
 rooter: APIRouter = APIRouter()
 

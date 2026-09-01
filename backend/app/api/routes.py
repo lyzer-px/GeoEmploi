@@ -18,11 +18,3 @@ async def root():
         "description": "New Linkedin",
         "version": "0.1.0",
     }
-
-@router.post("/api/localisation")
-async def save_user_location(local: Localisation):
-    return {
-        "message": "Localisation received",
-        "latitude": local.latitude,
-        "longitude": local.longitude
-    }

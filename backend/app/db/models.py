@@ -1,3 +1,6 @@
+from enum import Enum
+from datetime import date, time, datetime
+
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import (
     SmallInteger,
@@ -8,9 +11,6 @@ from sqlalchemy import (
     Time,
     Enum as SQLEnum,
 )
-
-from enum import Enum
-from datetime import date, time, datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
 

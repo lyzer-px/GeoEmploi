@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from .api.routes import rooter
 from .schemas.settings import Settings
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Startup...")

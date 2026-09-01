@@ -1,6 +1,3 @@
-from fastapi import APIRouter, Depends
-from fastapi import APIRouter
-
 from routes import router
 from app.schemas.user import JobOffer
 

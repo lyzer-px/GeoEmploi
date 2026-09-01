@@ -1,5 +1,13 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import SmallInteger, Date, DateTime, String, ForeignKey, Time, Enum as SQLEnum
+from sqlalchemy import (
+    SmallInteger,
+    Date,
+    DateTime,
+    String,
+    ForeignKey,
+    Time,
+    Enum as SQLEnum,
+)
 
 from enum import Enum
 from datetime import date, time, datetime
@@ -27,7 +35,9 @@ class User(Base):
     applications: Mapped[list["Application"]] = relationship(back_populates="user")
     offers_created: Mapped[list["Offer"]] = relationship(back_populates="employer")
     experiences: Mapped[list["Experience"]] = relationship(back_populates="user")
-    availabilities: Mapped[list["UserAvailability"]] = relationship(back_populates="user")
+    availabilities: Mapped[list["UserAvailability"]] = relationship(
+        back_populates="user"
+    )
 
     def set_password(self, password: str):
         self.password = generate_password_hash(password)
@@ -108,11 +118,14 @@ class Experience(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     user: Mapped["User"] = relationship(back_populates="experiences")
     description: Mapped[str | None] = mapped_column(String(256), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+
 
 class UserAvailability(Base):
     __tablename__ = "availabilities"
@@ -124,7 +137,9 @@ class UserAvailability(Base):
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     user: Mapped["User"] = relationship(back_populates="availabilities")
 
 
@@ -132,7 +147,9 @@ class OfferAvailability(Base):
     __tablename__ = "offer_availabilities"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id", ondelete="CASCADE"), nullable=False)
+    offer_id: Mapped[int] = mapped_column(
+        ForeignKey("offers.id", ondelete="CASCADE"), nullable=False
+    )
     day_of_week: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
@@ -158,13 +175,18 @@ class Offer(Base):
     )
     employer: Mapped["User"] = relationship(back_populates="offers_created")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now()
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now()
     )
 
     applications: Mapped[list["Application"]] = relationship(back_populates="offer")
-    required_availabilities: Mapped[list["OfferAvailability"]] = relationship(back_populates="offer")
+    required_availabilities: Mapped[list["OfferAvailability"]] = relationship(
+        back_populates="offer"
+    )
+
 
 class Application(Base):
     __tablename__ = "applications"

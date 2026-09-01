@@ -3,12 +3,15 @@ import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from backend.app.api.routes import rooter
+from .api.routes import rooter
+
+from .schemas.settings import Settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Startup...")
+    app.state.settings = Settings()
     yield
     logging.info("Shutting down...")
 

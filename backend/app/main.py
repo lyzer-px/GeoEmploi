@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
+from app.api import auth
 from fastapi import FastAPI
 
 from .core.loggings import setup_logging
@@ -26,4 +27,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(router=rooter)
+app.include_router(router=router)
+app.include_router(router=auth.auth_router)

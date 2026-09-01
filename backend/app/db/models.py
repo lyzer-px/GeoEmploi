@@ -9,6 +9,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Time,
+    Float,
     Enum as SQLEnum,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -44,7 +45,6 @@ class User(Base):
 
     def check_password(self, password: str):
         return check_password_hash(self.password, password)
-
 
 class Role(Base):
     __tablename__ = "roles"
@@ -206,3 +206,26 @@ class Application(Base):
         ForeignKey("offers.id", ondelete="CASCADE"), nullable=False
     )
     offer: Mapped["Offer"] = relationship(back_populates="applications")
+
+
+class Localisation(Base):
+    __tablename__ = "localisations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    latitude: Mapped[float] = mapped_column(Float, nullable=False)
+    longitude: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class JobOffer(Base):
+    __tablename__ = "job_offers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    city: Mapped[str] = mapped_column(String(256), nullable=False)
+    country: Mapped[str] = mapped_column(String(256), nullable=False)
+    address: Mapped[str] = mapped_column(String(256), nullable=False)
+    localisation: relationship("Localisation", back_populates="job_offer", uselist=False)
+
+    localisation_id: Mapped[int] = mapped_column(ForeignKey("localisations.id"))
+    localisation: Mapped["Localisation"] = relationship()
+    
+    

@@ -1,3 +1,5 @@
+from unittest.mock import Base
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -18,7 +20,9 @@ class Localisation(BaseModel):
     longitude: float = Field(..., ge=-180, le=180)
 
 
+
 class JobOffer(BaseModel):
-    title: str
-    description: str
-    recruiter: str
+    city: str
+    country: str
+    address: str
+    localisation: Localisation

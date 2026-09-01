@@ -1,6 +1,4 @@
 from app.schemas.user import Localisation
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
 from routes import router
 

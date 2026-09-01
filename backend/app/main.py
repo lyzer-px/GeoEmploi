@@ -1,11 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
 
-from app.api import auth
+from .api.auth import auth_router
+from .api.routes import router
 from fastapi import FastAPI
 
 from .core.loggings import setup_logging
-from .api.routes import rooter
 from .core.settings import Settings
 from .db.database import DatabaseHandler
 
@@ -19,6 +19,8 @@ async def lifespan(app: FastAPI):
     app.state.db.create_tables()
     yield
     logging.info("Shutting down...")
+    app.state.db.engine.dispose()
+
 
 app = FastAPI(
     title="efficient token workflow engine API",

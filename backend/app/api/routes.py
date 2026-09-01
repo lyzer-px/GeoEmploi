@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends
-from typing import Annotated
 from fastapi import APIRouter
-from app.schemas.user import UserCreate, UserIn, Localisation
-from starlette import status
-from auth import db_dependency, bcrypt_context
+from app.schemas.user import Localisation
 
 router: APIRouter = APIRouter()
+
 
 @router.get("/health")
 def get_health():
     return {"status": "ok"}
+
 
 @router.get("/")
 async def root():
@@ -19,10 +17,21 @@ async def root():
         "version": "0.1.0",
     }
 
+
 @router.post("/api/localisation")
 async def save_user_location(local: Localisation):
     return {
         "message": "Localisation received",
         "latitude": local.latitude,
-        "longitude": local.longitude
+        "longitude": local.longitude,
     }
+
+
+# créer un user
+# login un user
+# supprimer un user
+# modifier un user(password, first_name, last_name, password)
+
+# Ajouter une offre()
+# Supprimer une offre
+# 

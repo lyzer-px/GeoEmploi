@@ -5,3 +5,5 @@ pyjwt
 pwdlib[argon2]
 werkzeug
 pymysql==1.0.2
+passlib
+python-jose

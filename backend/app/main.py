@@ -4,18 +4,21 @@ from contextlib import asynccontextmanager
 from app.api import auth
 from fastapi import FastAPI
 
-from .api.routes import router
-from .schemas.settings import Settings
+from .core.loggings import setup_logging
+from .api.routes import rooter
+from .core.settings import Settings
+from .db.database import DatabaseHandler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logging.info("Startup...")
-    app.state.logger = logging.getLogger()
+    setup_logging()
     app.state.settings = Settings()
+    app.state.db = DatabaseHandler(app.state.settings)
+    logging.info("Creation of tables in %s database.", app.state.settings.db_name)
+    app.state.db.create_tables()
     yield
     logging.info("Shutting down...")
-
 
 app = FastAPI(
     title="efficient token workflow engine API",

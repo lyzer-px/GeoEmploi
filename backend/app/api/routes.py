@@ -1,3 +1,5 @@
+from fastapi import APIRouter, Depends
+from typing import Annotated
 from fastapi import APIRouter
 from app.schemas.user import UserCreate, UserIn, Localisation
 from starlette import status

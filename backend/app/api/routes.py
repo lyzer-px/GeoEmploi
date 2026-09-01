@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
+from app.schemas.user import UserCreate, UserIn, Location
 
 router: APIRouter = APIRouter()
 
@@ -15,14 +16,27 @@ def root():
         "version": "0.1.0",
     }
 
-class LocationPayload(BaseModel):
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-
 @router.post("/api/localisation")
-def save_user_location(payload: LocationPayload):
+def save_user_location(payload: Location):
     return {
         "message": "Location received",
         "latitude": payload.latitude,
         "longitude": payload.longitude
+    }
+
+
+@router.post("/api/create-user")
+def create_user(user: UserCreate):
+    return {
+        "message": "User created",
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email
+    }
+
+@router.post("/api/login")
+def login_user(user: UserIn):
+    return {
+        "message": "User logged in",
+        "email": user.email
     }

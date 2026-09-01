@@ -176,10 +176,10 @@ class Offer(Base):
     employer: Mapped["User"] = relationship(back_populates="offers_created")
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now()
+        DateTime, nullable=False, default=datetime.now(tz=datetime.timezone.utc)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now()
+        DateTime, nullable=False, default=datetime.now(tz=datetime.timezone.utc), onupdate=datetime.now(tz=datetime.timezone.utc)
     )
 
     applications: Mapped[list["Application"]] = relationship(back_populates="offer")

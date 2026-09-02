@@ -16,7 +16,7 @@ from sqlalchemy import (
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from backend.app.schemas.localisation import FixedLocalisation
+from schemas.localisation import FixedLocalisation
 
 
 class Base(DeclarativeBase):

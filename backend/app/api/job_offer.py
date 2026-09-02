@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
+from app.schemas.offer import NearbyOfferOut, NearbyOffersQuery
+from app.services.proximity.query import find_nearby_offers
 from db.models import Offer
 from job_offer import OfferCreate
 from api.auth import db_dependency, user_dependency

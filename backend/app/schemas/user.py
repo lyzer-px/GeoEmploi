@@ -13,11 +13,3 @@ class UserIn(BaseModel):
     email: EmailStr
     password: str
 
-class OfferCreate(BaseModel):
-    id: int
-    city: str
-    country: str
-    address: str
-    localisation: FixedLocalisation
-
-    model_config = {"from_attributes": True} 

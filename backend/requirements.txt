@@ -1,9 +1,11 @@
 fastapi[standard]
 python-dotenv
 sqlalchemy
+geoalchemy2
 pyjwt
 pwdlib[argon2]
 werkzeug
 pymysql==1.0.2
 passlib
 python-jose
+shapely

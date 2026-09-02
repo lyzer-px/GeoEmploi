@@ -17,6 +17,11 @@ class OfferStatus(str, Enum):
     OPEN = "open"
     CLOSED = "closed"
 
+class ContractType(str, Enum):
+    PART_TIME = "part-time",
+    FULL_TIME = "full-time",
+    INTERNSHIP = "internship"
+    VOLUNTEER = "volunteer"
 
 class Offer(Base):
     __tablename__ = "offers"
@@ -28,6 +33,7 @@ class Offer(Base):
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
+    contract_type: Mapped[ContractType] = mapped_column(SQLEnum(ContractType), nullable=False, unique=True)
     employer_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -48,5 +54,5 @@ class Offer(Base):
 
     applications: Mapped[list["Application"]] = relationship(back_populates="offer")
     required_availabilities: Mapped[list["OfferAvailability"]] = relationship(
-        back_populates="offer"
+        back_populates="offer",
     )

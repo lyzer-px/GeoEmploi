@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-
+from fastapi import APIRouter, Depends
 
 from app.schemas.localisation import Localisation
 from app.schemas.user import UserCreate, UserUpdate
+from app.services.user_service import get_user_service, UserService
 
 router: APIRouter = APIRouter()
 
@@ -20,20 +21,12 @@ async def root():
         "version": "0.1.0",
     }
 
-
-@router.post("/api/localisation")
-async def save_user_location(local: Localisation):
-    return {
-        "message": "Localisation received",
-        "latitude": local.latitude,
-        "longitude": local.longitude,
-    }
-
-
 @router.get("/users")
 def get_users():
     """Retrieve a list of all users"""
-    ...
+
+
+
 
 
 @router.get("/users/{id}")
@@ -43,12 +36,12 @@ def get_user(id: int):
 
 
 @router.post("/users")
-def create_user(user: UserCreate):
+def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
     """Create a new user"""
-    ...
+    service.create_user(UserCreate)
 
 
-@router.put("/users/{id}")
+@router.patch("/users/{id}")
 def update_user(id: int, user: UserUpdate):
     """Update user information"""
     ...

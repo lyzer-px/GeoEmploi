@@ -22,7 +22,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
     roles: Mapped[list["Role"]] = relationship(
-        secondary="user_roles", back_populates="users"
+        secondary="user_roles", back_populates="users",
     )
     skills: Mapped[list["Skill"]] = relationship(
         secondary="users_skills", back_populates="users"
@@ -37,7 +37,7 @@ class User(Base):
     def set_password(self, password: str):
         self.password = generate_password_hash(password)
 
-    def check_password(self, password: str):
+    def verify_password(self, password: str):
         return check_password_hash(self.password, password)
 
 

@@ -1,28 +1,23 @@
-from unittest.mock import Base
+from pydantic import BaseModel, EmailStr
 
-from pydantic import BaseModel, EmailStr, Field
-
+from app.schemas.localisation import FixedLocalisation
 
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
     password: str
-
+    base_localisation: FixedLocalisation
 
 class UserIn(BaseModel):
     email: EmailStr
     password: str
 
-
-class Localisation(BaseModel):
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-
-
-
-class JobOffer(BaseModel):
+class OfferCreate(BaseModel):
+    id: int
     city: str
     country: str
     address: str
-    localisation: Localisation
+    localisation: FixedLocalisation
+
+    model_config = {"from_attributes": True} 

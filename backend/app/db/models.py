@@ -13,7 +13,10 @@ from sqlalchemy import (
     Float,
     Enum as SQLEnum,
 )
+
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from backend.app.schemas.localisation import FixedLocalisation
 
 
 class Base(DeclarativeBase):
@@ -207,7 +210,7 @@ class Application(Base):
     )
     user: Mapped["User"] = relationship(back_populates="applications")
     offer_id: Mapped[int] = mapped_column(
-        ForeignKey("offers.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("job_offers.id", ondelete="CASCADE"), nullable=False
     )
     offer: Mapped["Offer"] = relationship(back_populates="applications")
 
@@ -217,16 +220,37 @@ class Localisation(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     latitude: Mapped[float] = mapped_column(Float, nullable=False)
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
-    job_offers: Mapped[list["JobOffer"]] = relationship(back_populates="localisation")
+    job_offers: Mapped[list["Offer"]] = relationship(back_populates="localisation")
 
 
-class JobOffer(Base):
-    __tablename__ = "job_offers"
+class Offer(Base):
+    __tablename__ = "offers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    city: Mapped[str] = mapped_column(String(256), nullable=False)
-    country: Mapped[str] = mapped_column(String(256), nullable=False)
-    address: Mapped[str] = mapped_column(String(256), nullable=False)
-    localisation_id: Mapped[int] = mapped_column(ForeignKey("localisations.id"))
-    localisation: Mapped["Localisation"] = relationship(back_populates="job_offers")
-    
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str] = mapped_column(String(2056), nullable=False)
+    status: Mapped[OfferStatus] = mapped_column(SQLEnum(OfferStatus), nullable=False)
+
+    employer_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    employer: Mapped["User"] = relationship(back_populates="offers_created")
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    applications: Mapped[list["Application"]] = relationship(back_populates="offer")
+    required_availabilities: Mapped[list["OfferAvailability"]] = relationship(
+        back_populates="offer"
+    )
+
+    @property
+    def localisation(self):
+        return self.employer.location

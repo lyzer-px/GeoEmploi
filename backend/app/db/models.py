@@ -253,4 +253,4 @@ class Offer(Base):
 
     @property
     def localisation(self):
-        return self.employer.location
+        return self.employer.base_localisation

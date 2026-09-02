@@ -1,5 +1,6 @@
 from enum import Enum
 from datetime import date, time, datetime, timezone
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -39,6 +40,8 @@ class User(Base):
     availabilities: Mapped[list["UserAvailability"]] = relationship(
         back_populates="user"
     )
+    base_localisation: Mapped["FixedLocalisation"] = relationship(back_populates="users")
+    precise_localisation_accepted: Mapped["bool"] = mapped_column(default=False)
 
     def set_password(self, password: str):
         self.password = generate_password_hash(password)
@@ -174,6 +177,7 @@ class Offer(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     employer: Mapped["User"] = relationship(back_populates="offers_created")
+    location = association_proxy("employer", "location")
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -207,13 +211,13 @@ class Application(Base):
     )
     offer: Mapped["Offer"] = relationship(back_populates="applications")
 
-
 class Localisation(Base):
     __tablename__ = "localisations"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     latitude: Mapped[float] = mapped_column(Float, nullable=False)
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
+    job_offers: Mapped[list["JobOffer"]] = relationship(back_populates="localisation")
 
 
 class JobOffer(Base):
@@ -223,9 +227,6 @@ class JobOffer(Base):
     city: Mapped[str] = mapped_column(String(256), nullable=False)
     country: Mapped[str] = mapped_column(String(256), nullable=False)
     address: Mapped[str] = mapped_column(String(256), nullable=False)
-    localisation: relationship("Localisation", back_populates="job_offer", uselist=False)
-
     localisation_id: Mapped[int] = mapped_column(ForeignKey("localisations.id"))
-    localisation: Mapped["Localisation"] = relationship()
-    
+    localisation: Mapped["Localisation"] = relationship(back_populates="job_offers")
     

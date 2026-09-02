@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 from .models import Base
 from app.core.settings import Settings
 
-
 class DatabaseHandler:
     engine: Engine
 
@@ -20,5 +19,10 @@ class DatabaseHandler:
         Base.metadata.create_all(self.engine)
 
     def get_session(self):
-        with self.session_factory() as session:
-            yield session
+        db = self.session_factory()
+        try:
+            yield db
+        finally:
+              db.close()
+
+       

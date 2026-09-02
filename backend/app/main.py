@@ -2,12 +2,15 @@ import logging
 from contextlib import asynccontextmanager
 
 from .api.auth import auth_router
-from .api.routes import router
+from .api.users import router
 from fastapi import FastAPI
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
 from .db.database import DatabaseHandler
+
+
+VERSION_API: str = "v1"
 
 
 @asynccontextmanager
@@ -29,5 +32,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(router=router)
-app.include_router(router=auth.auth_router)
+#app.include_router(router=router, prefix="/api/{VERSION_API}")
+#app.include_router(router=auth_router, prefix="/api/{VERSION_API}")

@@ -1,5 +1,8 @@
 from fastapi import APIRouter
-from app.schemas.user import Localisation
+
+
+from app.schemas.localisation import Localisation
+from app.schemas.user import UserCreate, UserUpdate
 
 router: APIRouter = APIRouter()
 
@@ -27,11 +30,41 @@ async def save_user_location(local: Localisation):
     }
 
 
-# créer un user
+@router.get("/users")
+def get_users():
+    """Retrieve a list of all users"""
+    ...
+
+
+@router.get("/users/{id}")
+def get_user(id: int):
+    """Retrieve a single user"""
+    ...
+
+
+@router.post("/users")
+def create_user(user: UserCreate):
+    """Create a new user"""
+    ...
+
+
+@router.put("/users/{id}")
+def update_user(id: int, user: UserUpdate):
+    """Update user information"""
+    ...
+
+
+@router.delete("/users/{id}")
+def delete_user(id: int):
+    """Delete a user"""
+    ...
+
+
+# créer un user(/api/creat)
 # login un user
+# logout un user
 # supprimer un user
 # modifier un user(password, first_name, last_name, password)
 
 # Ajouter une offre()
 # Supprimer une offre
-# 

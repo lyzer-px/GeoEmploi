@@ -1,8 +1,15 @@
-from fastapi import APIRouter
-from app.schemas.user import Localisation
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.db.database import db_handler
+from app.db.models import User
+
 
 router: APIRouter = APIRouter()
 
+db_dependency = Annotated[Session, Depends(db_handler.get_session)]
 
 @router.get("/health")
 def get_health():
@@ -13,25 +20,31 @@ def get_health():
 async def root():
     return {
         "title": "GeoEmploi",
-        "description": "New Linkedin",
-        "version": "0.1.0",
+        "description": "Il suffit de traverser la rue pour trouver un emploi !",
+        "version": "0.1.1",
     }
 
+@router.delete("/api/user/{user_id}")
+async def delete_user(user_id: int, db: db_dependency):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return {"message": "User not found"}
+    db.delete(user)
+    db.commit()
+    return {"message": "User supprimé avec succès"}
 
-@router.post("/api/localisation")
-async def save_user_location(local: Localisation):
-    return {
-        "message": "Localisation received",
-        "latitude": local.latitude,
-        "longitude": local.longitude,
-    }
-
-
-# créer un user
-# login un user
-# supprimer un user
-# modifier un user(password, first_name, last_name, password)
-
-# Ajouter une offre()
-# Supprimer une offre
-# 
+@router.put("/api/user/{user_id}")
+async def update_user(user_id: int, updated_user: User, db: db_dependency):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return {"message": "User not found"}
+    
+    user.first_name = updated_user.first_name
+    user.last_name = updated_user.last_name
+    user.email = updated_user.email
+    user.password = updated_user.password
+    
+    db.commit()
+    db.refresh(user)
+    
+    return {"message": "User mis à jour avec succès", "user": user}

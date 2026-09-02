@@ -5,8 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from backend.app.api.localisation import geocode
 from passlib.context import CryptContext
 from jose import jwt, JWTError
+from geoalchemy2.shape import from_shape
+from shapely.geometry import Point
 
 from app.db.models import User
 from app.db.session import db_handler
@@ -30,7 +33,21 @@ async def create_user(db: db_dependency, user: UserCreate):
         last_name=user.last_name,
         email=user.email,
         password=bcrypt_context.hash(user.password),
+        city=user.base_localisation.city,
+        country=user.base_localisation.country,
+        address=user.base_localisation.address,
     )
+
+    coords = await geocode(
+        user.base_localisation.city,
+        user.base_localisation.country,
+        user.base_localisation.address,
+    )
+    if coords:
+        create_user_model.location = from_shape(
+        Point(coords.longitude, coords.latitude), srid=4326
+    )
+
     db.add(create_user_model)
     db.commit()
 

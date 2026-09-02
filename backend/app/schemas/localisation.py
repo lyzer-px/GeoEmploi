@@ -8,3 +8,4 @@ class FixedLocalisation(BaseModel):
     country: str
     city: str
     address: str
+    coordinates: PreciseLocalisation

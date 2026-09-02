@@ -1,0 +1,5 @@
+import os
+
+ALGORITHM = "HS256"
+AUTH_TOKEN_EXPIRE_MINUTES = 20
+SECRET_KEY = os.getenv("SECRET_KEY")

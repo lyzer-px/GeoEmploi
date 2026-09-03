@@ -1,12 +1,9 @@
 from typing import Annotated
 import logging
 
-from jose import JWTError, jwt
+from jose import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
-from pydantic import ValidationError
-
 from app.core.config import SECRET_KEY, ALGORITHM
 from app.db.models.rbac import User
 from app.schemas.auth import AccessToken, RefreshToken, RefreshTokenRequest
@@ -25,14 +22,11 @@ UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 def get_current_token_payload(
     token: Annotated[str, Depends(oauth2_scheme)]
 ) -> AccessToken:
-    logging.info(f"{token=}")
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    logging.info(f"{payload=}")
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return AccessToken.model_validate(payload)
-    except (JWTError, ValidationError):
+    except (Exception):
         raise credentials_exception
 
 AccessTokenDep = Annotated[AccessToken, Depends(get_current_token_payload)]
@@ -60,7 +54,7 @@ def verify_refresh_token(body: RefreshTokenRequest) -> RefreshToken:
                 detail="Invalid token type",
             )
         return refresh_payload        
-    except (JWTError, ValidationError):
+    except (Exception):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired refresh token",

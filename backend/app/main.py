@@ -2,12 +2,12 @@ import logging
 from contextlib import asynccontextmanager
 
 from .api.auth import auth_router
-from .api.users import router
+from .api.users import users_router
 from fastapi import FastAPI
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
-from .db.database import DatabaseHandler, init_db
+from .db.database import init_db
 
 
 VERSION_API: str = "v1"
@@ -26,11 +26,23 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="efficient token workflow engine API",
-    description="An API for building multi-agent AI workflows with optimized token usage.",
+    title="Geo Emploi",
+    description="",
     version="0.1.0",
     lifespan=lifespan,
 )
 
-# .include_router(router=router, prefix="/api/{VERSION_API}")
-app.include_router(router=auth_router, prefix="/api/{VERSION_API}")
+app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
+app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
+
+@app.get("/", tags=["System"])
+async def root():
+    return {
+        "title": "GeoEmploi",
+        "description": "New Linkedin",
+        "version": "0.1.0",
+    }
+
+@app.get("/health", tags=["System"])
+def get_health():
+    return {"status": "ok"}

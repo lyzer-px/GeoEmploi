@@ -1,63 +1,30 @@
-from fastapi import APIRouter
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, status
+from fastapi.security import OAuth2PasswordBearer
 
-from app.schemas.localisation import Localisation
-from app.schemas.user import UserCreate, UserUpdate
-from app.services.user_service import get_user_service, UserService
+from app.api.dependencies import UserServiceDep, AccessTokenDep, CurrentUserDep
+from app.schemas.user import UserUpdate
+from app.db.models import User
 
-router: APIRouter = APIRouter()
-
-
-@router.get("/health")
-def get_health():
-    return {"status": "ok"}
+users_router = APIRouter(tags=["users"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-@router.get("/")
-async def root():
-    return {
-        "title": "GeoEmploi",
-        "description": "New Linkedin",
-        "version": "0.1.0",
-    }
-
-@router.get("/users")
-def get_users():
-    """Retrieve a list of all users"""
-
-
-
-
-
-@router.get("/users/{id}")
-def get_user(id: int):
-    """Retrieve a single user"""
-    ...
-
-
-@router.post("/users")
-def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
-    """Create a new user"""
-    service.create_user(UserCreate)
-
-
-@router.patch("/users/{id}")
-def update_user(id: int, user: UserUpdate):
+@users_router.patch("/me", status_code=status.HTTP_200_OK)
+def update_my_account(user: UserUpdate, user_service: UserServiceDep, token: AccessTokenDep):
     """Update user information"""
-    ...
+    user_service.update_user(token.user_id, user)
 
 
-@router.delete("/users/{id}")
-def delete_user(id: int):
-    """Delete a user"""
-    ...
+@users_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
+    "Delete user account"
+    user_service.delete_user(token.user_id)
 
+@users_router.get("/me")
+def get_my_account(user: CurrentUserDep):
+    """Retrieve information about a user"""
+    return { "response": "ok" }
 
-# créer un user(/api/creat)
-# login un user
-# logout un user
-# supprimer un user
-# modifier un user(password, first_name, last_name, password)
-
-# Ajouter une offre()
-# Supprimer une offre
+@users_router.get("/me/roles", status_code=status.HTTP_200_OK)
+def get_my_roles(token: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep):
+    return user_service.get_stringify_roles_of_user(user)

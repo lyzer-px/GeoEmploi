@@ -22,7 +22,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
     roles: Mapped[list["Role"]] = relationship(
-        secondary="user_roles", back_populates="users",
+        secondary="user_roles",
+        back_populates="users",
     )
     skills: Mapped[list["Skill"]] = relationship(
         secondary="users_skills", back_populates="users"

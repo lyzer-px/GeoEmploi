@@ -1,9 +1,16 @@
 import './App.css'
+import Header from './Header.tsx'
+import Footer from './Footer.tsx'
+import HomePage from './HomePage.tsx'
 
 function App() {
 
   return (
-    <h1> GEOEMPLOI</h1>
+      <>
+        <Header />
+        <HomePage />
+        <Footer />
+      </>
   )
 }
 

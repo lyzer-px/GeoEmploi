@@ -1,0 +1,167 @@
+Enum "offers_status_enum" {
+  "OPEN"
+  "CLOSED"
+}
+
+Table "applications" {
+  "id" int [pk, not null, increment]
+  "user_id" int [not null]
+  "offer_id" int [not null]
+
+  Indexes {
+    user_id [name: "user_id"]
+    offer_id [name: "offer_id"]
+  }
+}
+
+Table "availabilities" {
+  "id" int [pk, not null, increment]
+  "day_of_week" smallint [not null]
+  "start_time" time [not null]
+  "end_time" time [not null]
+  "start_date" date [not null]
+  "end_date" date [not null]
+  "user_id" int [not null]
+
+  Indexes {
+    user_id [name: "user_id"]
+  }
+}
+
+Table "experiences" {
+  "id" int [pk, not null, increment]
+  "name" varchar(256) [not null]
+  "user_id" int [not null]
+  "description" varchar(256)
+  "start_date" date [not null]
+  "end_date" date
+
+  Indexes {
+    name [unique, name: "name"]
+    user_id [name: "user_id"]
+  }
+}
+
+Table "offer_availabilities" {
+  "id" int [pk, not null, increment]
+  "offer_id" int [not null]
+  "day_of_week" smallint [not null]
+  "start_time" time [not null]
+  "end_time" time [not null]
+
+  Indexes {
+    offer_id [name: "offer_id"]
+  }
+}
+
+Table "offers" {
+  "id" int [pk, not null, increment]
+  "name" varchar(256) [not null]
+  "description" varchar(2056) [not null]
+  "status" offers_status_enum [not null]
+  "employer_id" int [not null]
+  "created_at" datetime [not null]
+  "updated_at" datetime [not null]
+
+  Indexes {
+    employer_id [name: "employer_id"]
+  }
+}
+
+Table "permissions" {
+  "id" int [pk, not null, increment]
+  "name" varchar(256) [not null]
+
+  Indexes {
+    name [unique, name: "name"]
+    id [name: "ix_permissions_id"]
+  }
+}
+
+Table "role_permissions" {
+  "role_id" int [not null]
+  "permission_id" int [not null]
+
+  Indexes {
+    (role_id, permission_id) [pk]
+    permission_id [name: "permission_id"]
+  }
+}
+
+Table "roles" {
+  "id" int [pk, not null, increment]
+  "name" varchar(256) [not null]
+  "description" varchar(256) [not null]
+
+  Indexes {
+    name [unique, name: "name"]
+  }
+}
+
+Table "skills" {
+  "id" int [pk, not null, increment]
+  "name" varchar(256) [not null]
+  "level" smallint [not null]
+  "description" varchar(256)
+
+  Indexes {
+    name [unique, name: "name"]
+  }
+}
+
+Table "user_roles" {
+  "user_id" int [not null]
+  "role_id" int [not null]
+
+  Indexes {
+    (user_id, role_id) [pk]
+    role_id [name: "role_id"]
+  }
+}
+
+Table "users" {
+  "id" int [pk, not null, increment]
+  "first_name" varchar(256) [not null]
+  "last_name" varchar(256) [not null]
+  "email" varchar(256) [not null]
+  "password" varchar(256) [not null]
+
+  Indexes {
+    email [unique, name: "email"]
+    id [name: "ix_users_id"]
+  }
+}
+
+Table "users_skills" {
+  "user_id" int [not null]
+  "skill_id" int [not null]
+
+  Indexes {
+    (user_id, skill_id) [pk]
+    skill_id [name: "skill_id"]
+  }
+}
+
+Ref "applications_ibfk_1":"users"."id" <? "applications"."user_id" [delete: cascade]
+
+Ref "applications_ibfk_2":"offers"."id" <? "applications"."offer_id" [delete: cascade]
+
+Ref "availabilities_ibfk_1":"users"."id" <? "availabilities"."user_id" [delete: cascade]
+
+Ref "experiences_ibfk_1":"users"."id" <? "experiences"."user_id" [delete: cascade]
+
+Ref "offer_availabilities_ibfk_1":"offers"."id" <? "offer_availabilities"."offer_id" [delete: cascade]
+
+Ref "offers_ibfk_1":"users"."id" <? "offers"."employer_id" [delete: cascade]
+
+Ref "role_permissions_ibfk_1":"roles"."id" <? "role_permissions"."role_id"
+
+Ref "role_permissions_ibfk_2":"permissions"."id" <? "role_permissions"."permission_id"
+
+Ref "user_roles_ibfk_1":"users"."id" <? "user_roles"."user_id" [delete: cascade]
+
+Ref "user_roles_ibfk_2":"roles"."id" <? "user_roles"."role_id" [delete: cascade]
+
+Ref "users_skills_ibfk_1":"users"."id" <? "users_skills"."user_id" [delete: cascade]
+
+Ref "users_skills_ibfk_2":"skills"."id" <? "users_skills"."skill_id" [delete: cascade]

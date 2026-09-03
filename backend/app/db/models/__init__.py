@@ -1,26 +1,17 @@
-from .database import DatabaseHandler
-from .models import (
-    Application,
+from .application import Application
+from .availability import (
     Availability,
     AvailabilityDay,
-    Base,
-    Experience,
-    Offer,
     OfferAvailability,
-    OfferStatus,
-    Permission,
-    Role,
-    RolePermission,
-    Skill,
-    User,
     UserAvailability,
-    UserRole,
-    UsersSkills,
     Weekday,
 )
+from .base import Base
+from .offer import Offer, OfferStatus
+from .rbac import Permission, Role, RolePermission, User, UserRole
+from .skill import Experience, Skill, UsersSkills
 
 __all__ = [
-    "DatabaseHandler",
     "Base",
     "Weekday",
     "OfferStatus",

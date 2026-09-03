@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from .api.routes import rooter
+from .api.routes import router as tiles_router
 from .schemas.settings import Settings
 
 
@@ -23,4 +24,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(tiles_router)
 app.include_router(router=rooter)

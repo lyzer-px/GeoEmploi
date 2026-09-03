@@ -19,8 +19,8 @@ class OfferStatus(str, Enum):
 
 
 class ContractType(str, Enum):
-    PART_TIME = ("part-time",)
-    FULL_TIME = ("full-time",)
+    PART_TIME = "part-time"
+    FULL_TIME = "full-time"
     INTERNSHIP = "internship"
     VOLUNTEER = "volunteer"
 

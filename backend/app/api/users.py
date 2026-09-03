@@ -21,9 +21,9 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
     user_service.delete_user(token.user_id)
 
 @users_router.get("/me")
-def get_my_account(user: CurrentUserDep):
+def get_my_account(token: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep):
     """Retrieve information about a user"""
-    return { "response": "ok" }
+    
 
 @users_router.get("/me/roles", status_code=status.HTTP_200_OK)
 def get_my_roles(token: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep):

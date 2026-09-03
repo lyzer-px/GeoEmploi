@@ -13,10 +13,12 @@ from sqlalchemy import (
     Float,
     Enum as SQLEnum,
 )
+from geoalchemy2 import Geography
+from geoalchemy2.shape import to_shape
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from schemas.localisation import FixedLocalisation
+from app.schemas.localisation import PreciseLocalisation
 
 
 class Base(DeclarativeBase):
@@ -31,6 +33,7 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(256), nullable=False)
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
+    location = mapped_column(Geography(geometry_type="POINT", srid=4326), nullable=True)
     roles: Mapped[list["Role"]] = relationship(
         secondary="user_roles", back_populates="users"
     )
@@ -43,7 +46,6 @@ class User(Base):
     availabilities: Mapped[list["UserAvailability"]] = relationship(
         back_populates="user"
     )
-    base_localisation: Mapped["FixedLocalisation"] = relationship(back_populates="users")
     precise_localisation_accepted: Mapped["bool"] = mapped_column(default=False)
 
     def set_password(self, password: str):
@@ -51,6 +53,14 @@ class User(Base):
 
     def check_password(self, password: str):
         return check_password_hash(self.password, password)
+
+    @property
+    def base_localisation(self) -> PreciseLocalisation | None:
+        if self.location is None:
+            return None
+
+        point = to_shape(self.location)
+        return PreciseLocalisation(latitude=point.y, longitude=point.x)
 
 class Role(Base):
     __tablename__ = "roles"
@@ -200,6 +210,10 @@ class Offer(Base):
         back_populates="offer"
     )
 
+    @property
+    def localisation(self):
+        return self.employer.base_localisation
+
 
 class Application(Base):
     __tablename__ = "applications"
@@ -210,47 +224,6 @@ class Application(Base):
     )
     user: Mapped["User"] = relationship(back_populates="applications")
     offer_id: Mapped[int] = mapped_column(
-        ForeignKey("job_offers.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("offers.id", ondelete="CASCADE"), nullable=False
     )
     offer: Mapped["Offer"] = relationship(back_populates="applications")
-
-class Localisation(Base):
-    __tablename__ = "localisations"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    latitude: Mapped[float] = mapped_column(Float, nullable=False)
-    longitude: Mapped[float] = mapped_column(Float, nullable=False)
-    job_offers: Mapped[list["Offer"]] = relationship(back_populates="localisation")
-
-
-class Offer(Base):
-    __tablename__ = "offers"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(256), nullable=False)
-    description: Mapped[str] = mapped_column(String(2056), nullable=False)
-    status: Mapped[OfferStatus] = mapped_column(SQLEnum(OfferStatus), nullable=False)
-
-    employer_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    employer: Mapped["User"] = relationship(back_populates="offers_created")
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
-
-    applications: Mapped[list["Application"]] = relationship(back_populates="offer")
-    required_availabilities: Mapped[list["OfferAvailability"]] = relationship(
-        back_populates="offer"
-    )
-
-    @property
-    def localisation(self):
-        return self.employer.base_localisation

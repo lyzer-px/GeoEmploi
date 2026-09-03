@@ -1,3 +1,5 @@
+from sqlalchemy.engine import URL
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,11 +11,17 @@ class Settings(BaseSettings):
     db_port: int
     hash_key: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
     def database_url(self) -> str:
-        return (
-            f"mysql+pymysql://{self.db_username}:{self.db_password}"
-            f"@{self.db_host}:{self.db_port}/{self.db_name}"
+        return str(
+            URL.create(
+                drivername="postgresql+psycopg2",
+                username=self.db_username,
+                password=self.db_password,
+                host=self.db_host,
+                port=self.db_port,
+                database=self.db_name,
+            )
         )

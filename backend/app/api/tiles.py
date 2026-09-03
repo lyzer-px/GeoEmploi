@@ -8,8 +8,8 @@ tiles_router: APIRouter = APIRouter(tags=["tiles"])
 tile_service: TileService = TileService()
 
 
-@tiles_router.get("/tile/{z}/{y}/{x}.png")
-async def serve_tile(z: int, y: int, x: int):
+@tiles_router.get("/tile/{z}/{x}/{y}.png")
+async def serve_tile(z: int, x: int, y: int):
     tile = tile_service.get_tile(z, x, y)
 
     return Response(content=tile, media_type="image/png")

@@ -1,3 +1,7 @@
+import './App.css'
+import Header from './Header.tsx'
+import Footer from './Footer.tsx'
+import HomePage from './HomePage.tsx'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import { ROUTES } from './routes';
@@ -18,13 +22,12 @@ function Home() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path={ROUTES.HOME} element={<Home />} />
-        <Route path={ROUTES.LOGIN} element={<Login />} />
-      </Routes>
-    </BrowserRouter>
-  );
+      <>
+        <Header />
+        <HomePage />
+        <Footer />
+      </>
+  )
 }
 
 export default App;

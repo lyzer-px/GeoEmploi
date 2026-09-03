@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import db_handler
 from app.db.models import User
+from app.schemas.user import UserUpdate
 
 
 router: APIRouter = APIRouter()
@@ -34,7 +35,7 @@ async def delete_user(user_id: int, db: db_dependency):
     return {"message": "User supprimé avec succès"}
 
 @router.put("/api/user/{user_id}")
-async def update_user(user_id: int, updated_user: User, db: db_dependency):
+async def update_user(user_id: int, updated_user: UserUpdate, db: db_dependency):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return {"message": "User not found"}

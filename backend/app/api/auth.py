@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from backend.app.api.localisation import geocode
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from geoalchemy2.shape import from_shape
@@ -13,8 +12,10 @@ from shapely.geometry import Point
 
 from app.db.models import User
 from app.db.session import db_handler
-from app.schemas.user import UserCreate, Token
+from app.schemas.user import UserCreate
+from app.schemas.auth import Token
 from app.core.config import SECRET_KEY
+from app.services.geocoding import geocode
 
 ALGORITHM = "HS256"
 AUTH_TOKEN_EXPIRE_MINUTES = 20
@@ -33,9 +34,6 @@ async def create_user(db: db_dependency, user: UserCreate):
         last_name=user.last_name,
         email=user.email,
         password=bcrypt_context.hash(user.password),
-        city=user.base_localisation.city,
-        country=user.base_localisation.country,
-        address=user.base_localisation.address,
     )
 
     coords = await geocode(
@@ -106,5 +104,5 @@ async def get_current_user(
 user_dependency = Annotated[User, Depends(get_current_user)]
 
 @auth_router.get("/login", status_code=status.HTTP_200_OK)
-async def login_user(user: user_dependency):
-    return {"user": user}
+async def login_user(current_user=Depends(get_current_user)):
+    return {"user": current_user}

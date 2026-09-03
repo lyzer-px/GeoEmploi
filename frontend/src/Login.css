@@ -1,0 +1,17 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.login-block {
+    width: 490px;
+}
+
+.login-space {
+    width: 490px;
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+}

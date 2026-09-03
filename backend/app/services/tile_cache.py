@@ -7,7 +7,6 @@ TILE_CACHE_DIR.mkdir(exist_ok=True)
 
 WMTS_URL = "https://data.geopf.fr/wmts"
 
-
 def tile_path(z: int, x: int, y: int) -> Path:
     return TILE_CACHE_DIR / f"{z}_{x}_{y}.png"
 

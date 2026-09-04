@@ -1,33 +1,32 @@
-import './App.css'
-import Header from './Header.tsx'
-import Footer from './Footer.tsx'
-import HomePage from './HomePage.tsx'
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
+import HomePage from './HomePage';
 import { ROUTES } from './routes';
+import MyHeader from './Header';
+import Footer from './Footer';
+import './App.css'
 
 function Home() {
-  const navigate = useNavigate();
-
   return (
-    <div>
-      <h1>ChomageGO</h1>
-
-      <button onClick={() => navigate(ROUTES.LOGIN)}>
-        Aller vers la page de connexion
-      </button>
+    <div className="app-layout">
+      <MyHeader />
+      <main className="app-main">
+        <HomePage />
+      </main>
+      <Footer />
     </div>
   );
 }
 
 function App() {
   return (
-      <>
-        <Header />
-        <HomePage />
-        <Footer />
-      </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path={ROUTES.HOME} element={<Home />} />
+        <Route path={ROUTES.LOGIN} element={<Login />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

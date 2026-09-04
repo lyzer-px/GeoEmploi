@@ -1,7 +1,10 @@
-
 import { Header } from "@codegouvfr/react-dsfr/Header";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "./routes";
 
 function MyHeader() {
+    const navigate = useNavigate();
+
     return (
         <Header
         brandTop={<> Ministère <br /> du Job et <br /> Bonheur </>}
@@ -14,15 +17,10 @@ function MyHeader() {
         quickAccessItems={[
             {
             buttonProps: {
-                onClick: function noRefCheck(){}
+                onClick: () => navigate(ROUTES.LOGIN),
             },
             iconId: 'ri-account-box-line',
             text: 'Se connecter'
-            // buttonProps: {
-            //     onClick: () => {
-            //         setIsLoggedIn(true);
-            //     }
-            // }
             }
         ]}
         navigation={[{ text: "Accueil", linkProps: {href: "/",}, },

@@ -129,7 +129,7 @@ export function Login() {
                         state="default"
                         nativeInputProps={{
                             value: firstName,
-                            onChange: (e) => setLastName(e.target.value),
+                            onChange: (e) => setFirstName(e.target.value),
                         }}
                     />
                     <Input
@@ -137,7 +137,7 @@ export function Login() {
                         state="default"
                         nativeInputProps={{
                             value: lastName,
-                            onChange: (e) => setFirstName(e.target.value),
+                            onChange: (e) => setLastName(e.target.value),
                         }}
                     />
                     <Input

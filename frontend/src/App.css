@@ -29,6 +29,10 @@
   justify-content: center;
 }
 
+/* =========================
+   ADMIN PAGE
+   ========================= */
+
 .admin-page {
   width: 100%;
   flex: 1;
@@ -44,8 +48,14 @@
   max-width: 1200px;
 }
 
+
+/* =========================
+   TITLE
+   ========================= */
+
 .admin-kicker {
   margin: 0 0 0.25rem;
+
   color: #666;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -54,66 +64,186 @@
 
 .admin-content h1 {
   margin: 0;
+
   font-size: 2rem;
 }
 
-/* Grand rectangle */
+
+/* =========================
+   MAIN BOX
+   ========================= */
+
 .admin-box {
   width: 100%;
   min-height: 500px;
+
   margin-top: 2rem;
   padding: 3rem;
 
   box-sizing: border-box;
+
   border: 1px solid var(--border);
   border-radius: 8px;
+
   box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+
   background: #fff;
 }
 
-/* Contenu du panneau */
+
+/* =========================
+   DASHBOARD
+   ========================= */
+
 .admin-dashboard {
   display: grid;
+
   grid-template-columns: 1fr 1fr;
   gap: 5rem;
 
-  height: 100%;
+  align-items: start;
+}
+
+
+/* =========================
+   CATEGORY SELECTOR
+   ========================= */
+
+.admin-selector {
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
-/* Graphique */
-.admin-chart {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.admin-selector-title {
+  width: 250px;
+
+  margin: 0 0 0.5rem;
+
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.admin-chart-circle {
-  width: 280px;
-  height: 280px;
+.admin-category-buttons {
+  width: 250px;
 
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-category-button {
+  width: 100%;
+
+  padding: 0.8rem 1rem;
 
   box-sizing: border-box;
-  border: 35px solid #ddd;
-  border-radius: 50%;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #eeeeee;
+  color: #333;
+
+  font-size: 1rem;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 }
 
-.admin-chart-circle span {
-  font-size: 1.5rem;
+.admin-category-button:hover {
+  background: #e2e2e2;
 }
+
+.admin-category-button.active {
+  background: #e3e3fd;
+  color: #000091;
+  border-color: #000091;
+}
+
+.admin-category-button:focus-visible {
+  outline: 2px solid #000091;
+  outline-offset: 2px;
+}
+
+
+/* =========================
+   STATISTICS
+   ========================= */
+
+.admin-stats {
+  width: 250px;
+
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+
+  border-top: 1px solid var(--border);
+}
+
+.admin-stats h2 {
+  margin: 0 0 1rem;
+
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.admin-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0.65rem 0;
+
+  border-bottom: 1px solid #eee;
+}
+
+.admin-stat:last-child {
+  border-bottom: none;
+}
+
+.admin-stat span {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.admin-stat strong {
+  color: #222;
+  font-size: 1rem;
+}
+
+
+/* =========================
+   USERS / OFFERS CONTAINER
+   ========================= */
+
+.admin-users-container {
+  position: relative;
+
+  width: 100%;
+}
+
+
+/* =========================
+   SEARCH BAR
+   ========================= */
 
 .admin-user-search {
   width: 100%;
-  padding: 0.8rem 1rem;
-  box-sizing: border-box;
 
+  padding: 0.8rem 1rem;
   margin-bottom: 5px;
+
+  box-sizing: border-box;
 
   border: none;
   border-radius: 10px;
+
   background: #eeeeee;
   color: #333;
 
@@ -127,15 +257,52 @@
 .admin-user-search:focus {
   outline: none;
 }
+
+
+/* =========================
+   USERS / OFFERS LIST
+   ========================= */
+
 .admin-users {
   width: 100%;
   max-height: 350px;
 
   border: 1px solid var(--border);
   border-radius: 10px;
+
   overflow-y: auto;
   overflow-x: hidden;
+
+  scrollbar-width: thin;
+  scrollbar-color: #cccccc transparent;
 }
+
+
+/* =========================
+   SCROLLBAR - WEBKIT
+   ========================= */
+
+.admin-users::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-users::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-users::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 10px;
+}
+
+.admin-users::-webkit-scrollbar-thumb:hover {
+  background: #aaaaaa;
+}
+
+
+/* =========================
+   USER / OFFER ITEM
+   ========================= */
 
 .admin-user {
   display: flex;
@@ -145,15 +312,33 @@
   padding: 1rem 1.25rem;
 
   border-bottom: 1px solid var(--border);
+
+  cursor: pointer;
+
+  transition: background 0.2s;
 }
 
 .admin-user:last-child {
   border-bottom: none;
 }
 
+.admin-user:hover {
+  background: #f5f5f5;
+}
+
+.admin-user.selected {
+  background: #e3e3fd;
+}
+
+
+/* =========================
+   AVATAR / ICON
+   ========================= */
+
 .admin-user-avatar {
   width: 42px;
   height: 42px;
+
   flex-shrink: 0;
 
   display: flex;
@@ -164,7 +349,14 @@
   border-radius: 50%;
 }
 
+
+/* =========================
+   USER / OFFER INFORMATION
+   ========================= */
+
 .admin-user-info {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -179,32 +371,130 @@
   font-size: 0.875rem;
 }
 
-.admin-selector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.admin-selector select {
-  width: 250px;
-  padding: 0.8rem 1rem;
+/* =========================
+   ACTIONS BUBBLE
+   ========================= */
+
+.admin-actions {
+  position: absolute;
+
+  right: -220px;
+
+  width: 190px;
+
+  padding: 0.6rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  box-sizing: border-box;
+
+  background: #fff;
 
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
 
-  background: #eeeeee;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+
+  transform: translateY(-50%);
+
+  z-index: 10;
+}
+
+
+/* =========================
+   BUBBLE TRIANGLE
+   ========================= */
+
+.admin-actions::before {
+  content: "";
+
+  position: absolute;
+
+  left: -10px;
+  top: 50%;
+
+  width: 0;
+  height: 0;
+
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid #fff;
+
+  transform: translateY(-50%);
+}
+
+.admin-actions::after {
+  content: "";
+
+  position: absolute;
+
+  left: -11px;
+  top: 50%;
+
+  width: 0;
+  height: 0;
+
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+  border-right: 11px solid var(--border);
+
+  transform: translateY(-50%);
+
+  z-index: -1;
+}
+
+
+/* =========================
+   ACTION BUTTONS
+   ========================= */
+
+.admin-actions button {
+  width: 100%;
+
+  padding: 0.65rem 0.75rem;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
   color: #333;
 
-  font-size: 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+
   cursor: pointer;
+
+  transition: background 0.2s;
 }
 
-.admin-selector select:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.admin-actions button:hover {
+  background: #eeeeee;
 }
 
-/* Responsive */
+.admin-actions button:focus-visible {
+  outline: 2px solid #000091;
+  outline-offset: 1px;
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1100px) {
+  .admin-dashboard {
+    gap: 3rem;
+  }
+
+  .admin-actions {
+    right: -200px;
+    width: 180px;
+  }
+}
+
 @media (max-width: 900px) {
   .admin-page {
     padding: 1.5rem;
@@ -219,9 +509,29 @@
     gap: 3rem;
   }
 
-  .admin-chart-circle {
-    width: 220px;
-    height: 220px;
+  .admin-selector {
+    align-items: flex-start;
+  }
+
+  .admin-selector-title,
+  .admin-category-buttons,
+  .admin-stats {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .admin-actions {
+    position: static;
+
+    width: 100%;
+    margin-top: 0.75rem;
+
+    transform: none;
+  }
+
+  .admin-actions::before,
+  .admin-actions::after {
+    display: none;
   }
 }
 
@@ -237,6 +547,16 @@
 
   .admin-content h1 {
     font-size: 1.6rem;
+  }
+
+  .admin-category-buttons,
+  .admin-selector-title,
+  .admin-stats {
+    max-width: none;
+  }
+
+  .admin-user {
+    padding: 0.9rem 1rem;
   }
 }
 

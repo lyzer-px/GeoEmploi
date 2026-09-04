@@ -6,15 +6,17 @@ from sqlmodel import select
 from fastapi import Depends, HTTPException
 
 from app.db.models import User, Role
-from app.schemas.user import UserUpdate, UserCreate
+from app.schemas.input.user import UserUpdate, UserCreate
 from app.db.database import get_db_session
 
 
 class UserNotFoundError(Exception):
     pass
 
+
 class UserAlreadyExistsError(Exception):
     pass
+
 
 class UserService:
     def __init__(self, session: Session):
@@ -59,9 +61,7 @@ class UserService:
         user: Optional[User] = self.get_user_by_id(user_id)
 
         if not user:
-            raise HTTPException(
-                status_code=404, detail=f"User {user_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"User {user_id} not found")
         update_data: dict[str, Any] = user_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             if field == "password":
@@ -90,10 +90,7 @@ class UserService:
             self._db.commit()
         except Exception:
             self._db.rollback()
-            raise HTTPException(
-            status_code=404, 
-            detail="User not found"
-        ) 
+            raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_user_service(session: Session = Depends(get_db_session)) -> UserService:

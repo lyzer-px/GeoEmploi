@@ -4,13 +4,18 @@ from contextlib import asynccontextmanager
 from .api.auth import auth_router
 from .api.users import users_router
 from .api.tiles import tiles_router
+from .api.roles import roles_router
+from .api.permissions import permissions_router
+from .api.offers import offers_router
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
 from .db.database import init_db
 
 VERSION_API: str = "v1"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,10 +36,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(router=tiles_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/tiles")
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
-app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
+app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}/roles")
+app.include_router(router=permissions_router, prefix=f"/api/{VERSION_API}/permissions")
+app.include_router(router=offers_router, prefix=f"/api/{VERSION_API}/offers")
+
 
 @app.get("/", tags=["System"])
 async def root():
@@ -43,6 +62,7 @@ async def root():
         "description": "New Linkedin",
         "version": "0.1.0",
     }
+
 
 @app.get("/health", tags=["System"])
 def get_health():

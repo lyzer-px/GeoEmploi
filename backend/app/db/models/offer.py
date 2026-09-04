@@ -9,18 +9,12 @@ from .base import Base
 
 if TYPE_CHECKING:
     from .application import Application
-    from .availability import OfferAvailability
     from .rbac import User
 
 
-class OfferStatus(str, Enum):
-    OPEN = "open"
-    CLOSED = "closed"
-
-
 class ContractType(str, Enum):
-    PART_TIME = ("part-time",)
-    FULL_TIME = ("full-time",)
+    PART_TIME = "part-time"
+    FULL_TIME = "full-time"
     INTERNSHIP = "internship"
     VOLUNTEER = "volunteer"
 
@@ -31,12 +25,12 @@ class Offer(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     description: Mapped[str] = mapped_column(String(2056), nullable=False)
-    status: Mapped[OfferStatus] = mapped_column(SQLEnum(OfferStatus), nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     contract_type: Mapped[ContractType] = mapped_column(
-        SQLEnum(ContractType), nullable=False, unique=True
+        SQLEnum(ContractType),
+        nullable=False,
     )
     employer_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
@@ -55,8 +49,9 @@ class Offer(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
-
+    adress: Mapped[str] = mapped_column(String(1024), nullable=True)
+    geocoding_source: Mapped[str] = mapped_column(String(1024))
+    geocoding_score: Mapped[float] = mapped_column(nullable=True)
+    latitude: Mapped[float] = mapped_column(nullable=False)
+    longitude: Mapped[float] = mapped_column(nullable=False)
     applications: Mapped[list["Application"]] = relationship(back_populates="offer")
-    required_availabilities: Mapped[list["OfferAvailability"]] = relationship(
-        back_populates="offer",
-    )

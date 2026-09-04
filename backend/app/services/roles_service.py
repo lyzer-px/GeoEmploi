@@ -25,18 +25,21 @@ class RoleService:
         return list(permissions_dict.values())
 
     def get_user_permission_names(self, user: User) -> set[str]:
-        """Retrieves the unique permission names (example: {'create:offer', 'read:offer'})."""
+        """Retrieves the unique permission names)."""
         return {perm.name for role in user.roles for perm in role.permissions}
 
     def has_permission(self, user: User, permission_name: str) -> bool:
-        """Checks whether the User instance has a given permission."""
+        """Checks if the User has a given permission."""
         return permission_name in self.get_user_permission_names(user)
 
     def assign_role_to_user(self, user: User, role_name: str) -> User:
         """Assigns a role to the provided User instance."""
         role = self.get_role_by_name(role_name)
         if not role:
-            raise HTTPException(status_code=404, detail=f"Role '{role_name}' not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Role '{role_name}' not found",
+            )
 
         if role not in user.roles:
             user.roles.append(role)
@@ -46,7 +49,7 @@ class RoleService:
             except Exception:
                 self._db.rollback()
                 raise HTTPException(
-                    status_code=500, detail="Error assigning role to user."
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error assigning role to user."
                 )
 
         return user
@@ -55,10 +58,14 @@ class RoleService:
         """Assigns a self-assignable role to the user after validating permissions."""
         role = self.get_role_by_name(role_name)
         if not role:
-            raise HTTPException(status_code=404, detail=f"Role '{role_name}' not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Role '{role_name}' not found",
+            )
         if not role.is_self_assignable:
             raise HTTPException(
-                status_code=403, detail=f"Role '{role_name}' cannot be self-assigned."
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{role_name}' cannot be self-assigned.",
             )
         return self.assign_role_to_user(user, role_name)
 
@@ -67,7 +74,7 @@ class RoleService:
         role_to_remove = next((r for r in user.roles if r.name == role_name), None)
         if not role_to_remove:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"User {user.id} does not have role '{role_name}'",
             )
 
@@ -78,19 +85,21 @@ class RoleService:
         except Exception:
             self._db.rollback()
             raise HTTPException(
-                status_code=500, detail="Error removing role from user."
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error removing role from user.",
             )
 
         return user
 
     def set_user_roles(self, user: User, role_names: list[str]) -> User:
-        """Replace all of the user's roles."""
+        """Replace all of the users roles."""
         statement = select(Role).where(Role.name.in_(role_names))
         roles = list(self._db.scalars(statement).all())
 
         if len(roles) != len(set(role_names)):
             raise HTTPException(
-                status_code=404, detail="One or more specified roles were not found."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="One or more specified roles were not found.",
             )
 
         user.roles = roles
@@ -99,7 +108,10 @@ class RoleService:
             self._db.refresh(user)
         except Exception:
             self._db.rollback()
-            raise HTTPException(status_code=500, detail="Error updating user roles.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error updating user roles.",
+            )
 
         return user
 
@@ -107,7 +119,7 @@ class RoleService:
         statement = select(Role).where(Role.name == name)
         return self._db.scalars(statement).first()
 
-    def get_all_roles(self) -> Sequence[Role]:
+    def get_all_roles(self) -> list[Role]:
         statement = select(Role)
         return self._db.scalars(statement).all()
 
@@ -130,7 +142,8 @@ class RoleService:
     def create_role(self, role_data: RoleCreate) -> Role:
         if self.get_role_by_name(role_data.name):
             raise HTTPException(
-                status_code=409, detail=f"Role '{role_data.name}' already exists."
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Role '{role_data.name}' already exists.",
             )
         permissions: list[Permission] = self._get_permissions_by_names(
             role_data.permissions
@@ -148,7 +161,10 @@ class RoleService:
             return new_role
         except Exception:
             self._db.rollback()
-            raise HTTPException(status_code=500, detail="Error creating role.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error creating role.",
+            )
 
     def assign_permission_to_role(self, role_name: str, permission_name: str) -> Role:
         role = self.get_role_by_name(role_name)

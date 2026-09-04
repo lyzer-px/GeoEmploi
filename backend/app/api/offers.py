@@ -26,6 +26,7 @@ def update_offer(
 ):
     offer_service.update_offer(offerId, offer_update)
 
+
 @offers_router.get("/", status_code=status.HTTP_200_OK)
 def get_all_offers(offer_service: OfferServiceDep):
     return offer_service.get_all_offers()

@@ -22,7 +22,7 @@ class TileService:
         return self.cache_dir / f"{z}_{x}_{y}.png"
 
     def is_cached(self, z: int, x: int, y: int) -> bool:
-        return self.cache_dir / f"{z}_{x}_{y}.png".exists()
+        return self.tile_path(z, x, y).is_file()
 
     def read_from_cache(self, z: int, x: int, y: int) -> bytes:
         return self.tile_path(z, x, y).read_bytes()

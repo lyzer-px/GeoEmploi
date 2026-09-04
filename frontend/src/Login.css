@@ -10,8 +10,15 @@
 }
 
 .login-space {
-    width: 490px;
     display: flex;
     flex-direction: column;
-    gap: 5rem;
+    gap: 3rem;
+}
+
+.login-hidden {
+    visibility: hidden;
+}
+
+.login-card {
+    width: 360px;
 }

@@ -19,3 +19,7 @@ class UserUpdate(BaseModel):
 class UserIn(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserRolesUpdate(BaseModel):
+    roles: list[str]

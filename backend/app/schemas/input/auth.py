@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, field_serializer
 
+
 class AccessToken(BaseModel):
     user_id: int
     email: EmailStr
@@ -24,10 +25,6 @@ class RefreshToken(BaseModel):
     def serialize_exp(self, exp: datetime, _info) -> int:
         return int(exp.timestamp())
 
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
-
-class Token(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "Bearer"

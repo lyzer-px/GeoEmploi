@@ -7,8 +7,6 @@ class Settings(BaseSettings):
     db_password: str
     db_host: str
     db_port: int
-    hash_key: str
-    gouv_address_api_url: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

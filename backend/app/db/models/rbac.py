@@ -8,7 +8,6 @@ from .base import Base
 
 if TYPE_CHECKING:
     from .application import Application
-    from .availability import UserAvailability
     from .offer import Offer
     from .skill import Experience, Skill
 
@@ -31,9 +30,6 @@ class User(Base):
     applications: Mapped[list["Application"]] = relationship(back_populates="user")
     offers_created: Mapped[list["Offer"]] = relationship(back_populates="employer")
     experiences: Mapped[list["Experience"]] = relationship(back_populates="user")
-    availabilities: Mapped[list["UserAvailability"]] = relationship(
-        back_populates="user"
-    )
 
     def set_password(self, password: str):
         self.password = generate_password_hash(password)
@@ -48,6 +44,7 @@ class Role(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(256), unique=True)
     description: Mapped[str] = mapped_column(String(256))
+    is_self_assignable: Mapped[bool] = mapped_column(default=False, nullable=False)
     users: Mapped[list["User"]] = relationship(
         secondary="user_roles", back_populates="roles"
     )

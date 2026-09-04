@@ -1,13 +1,6 @@
 from .application import Application
-from .availability import (
-    Availability,
-    AvailabilityDay,
-    OfferAvailability,
-    UserAvailability,
-    Weekday,
-)
 from .base import Base
-from .offer import Offer, OfferStatus
+from .offer import Offer
 from .rbac import Permission, Role, RolePermission, User, UserRole
 from .skill import Experience, Skill, UsersSkills
 
@@ -23,10 +16,6 @@ __all__ = [
     "Skill",
     "UsersSkills",
     "Experience",
-    "Availability",
-    "AvailabilityDay",
-    "UserAvailability",
-    "OfferAvailability",
     "Offer",
     "Application",
 ]

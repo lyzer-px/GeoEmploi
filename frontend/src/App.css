@@ -169,6 +169,39 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 180px;
   gap: 1rem;
+  position: relative;
+}
+
+.geoemploi-location-suggestions {
+  position: absolute;
+  z-index: 1000;
+  top: 100%;
+  left: 0;
+  width: calc(100% - 196px);
+  max-height: 15rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  overflow-y: auto;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 15%);
+}
+
+.geoemploi-location-suggestions button {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  color: #161616;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.geoemploi-location-suggestions button:hover,
+.geoemploi-location-suggestions button:focus-visible {
+  background: #e3e3fd;
 }
 
 .geoemploi-location {

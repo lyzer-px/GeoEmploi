@@ -31,9 +31,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(router=tiles_router)
+app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
-app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
 
 @app.get("/", tags=["System"])

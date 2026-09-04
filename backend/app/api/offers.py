@@ -8,7 +8,7 @@ from app.schemas.offers import CreateOfferRequest
 
 offers_router = APIRouter(tags=["offers"])
 
-@offers_router.post("/offre")
+@offers_router.post("/")
 async def create_offer(data: CreateOfferRequest):
     new_offer = Offer(
         name=data.name,

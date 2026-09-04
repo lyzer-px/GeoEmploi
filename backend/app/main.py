@@ -3,15 +3,14 @@ from contextlib import asynccontextmanager
 
 from .api.auth import auth_router
 from .api.users import users_router
+from .api.tiles import tiles_router
 from fastapi import FastAPI
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
 from .db.database import init_db
 
-
 VERSION_API: str = "v1"
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,7 +31,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(router=tiles_router)
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
+app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
 
 @app.get("/", tags=["System"])

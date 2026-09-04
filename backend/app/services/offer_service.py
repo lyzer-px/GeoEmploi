@@ -25,13 +25,13 @@ class OfferService:
         """Retrieves an offer by its ID."""
         statement = select(Offer).where(Offer.id == offer_id)
         return self._db.scalars(statement).first()
-
-    def get_all_offers(self, skip: int = 0, limit: int = 100) -> Sequence[Offer]:
+    
+    def get_all_offers(self, skip: int = 0, limit: int = 100) -> list[Offer]:
         """Retrieves all offers with pagination."""
         statement = select(Offer).offset(skip).limit(limit)
         return self._db.scalars(statement).all()
 
-    def get_offers_by_employer(self, employer_id: int) -> Sequence[Offer]:
+    def get_offers_by_employer(self, employer_id: int) -> list[Offer]:
         """Retrieves all offers created by a specific employer."""
         statement = select(Offer).where(Offer.employer_id == employer_id)
         return self._db.scalars(statement).all()

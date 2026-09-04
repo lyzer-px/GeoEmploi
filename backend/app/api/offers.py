@@ -3,6 +3,7 @@ from typing import Sequence
 
 from app.api.dependencies import require_permission, OfferServiceDep
 from app.schemas.input.offers import OfferCreate, OfferUpdate
+from app.schemas.output.offers import OfferOut
 from app.db.models import User, Offer
 
 offers_router = APIRouter(tags=["offers"])
@@ -29,4 +30,9 @@ def update_offer(
 
 @offers_router.get("/", status_code=status.HTTP_200_OK)
 def get_all_offers(offer_service: OfferServiceDep):
-    return offer_service.get_all_offers()
+    offers: list[Offer] = offer_service.get_all_offers()
+    offers_out: list[OfferOut] = []
+
+    for offer in offers:
+        offers_out.append(OfferOut.from_orm_model(offer))
+    return offers_out

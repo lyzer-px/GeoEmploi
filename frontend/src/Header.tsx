@@ -24,7 +24,6 @@ function MyHeader() {
             }
         ]}
         navigation={[{ text: "Accueil", linkProps: {href: "/",}, },
-            { text: "Nos offres", linkProps: { href: "/offres",}, },
             { text: "À propos", linkProps: { href: "/a-propos",}, },
         ]}
         />

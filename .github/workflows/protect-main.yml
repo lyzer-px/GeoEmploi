@@ -1,0 +1,44 @@
+name: Main Branch Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  main-branch-policy:
+    name: Validate main branch policy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check pull request source
+        run: |
+          echo "Target branch: ${{ github.base_ref }}"
+          echo "Source branch: ${{ github.head_ref }}"
+
+          if [[ "${{ github.base_ref }}" != "main" ]]; then
+            echo "❌ This workflow only applies to PRs targeting main."
+            exit 1
+          fi
+
+          if [[ "${{ github.head_ref }}" == "dev" ]]; then
+            echo "❌ Direct merges from dev to main are not allowed."
+            echo "Create a dedicated release/hotfix branch and open a PR to main."
+            exit 1
+          fi
+
+          echo "✅ Pull request source branch is allowed."
+
+      - name: Verify pull request
+        run: |
+          echo "✅ Changes to main must be made through a Pull Request."
+          echo "✅ Source branch is not dev."
+          echo "✅ Main branch policy passed."

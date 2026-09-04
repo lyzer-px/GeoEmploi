@@ -4,3 +4,12 @@ sqlalchemy
 pyjwt
 pwdlib[argon2]
 werkzeug
+pymysql==1.0.2
+passlib
+python-jose
+cryptography
+sqlmodel
+alembic
+psycopg2-binary
+starlette
+pyproj

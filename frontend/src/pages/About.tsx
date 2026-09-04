@@ -28,11 +28,6 @@ function About() {
                     une information claire, utile et accessible, au bénéfice des candidats, des recruteurs,
                     des entreprises et des acteurs de l’emploi.
                 </p>
-                <textarea
-                    className="about-editor"
-                    aria-label="Contenu de la page À propos"
-                    placeholder="Écrivez le contenu de la page À propos ici..."
-                />
             </main>
             <Footer />
         </div>

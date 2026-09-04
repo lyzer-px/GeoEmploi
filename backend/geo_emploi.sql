@@ -16,6 +16,19 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `alembic_version`
+--
+
+DROP TABLE IF EXISTS `alembic_version`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `alembic_version` (
+  `version_num` varchar(32) NOT NULL,
+  PRIMARY KEY (`version_num`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `applications`
 --
 
@@ -27,50 +40,10 @@ CREATE TABLE `applications` (
   `user_id` int NOT NULL,
   `offer_id` int NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
   KEY `offer_id` (`offer_id`),
-  CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `applications_ibfk_2` FOREIGN KEY (`offer_id`) REFERENCES `offers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `availabilities`
---
-
-DROP TABLE IF EXISTS `availabilities`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `availabilities` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `day_of_week` smallint NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `user_id` int NOT NULL,
-  PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `availabilities_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `availability_days`
---
-
-DROP TABLE IF EXISTS `availability_days`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `availability_days` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `day` enum('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY') NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `availability_id` int NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `availability_id` (`availability_id`),
-  CONSTRAINT `availability_days_ibfk_1` FOREIGN KEY (`availability_id`) REFERENCES `availabilities` (`id`) ON DELETE CASCADE
+  CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`offer_id`) REFERENCES `offers` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `applications_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -89,28 +62,8 @@ CREATE TABLE `experiences` (
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `experiences_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `offer_availabilities`
---
-
-DROP TABLE IF EXISTS `offer_availabilities`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `offer_availabilities` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `offer_id` int NOT NULL,
-  `day_of_week` smallint NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `offer_id` (`offer_id`),
-  CONSTRAINT `offer_availabilities_ibfk_1` FOREIGN KEY (`offer_id`) REFERENCES `offers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -125,14 +78,21 @@ CREATE TABLE `offers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(256) NOT NULL,
   `description` varchar(2056) NOT NULL,
-  `status` enum('OPEN','CLOSED') NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `contract_type` enum('PART_TIME','FULL_TIME','INTERNSHIP','VOLUNTEER') NOT NULL,
   `employer_id` int NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
+  `adress` varchar(1024) DEFAULT NULL,
+  `geocoding_source` varchar(1024) NOT NULL,
+  `geocoding_score` float DEFAULT NULL,
+  `latitude` float NOT NULL,
+  `longitude` float NOT NULL,
   PRIMARY KEY (`id`),
   KEY `employer_id` (`employer_id`),
   CONSTRAINT `offers_ibfk_1` FOREIGN KEY (`employer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +108,7 @@ CREATE TABLE `permissions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `ix_permissions_id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,8 +123,8 @@ CREATE TABLE `role_permissions` (
   `permission_id` int NOT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `permission_id` (`permission_id`),
-  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
-  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`)
+  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -179,9 +139,10 @@ CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(256) NOT NULL,
   `description` varchar(256) NOT NULL,
+  `is_self_assignable` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -194,29 +155,9 @@ DROP TABLE IF EXISTS `skills`;
 CREATE TABLE `skills` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(256) NOT NULL,
-  `level` smallint NOT NULL,
   `description` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `user_availabilities`
---
-
-DROP TABLE IF EXISTS `user_availabilities`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_availabilities` (
-  `availability_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  PRIMARY KEY (`availability_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `user_availabilities_ibfk_1` FOREIGN KEY (`availability_id`) REFERENCES `availabilities` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_availabilities_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -232,8 +173,8 @@ CREATE TABLE `user_roles` (
   `role_id` int NOT NULL,
   PRIMARY KEY (`user_id`,`role_id`),
   KEY `role_id` (`role_id`),
-  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -253,7 +194,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `ix_users_id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -266,10 +207,11 @@ DROP TABLE IF EXISTS `users_skills`;
 CREATE TABLE `users_skills` (
   `user_id` int NOT NULL,
   `skill_id` int NOT NULL,
+  `level` smallint NOT NULL,
   PRIMARY KEY (`user_id`,`skill_id`),
   KEY `skill_id` (`skill_id`),
-  CONSTRAINT `users_skills_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `users_skills_ibfk_2` FOREIGN KEY (`skill_id`) REFERENCES `skills` (`id`) ON DELETE CASCADE
+  CONSTRAINT `users_skills_ibfk_1` FOREIGN KEY (`skill_id`) REFERENCES `skills` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `users_skills_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -282,4 +224,4 @@ CREATE TABLE `users_skills` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-02  2:39:08
+-- Dump completed on 2026-09-04 13:49:30

@@ -1,6 +1,12 @@
-Enum "offers_status_enum" {
-  "OPEN"
-  "CLOSED"
+Enum "offers_contract_type_enum" {
+  "PART_TIME"
+  "FULL_TIME"
+  "INTERNSHIP"
+  "VOLUNTEER"
+}
+
+Table "alembic_version" {
+  "version_num" varchar(32) [pk, not null]
 }
 
 Table "applications" {
@@ -9,21 +15,7 @@ Table "applications" {
   "offer_id" int [not null]
 
   Indexes {
-    user_id [name: "user_id"]
     offer_id [name: "offer_id"]
-  }
-}
-
-Table "availabilities" {
-  "id" int [pk, not null, increment]
-  "day_of_week" smallint [not null]
-  "start_time" time [not null]
-  "end_time" time [not null]
-  "start_date" date [not null]
-  "end_date" date [not null]
-  "user_id" int [not null]
-
-  Indexes {
     user_id [name: "user_id"]
   }
 }
@@ -37,20 +29,7 @@ Table "experiences" {
   "end_date" date
 
   Indexes {
-    name [unique, name: "name"]
     user_id [name: "user_id"]
-  }
-}
-
-Table "offer_availabilities" {
-  "id" int [pk, not null, increment]
-  "offer_id" int [not null]
-  "day_of_week" smallint [not null]
-  "start_time" time [not null]
-  "end_time" time [not null]
-
-  Indexes {
-    offer_id [name: "offer_id"]
   }
 }
 
@@ -58,10 +37,17 @@ Table "offers" {
   "id" int [pk, not null, increment]
   "name" varchar(256) [not null]
   "description" varchar(2056) [not null]
-  "status" offers_status_enum [not null]
+  "start_date" date [not null]
+  "end_date" date
+  "contract_type" offers_contract_type_enum [not null]
   "employer_id" int [not null]
   "created_at" datetime [not null]
   "updated_at" datetime [not null]
+  "adress" varchar(1024)
+  "geocoding_source" varchar(1024) [not null]
+  "geocoding_score" float
+  "latitude" float [not null]
+  "longitude" float [not null]
 
   Indexes {
     employer_id [name: "employer_id"]
@@ -92,6 +78,7 @@ Table "roles" {
   "id" int [pk, not null, increment]
   "name" varchar(256) [not null]
   "description" varchar(256) [not null]
+  "is_self_assignable" tinyint(1) [not null]
 
   Indexes {
     name [unique, name: "name"]
@@ -101,7 +88,6 @@ Table "roles" {
 Table "skills" {
   "id" int [pk, not null, increment]
   "name" varchar(256) [not null]
-  "level" smallint [not null]
   "description" varchar(256)
 
   Indexes {
@@ -135,6 +121,7 @@ Table "users" {
 Table "users_skills" {
   "user_id" int [not null]
   "skill_id" int [not null]
+  "level" smallint [not null]
 
   Indexes {
     (user_id, skill_id) [pk]
@@ -142,26 +129,22 @@ Table "users_skills" {
   }
 }
 
-Ref "applications_ibfk_1":"users"."id" <? "applications"."user_id" [delete: cascade]
+Ref "applications_ibfk_1":"offers"."id" <? "applications"."offer_id" [delete: cascade]
 
-Ref "applications_ibfk_2":"offers"."id" <? "applications"."offer_id" [delete: cascade]
-
-Ref "availabilities_ibfk_1":"users"."id" <? "availabilities"."user_id" [delete: cascade]
+Ref "applications_ibfk_2":"users"."id" <? "applications"."user_id" [delete: cascade]
 
 Ref "experiences_ibfk_1":"users"."id" <? "experiences"."user_id" [delete: cascade]
 
-Ref "offer_availabilities_ibfk_1":"offers"."id" <? "offer_availabilities"."offer_id" [delete: cascade]
-
 Ref "offers_ibfk_1":"users"."id" <? "offers"."employer_id" [delete: cascade]
 
-Ref "role_permissions_ibfk_1":"roles"."id" <? "role_permissions"."role_id"
+Ref "role_permissions_ibfk_1":"permissions"."id" <? "role_permissions"."permission_id" [delete: cascade]
 
-Ref "role_permissions_ibfk_2":"permissions"."id" <? "role_permissions"."permission_id"
+Ref "role_permissions_ibfk_2":"roles"."id" <? "role_permissions"."role_id" [delete: cascade]
 
-Ref "user_roles_ibfk_1":"users"."id" <? "user_roles"."user_id" [delete: cascade]
+Ref "user_roles_ibfk_1":"roles"."id" <? "user_roles"."role_id" [delete: cascade]
 
-Ref "user_roles_ibfk_2":"roles"."id" <? "user_roles"."role_id" [delete: cascade]
+Ref "user_roles_ibfk_2":"users"."id" <? "user_roles"."user_id" [delete: cascade]
 
-Ref "users_skills_ibfk_1":"users"."id" <? "users_skills"."user_id" [delete: cascade]
+Ref "users_skills_ibfk_1":"skills"."id" <? "users_skills"."skill_id" [delete: cascade]
 
-Ref "users_skills_ibfk_2":"skills"."id" <? "users_skills"."skill_id" [delete: cascade]
+Ref "users_skills_ibfk_2":"users"."id" <? "users_skills"."user_id" [delete: cascade]

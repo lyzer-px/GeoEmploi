@@ -5,6 +5,7 @@ import HomePage from './HomePage';
 import { ROUTES } from './routes';
 import MyHeader from './Header';
 import Footer from './Footer';
+import './App.css'
 
 function Home() {
   return (

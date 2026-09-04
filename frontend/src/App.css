@@ -29,6 +29,27 @@
   justify-content: center;
 }
 
+.admin-page {
+  width: min(1400px, 100%);
+  flex: 1;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.admin-page h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.admin-kicker {
+  margin: 0 0 0.25rem;
+  color: #666;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .hero {
   position: relative;
 

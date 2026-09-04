@@ -44,6 +44,7 @@ class Role(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(256), unique=True)
     description: Mapped[str] = mapped_column(String(256))
+    is_self_assignable: Mapped[bool] = mapped_column(default=False, nullable=False)
     users: Mapped[list["User"]] = relationship(
         secondary="user_roles", back_populates="roles"
     )

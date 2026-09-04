@@ -4,7 +4,11 @@ from contextlib import asynccontextmanager
 from .api.auth import auth_router
 from .api.users import users_router
 from .api.tiles import tiles_router
+from .api.roles import roles_router
+from .api.permissions import permissions_router
+from .api.offers import offers_router
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
@@ -32,9 +36,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
+app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}/roles")
+app.include_router(router=permissions_router, prefix=f"/api/{VERSION_API}/permissions")
+app.include_router(router=offers_router, prefix=f"/api/{VERSION_API}/offers")
 
 
 @app.get("/", tags=["System"])

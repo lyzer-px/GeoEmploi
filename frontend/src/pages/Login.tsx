@@ -21,7 +21,7 @@ export function Login() {
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
     const isLoginDisabled = loginEmail === "" || loginPassword === "";
-
+    
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [registerEmail, setRegisterEmail] = useState("");
@@ -30,8 +30,10 @@ export function Login() {
     const isRegisterDisabled =
         firstName === "" || lastName === "" || registerEmail === "" || registerPassword === "";
 
+    const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
+    console.log("API_BACKEND_URL:", API_BACKEND_URL);
     function sendLoginRequest() {
-        fetch("/api/v1/auth/login", {
+        fetch(`${API_BACKEND_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: loginEmail, password: loginPassword }),
@@ -41,6 +43,7 @@ export function Login() {
                     throw new Error("Échec de la connexion");
                 }
                 const data = await response.json();
+                 console.log("5. data =", data);
                 if (data.role === "employer") {
                     navigate("/employeur");
                 } else {

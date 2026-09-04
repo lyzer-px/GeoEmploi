@@ -7,6 +7,8 @@ from app.core.config import SECRET_KEY, ALGORITHM
 from app.db.models.rbac import User
 from app.schemas.input.auth import AccessToken, RefreshToken, RefreshTokenRequest
 from app.services.user_service import UserService, get_user_service
+from app.services.roles_service import RoleService, get_role_service
+from app.services.offer_service import OfferService, get_offer_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -17,11 +19,13 @@ credentials_exception = HTTPException(
 )
 
 permissions_exception = HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have the necessary permissions to perform this action."
-        )
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="You do not have the necessary permissions to perform this action.",
+)
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+RoleServiceDep = Annotated[RoleService, Depends(get_role_service)]
+OfferServiceDep = Annotated[OfferService, Depends(get_offer_service)]
 
 
 def get_current_token_payload(
@@ -73,11 +77,16 @@ def verify_refresh_token(body: RefreshTokenRequest) -> RefreshToken:
 
 RefreshTokenDep = Annotated[RefreshToken, Depends(verify_refresh_token)]
 
-def require_offer_creation_permission(user: User, user_service: UserServiceDep) -> User:
-    roles: list[str] = user_service.get_stringify_roles_of_user(user)
-    if "create:offer" not in current_user.permissions:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'avez pas les droits nécessaires pour créer une offre."
-        )
-    return current_user
+def require_permission(permission_name: str):
+    def dependency(
+        user: CurrentUserDep,
+        role_service: RoleServiceDep,
+    ) -> User:
+        if not role_service.has_permission(user, permission_name):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing required permission: {permission_name}",
+            )
+
+        return user
+    return dependency

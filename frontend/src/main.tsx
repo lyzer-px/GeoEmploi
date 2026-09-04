@@ -1,6 +1,5 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import '@gouvfr/dsfr/dist/dsfr.min.css'
 import './index.css'
 import App from './App.tsx'

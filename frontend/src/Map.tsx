@@ -1,24 +1,74 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-
 const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
 
-function Map() {
+export type MapSearchArea = {
+    latitude: number;
+    longitude: number;
+    radiusKm: number;
+    label: string;
+};
+
+type MapProps = {
+    searchArea: MapSearchArea | null;
+};
+
+function Map({ searchArea }: MapProps) {
+    const mapElementRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<L.Map | null>(null);
+    const searchCircleRef = useRef<L.Circle | null>(null);
+    const searchMarkerRef = useRef<L.Marker | null>(null);
+
     useEffect(() => {
-    const map = L.map("map").setView([46.6, 2.3], 6);
+        if (!mapElementRef.current || mapRef.current) {
+            return;
+        }
 
-    L.tileLayer(`${API_BACKEND_URL}/tiles/{z}/{x}/{y}.png`, {
-        attribution: "&copy; https://data.geopf.fr",
-    }).addTo(map);
+        const map = L.map(mapElementRef.current).setView([46.6, 2.3], 6);
+        mapRef.current = map;
 
-    return () => {
-        map.remove();
-    };
+        L.tileLayer(`${API_BACKEND_URL}/tiles/{z}/{x}/{y}.png`, {
+            attribution: "&copy; https://data.geopf.fr",
+        }).addTo(map);
+
+        return () => {
+            map.remove();
+            mapRef.current = null;
+        };
     }, []);
 
-    return <div id="map"></div>;
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !searchArea) {
+            return;
+        }
+
+        searchCircleRef.current?.remove();
+        searchMarkerRef.current?.remove();
+
+        const center: L.LatLngExpression = [searchArea.latitude, searchArea.longitude];
+        const circle = L.circle(center, {
+            radius: searchArea.radiusKm * 1_000,
+            color: "#000091",
+            fillColor: "#6a6af4",
+            fillOpacity: 0.16,
+            weight: 2,
+        }).addTo(map);
+
+        searchCircleRef.current = circle;
+        searchMarkerRef.current = L.marker(center)
+            .addTo(map)
+            .bindPopup(searchArea.label);
+
+        map.flyToBounds(circle.getBounds(), {
+            padding: [36, 36],
+            maxZoom: 13,
+        });
+    }, [searchArea]);
+
+    return <div id="map" ref={mapElementRef} />;
 }
 
 export default Map;

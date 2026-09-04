@@ -47,7 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/offers")
+app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/tiles")
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
 app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}/roles")

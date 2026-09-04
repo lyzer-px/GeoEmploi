@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const tileUrl = `${import.meta.env.VITE_TILE_URL}`;
+
+const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
 
 function Map() {
     useEffect(() => {
     const map = L.map("map").setView([46.6, 2.3], 6);
 
-    L.tileLayer(`${tileUrl}/{z}/{x}/{y}.png`, {
+    L.tileLayer(`${API_BACKEND_URL}/tiles/{z}/{x}/{y}.png`, {
         attribution: "&copy; https://data.geopf.fr",
     }).addTo(map);
 

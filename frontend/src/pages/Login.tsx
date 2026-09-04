@@ -56,15 +56,15 @@ export function Login() {
     }
 
     function sendRegisterRequest() {
-        fetch("/api/v1/auth/register", {
+        fetch(`${API_BACKEND_URL}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                firstName,
-                lastName,
+                first_name: firstName,
+                last_name: lastName,
                 email: registerEmail,
                 password: registerPassword,
-                role,
+                role: role
             }),
         })
             .then(async (response) => {

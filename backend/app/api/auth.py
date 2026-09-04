@@ -5,7 +5,7 @@ from app.db import User
 from app.schemas.input.user import UserCreate, UserIn
 from app.schemas.input.auth import AccessToken, RefreshTokenRequest
 from app.schemas.output.token import Token
-from app.api.dependencies import UserServiceDep, RefreshTokenDep
+from app.api.dependencies import UserServiceDep, RefreshTokenDep, RoleServiceDep
 from app.services.auth_service import AuthenticationService
 
 auth_router = APIRouter(tags=["auth"])
@@ -22,9 +22,10 @@ def login_user(user_data: UserIn, user_service: UserServiceDep):
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
-@auth_router.post("/users", response_model=Token, status_code=status.HTTP_201_CREATED)
-def create_user(new_user: UserCreate, user_service: UserServiceDep):
+@auth_router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+def create_user(new_user: UserCreate, user_service: UserServiceDep, role_service: RoleServiceDep):
     user: User = user_service.create_user(new_user)
+    role_service.assign_self_assignable_role_to_user(user, new_user.role)
     access_payload: AccessToken = AuthenticationService.create_access_token_payload(
         user.email, user_service
     )

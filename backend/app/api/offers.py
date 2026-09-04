@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, status
-
+from typing import Sequence
 
 from app.api.dependencies import require_permission, OfferServiceDep
 from app.schemas.input.offers import OfferCreate, OfferUpdate
-from app.db.models import User
+from app.db.models import User, Offer
 
 offers_router = APIRouter(tags=["offers"])
 

@@ -12,6 +12,7 @@ from .db.database import init_db
 
 VERSION_API: str = "v1"
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
@@ -35,6 +36,7 @@ app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/offers")
 app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
 
+
 @app.get("/", tags=["System"])
 async def root():
     return {
@@ -42,6 +44,7 @@ async def root():
         "description": "New Linkedin",
         "version": "0.1.0",
     }
+
 
 @app.get("/health", tags=["System"])
 def get_health():

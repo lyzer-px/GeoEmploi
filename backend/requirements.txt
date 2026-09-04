@@ -9,3 +9,5 @@ passlib
 python-jose
 cryptography
 sqlmodel
+alembic
+psycopg2-binary

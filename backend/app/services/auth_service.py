@@ -2,12 +2,11 @@ import jwt
 from typing import Optional
 from datetime import datetime, timezone, timedelta
 
-from jose import jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 from ..services.user_service import UserService
-from app.schemas.auth import AccessToken, RefreshToken
-from app.schemas.user import UserIn
+from app.schemas.input.auth import AccessToken, RefreshToken
+from app.schemas.input.user import UserIn
 from app.db.models import User
 from app.core.config import (
     SECRET_KEY,
@@ -60,7 +59,4 @@ class AuthenticationService:
         expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAY)
         print(f"{expire=}, {user_id=}")
         token_payload: RefreshToken = RefreshToken(user_id=user_id, exp=expire)
-        return jwt.encode(
-            token_payload.model_dump(), SECRET_KEY, algorithm=ALGORITHM
-        )
-
+        return jwt.encode(token_payload.model_dump(), SECRET_KEY, algorithm=ALGORITHM)

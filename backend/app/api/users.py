@@ -7,7 +7,7 @@ from app.api.dependencies import (
     CurrentUserDep,
     RoleServiceDep,
 )
-from app.schemas.input.user import UserUpdate, UserRolesUpdate
+from app.schemas.input.user import UserAdminResponse, UserUpdate, UserRolesUpdate
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -45,3 +45,12 @@ def set_my_roles(
 ):
     for role in roles_data.roles:
         role_service.assign_self_assignable_role_to_user(user, role)
+
+
+@users_router.get(
+    "/",
+    response_model=list[UserAdminResponse],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_users(user_service: UserServiceDep):
+    return user_service.get_all_users()

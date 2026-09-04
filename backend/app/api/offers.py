@@ -14,7 +14,7 @@ def create_offer(
     offer_service: OfferServiceDep,
     user: User = Depends(require_permission("create:offer")),
 ):
-    offer_service.create_offer(offer_data, user)
+    return offer_service.create_offer(offer_data, user)
 
 
 @offers_router.patch("/{offerId}", status_code=status.HTTP_200_OK)

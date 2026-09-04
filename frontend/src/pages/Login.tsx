@@ -100,7 +100,7 @@ export function Login() {
                         }}
                     />
                     <Link to={ROUTES.FORGOT_PASSWORD}>Mot de passe oublié</Link>
-                    <div>
+                    <div className="login-space">
                         <Button disabled={isLoginDisabled} onClick={sendLoginRequest}>
                             Connexion
                         </Button>
@@ -125,18 +125,18 @@ export function Login() {
                         <option value="employer">Employeur</option>
                     </Select>
                     <Input
-                        label="Nom"
-                        state="default"
-                        nativeInputProps={{
-                            value: lastName,
-                            onChange: (e) => setLastName(e.target.value),
-                        }}
-                    />
-                    <Input
                         label="Prénom"
                         state="default"
                         nativeInputProps={{
                             value: firstName,
+                            onChange: (e) => setLastName(e.target.value),
+                        }}
+                    />
+                    <Input
+                        label="Nom"
+                        state="default"
+                        nativeInputProps={{
+                            value: lastName,
                             onChange: (e) => setFirstName(e.target.value),
                         }}
                     />
@@ -155,7 +155,7 @@ export function Login() {
                             onChange: (e) => setRegisterPassword(e.target.value),
                         }}
                     />
-                    <div>
+                    <div className="login-space">
                         <Button disabled={isRegisterDisabled} onClick={sendRegisterRequest}>
                             Créer mon compte
                         </Button>

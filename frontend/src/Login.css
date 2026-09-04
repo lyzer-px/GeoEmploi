@@ -11,8 +11,9 @@
 
 .login-space {
     display: flex;
-    flex-direction: column;
-    gap: 3rem;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
 }
 
 .login-hidden {
@@ -21,4 +22,8 @@
 
 .login-card {
     width: 360px;
+}
+
+.login-center-title {
+    margin: 0;
 }

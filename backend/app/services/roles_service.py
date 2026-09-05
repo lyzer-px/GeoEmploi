@@ -55,6 +55,22 @@ class RoleService:
 
         return user
 
+    def get_self_assignable_role(self, role_name: str) -> Role:
+        role = self._db.scalar(
+            select(Role).where(Role.name == role_name)
+        )
+        if role is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Role '{role_name}' does not exist.",
+            )
+        if not role.is_self_assignable:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role '{role_name}' cannot be self-assigned.",
+            )
+        return role
+
     def assign_self_assignable_role_to_user(self, user: User, role_name: str) -> User:
         """Assigns a self-assignable role to the user after validating permissions."""
         role = self.get_role_by_name(role_name)

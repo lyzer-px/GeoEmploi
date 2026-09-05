@@ -41,19 +41,28 @@ class UserService:
     def get_stringify_roles_of_user(self, user: User) -> list[str]:
         return [role.name for role in user.roles]
 
-    def create_user(self, user: UserCreate) -> User:
-        new_user: User = User(
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.email,
+    def create_user(
+        self,
+        user_data: UserCreate,
+        role: Role,
+    ) -> User:
+        new_user = User(
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            email=user_data.email,
         )
-        new_user.set_password(user.password)
+
+        new_user.set_password(user_data.password)
+        new_user.roles.append(role)
         self._db.add(new_user)
         try:
             self._db.commit()
         except Exception:
             self._db.rollback()
-            raise HTTPException(status_code=409, detail="This user already exists.")
+            raise HTTPException(
+                status_code=409,
+                detail="This user already exists.",
+            )
         self._db.refresh(new_user)
         return new_user
 

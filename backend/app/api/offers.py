@@ -36,7 +36,8 @@ def create_offer(
 
 
 @offers_router.patch(
-    "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut)
+    "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut
+)
 def update_offer(
     offer_data: OfferUpdate, offer: OfferUpdateDep, offer_service: OfferServiceDep
 ):

@@ -7,11 +7,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
 
+from app.api.dependencies.offers import OfferDeleteDep, OfferUpdateDep
+from app.core.permissions import perm, Action, Resource
 from app.schemas.input.offers import OfferCreate, OfferUpdate
 from app.schemas.output.offers import OfferOut
 from app.db.database import get_db_session
-from app.api.dependencies import require_permission, OfferServiceDep
-from app.db.models import User, Offer
+from app.api.dependencies.auth import (
+    require_permission,
+    OfferServiceDep,
+)
+from app.db.models import User
 from app.services.geography import get_bounding_box, perimeter_to_radius, BoundingBox
 from app.services.offer_service import OfferService
 
@@ -21,38 +26,34 @@ set_page(CursorPage[OfferOut])
 set_params(CursorParams(size=10))
 
 
-@offers_router.post("/", status_code=status.HTTP_201_CREATED)
+@offers_router.post("/", status_code=status.HTTP_201_CREATED, response_model=OfferOut)
 def create_offer(
     offer_data: OfferCreate,
     offer_service: OfferServiceDep,
-    user: User = Depends(require_permission("create:offer")),
+    user: User = Depends(require_permission(perm(Action.CREATE, Resource.OFFER))),
 ):
     return offer_service.create_offer(offer_data, user)
 
 
-@offers_router.patch("/{offerId}", status_code=status.HTTP_200_OK)
+@offers_router.patch(
+    "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut)
 def update_offer(
-    offerId: int,
-    offer_update: OfferUpdate,
-    offer_service: OfferServiceDep,
-    _: User = Depends(require_permission("update:offer")),
+    offer_data: OfferUpdate, offer: OfferUpdateDep, offer_service: OfferServiceDep
 ):
-    return offer_service.update_offer(offerId, offer_update)
+    return offer_service.update_offer(offer, offer_data)
 
-@offers_router.get("/", status_code=status.HTTP_200_OK)
-def get_all_offers(offer_service: OfferServiceDep):
-    return offer_service.get_all_offers()
 
-@offers_router.delete("/{offerId}", status_code=status.HTTP_204_NO_CONTENT)
+@offers_router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_offer(
-    offerId: int,
+    offer: OfferDeleteDep,
     offer_service: OfferServiceDep,
 ):
-    offer_service.delete_offer(offerId)
+    offer_service.delete_offer(offer)
+
+
 @offers_router.get(
     "/", status_code=status.HTTP_200_OK, response_model=CursorPage[OfferOut]
 )
-
 def get_offers_by_position(
     latitude: float,
     longitude: float,
@@ -60,6 +61,8 @@ def get_offers_by_position(
     session: Session = Depends(get_db_session),
 ):
     logging.info(f"Get offers by position: {latitude=}, {longitude=}")
-    bounding_box: BoundingBox = get_bounding_box(latitude, longitude, perimeter_to_radius(perimeter))
+    bounding_box: BoundingBox = get_bounding_box(
+        latitude, longitude, perimeter_to_radius(perimeter)
+    )
     statement: Select = OfferService.get_offers_statement_by_location(bounding_box)
     return paginate(session, statement)

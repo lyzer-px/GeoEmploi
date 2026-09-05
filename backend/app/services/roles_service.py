@@ -215,6 +215,7 @@ class RoleService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error creating permission.",
             )
+
     def update_role(self, role_id: int, role_data: RoleCreate) -> Role:
         role = self._db.get(Role, role_id)
 
@@ -223,24 +224,22 @@ class RoleService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Role {role_id} not found.",
             )
-    
+
         existing_role = self.get_role_by_name(role_data.name)
-    
+
         if existing_role and existing_role.id != role_id:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Role '{role_data.name}' already exists.",
             )
-    
-        permissions = self._get_permissions_by_names(
-            role_data.permissions
-        )
-    
+
+        permissions = self._get_permissions_by_names(role_data.permissions)
+
         role.name = role_data.name
         role.description = role_data.description
         role.is_self_assignable = role_data.is_self_assignable
         role.permissions = permissions
-    
+
         try:
             self._db.commit()
             self._db.refresh(role)
@@ -251,7 +250,7 @@ class RoleService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error updating role.",
             )
-    
+
     def get_all_permissions(self) -> Sequence[Permission]:
         statement = select(Permission)
         return self._db.scalars(statement).all()

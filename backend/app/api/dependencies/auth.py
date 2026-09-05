@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Callable, TypeVar
 
 from jose import jwt
 from fastapi import Depends, HTTPException, status
@@ -9,6 +9,8 @@ from app.schemas.input.auth import AccessToken, RefreshToken, RefreshTokenReques
 from app.services.user_service import UserService, get_user_service
 from app.services.roles_service import RoleService, get_role_service
 from app.services.offer_service import OfferService, get_offer_service
+from app.core.permissions import Resource, Action, perm
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -22,6 +24,8 @@ permissions_exception = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
     detail="You do not have the necessary permissions to perform this action.",
 )
+
+T = TypeVar("T")
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 RoleServiceDep = Annotated[RoleService, Depends(get_role_service)]
@@ -46,15 +50,10 @@ def get_current_user(
     payload: AccessTokenDep,
     user_service: UserServiceDep,
 ) -> User:
-    print("PAYLOAD USER ID:", payload.user_id)
-
     user = user_service.get_user_by_id(payload.user_id)
-
-    print("USER:", user)
 
     if not user:
         raise credentials_exception
-
     return user
 
 
@@ -95,5 +94,32 @@ def require_permission(permission_name: str):
             )
 
         return user
+
+    return dependency
+
+
+def require_ownership(
+    resource: Resource,
+    action: Action,
+    owner_field: str,
+    resource_fetcher: Callable[..., T],
+):
+    perm_own: str = perm(action, resource)
+    perm_any: str = perm(Action.UPDATE_ANY, resource)
+
+    def dependency(
+        user: CurrentUserDep,
+        role_service: RoleServiceDep,
+        target=Depends(resource_fetcher),
+    ):
+        if role_service.has_permission(user, perm_any):
+            return target
+        owner_id: int = getattr(target, owner_field, None)
+        if role_service.has_permission(user, perm_own) and owner_id == user.id:
+            return target
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Missing required permission: {perm_own}",
+        )
 
     return dependency

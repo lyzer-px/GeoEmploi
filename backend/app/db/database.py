@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from .models.base import Base
 from app.core.settings import Settings
+from .setup import init_permissions, init_roles
+from app.core.roles import ROLES_DEFINITION
 
 
 class DatabaseHandler:
@@ -35,7 +37,15 @@ class DatabaseHandler:
 
 def init_db(settings: Settings) -> DatabaseHandler:
     global db_handler
+
     db_handler = DatabaseHandler(settings)
+    db_handler.create_tables()
+    session = db_handler.session_factory()
+    try:
+        init_permissions(session)
+        init_roles(session, ROLES_DEFINITION)
+    finally:
+        session.close()
     return db_handler
 
 

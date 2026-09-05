@@ -10,7 +10,6 @@ from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
 from sqlalchemy.sql import Select
-from sqlalchemy import select
 
 
 class OfferNotFoundError(Exception):
@@ -82,15 +81,7 @@ class OfferService:
                 detail="Error during the creation of the offer.",
             )
 
-    def update_offer(self, offer_id: int, offer_data: OfferUpdate) -> Offer:
-        """Updates an existing offer."""
-        offer = self.get_offer_by_id(offer_id)
-
-        if not offer:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Offer {offer_id} not found.",
-            )
+    def update_offer(self, offer: Offer, offer_data: OfferUpdate) -> Offer:
         update_dict: dict[str, Any] = offer_data.model_dump(exclude_unset=True)
         if "address" in update_dict:
             update_dict["adress"] = update_dict.pop("address")
@@ -108,12 +99,7 @@ class OfferService:
                 detail="Error updating the offer.",
             )
 
-    def delete_offer(self, offer_id: int) -> None:
-        """Delete an offer"""
-        offer = self.get_offer_by_id(offer_id)
-        if not offer:
-            raise OfferNotFoundError(f"Offer {offer_id} not found.")
-
+    def delete_offer(self, offer: Offer) -> None:
         self._db.delete(offer)
         try:
             self._db.commit()

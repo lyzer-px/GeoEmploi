@@ -1,5 +1,8 @@
 import logging
+
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 
 from .api.auth import auth_router
 from .api.users import users_router
@@ -7,8 +10,6 @@ from .api.tiles import tiles_router
 from .api.roles import roles_router
 from .api.permissions import permissions_router
 from .api.offers import offers_router
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from .core.loggings import setup_logging
 from .core.settings import Settings

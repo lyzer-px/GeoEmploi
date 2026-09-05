@@ -4,6 +4,7 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
 
+
 class ContractType(str, Enum):
     PART_TIME = "part-time"
     FULL_TIME = "full-time"

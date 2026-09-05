@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException
 from app.db import User
 from app.schemas.input.user import UserCreate, UserIn
 from app.schemas.input.auth import AccessToken, RefreshTokenRequest
-from app.schemas.output.token import Token
-from app.api.dependencies import UserServiceDep, RefreshTokenDep, RoleServiceDep
+from app.schemas.output.auth import Token
+from app.api.dependencies.auth import UserServiceDep, RefreshTokenDep, RoleServiceDep
 from app.services.auth_service import AuthenticationService
+from app.schemas.output.auth import RegisterResponse, UserOut
 
 auth_router = APIRouter(tags=["auth"])
 
@@ -23,7 +24,7 @@ def login_user(user_data: UserIn, user_service: UserServiceDep):
 
 
 @auth_router.post(
-    "/register", response_model=Token, status_code=status.HTTP_201_CREATED
+    "/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED
 )
 def create_user(
     new_user: UserCreate, user_service: UserServiceDep, role_service: RoleServiceDep
@@ -35,8 +36,10 @@ def create_user(
     )
     access_token: str = AuthenticationService.create_access_token(access_payload)
     refresh_token: str = AuthenticationService.create_refresh_token(user.id)
-    return Token(access_token=access_token, refresh_token=refresh_token)
-
+    return RegisterResponse(
+        user=UserOut.model_validate(user),
+        tokens=Token(access_token=access_token, refresh_token=refresh_token),
+    )
 
 @auth_router.post("/refresh", response_model=Token)
 def refresh_access_token(

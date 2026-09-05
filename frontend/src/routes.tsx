@@ -6,6 +6,6 @@ export const ROUTES = {
   JOB_SEEKER_REGISTER: '/register/job-seeker',
   EMPLOYER_REGISTER: '/register/employer',
   FORGOT_PASSWORD: '/forgot-password',
-  ADMIN: '/admin'
+  ADMIN: '/admin',
   ABOUT: '/a-propos'
 } as const;

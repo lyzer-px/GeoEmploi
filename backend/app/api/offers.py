@@ -1,12 +1,23 @@
 from fastapi import APIRouter, Depends, status
-from typing import Sequence
+from fastapi_pagination import set_params, set_page
+from fastapi_pagination.cursor import CursorPage, CursorParams
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy.orm import Session, Query
 
-from app.api.dependencies import require_permission, OfferServiceDep
+import logging
+
 from app.schemas.input.offers import OfferCreate, OfferUpdate
 from app.schemas.output.offers import OfferOut
+from app.db.database import get_db_session
+from app.api.dependencies import require_permission, OfferServiceDep
 from app.db.models import User, Offer
+from app.services.geography import get_bounding_box, perimeter_to_radius, BoundingBox
+from app.services.offer_service import OfferService
 
 offers_router = APIRouter(tags=["offers"])
+
+set_page(CursorPage[OfferOut])
+set_params(CursorParams(size=10))
 
 
 @offers_router.post("/", status_code=status.HTTP_201_CREATED)
@@ -28,7 +39,7 @@ def update_offer(
     offer_service.update_offer(offerId, offer_update)
 
 
-@offers_router.get("/", status_code=status.HTTP_200_OK)
+@offers_router.get("/", status_code=status.HTTP_200_OK, response_model=list[OfferOut])
 def get_all_offers(offer_service: OfferServiceDep):
     offers: list[Offer] = offer_service.get_all_offers()
     offers_out: list[OfferOut] = []
@@ -36,3 +47,18 @@ def get_all_offers(offer_service: OfferServiceDep):
     for offer in offers:
         offers_out.append(OfferOut.from_orm_model(offer))
     return offers_out
+
+
+@offers_router.get(
+    "/", status_code=status.HTTP_200_OK, response_model=CursorPage[OfferOut]
+)
+def get_offers_by_position(
+    latitude: float,
+    longitude: float,
+    perimeter: float,
+    session: Session = Depends(get_db_session),
+):
+    logging.info(f"Get offers by position: {latitude=}, {longitude=}")
+    bounding_box: BoundingBox = get_bounding_box(latitude, longitude, perimeter_to_radius(perimeter))
+    statement: Query = OfferService.get_offers_statement_by_location(bounding_box)
+    return paginate(session, statement)

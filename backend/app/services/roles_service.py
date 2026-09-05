@@ -49,7 +49,8 @@ class RoleService:
             except Exception:
                 self._db.rollback()
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error assigning role to user."
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Error assigning role to user.",
                 )
 
         return user

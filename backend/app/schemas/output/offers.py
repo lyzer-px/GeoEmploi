@@ -5,6 +5,7 @@ from app.db.models import Offer
 
 from pydantic import BaseModel
 
+
 class ContractType(str, Enum):
     PART_TIME = "part-time"
     FULL_TIME = "full-time"

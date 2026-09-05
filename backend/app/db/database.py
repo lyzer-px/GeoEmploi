@@ -3,10 +3,10 @@ from typing import Generator
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
-
 from .models.base import Base
 from app.core.settings import Settings
-from .setup import init_permissions
+from .setup import init_permissions, init_roles
+from app.core.roles import ROLES_DEFINITION
 
 class DatabaseHandler:
     engine: Engine
@@ -42,9 +42,11 @@ def init_db(settings: Settings) -> DatabaseHandler:
     session = db_handler.session_factory()
     try:
         init_permissions(session)
+        init_roles(session, ROLES_DEFINITION)
     finally:
         session.close()
     return db_handler
+
 
 def get_db_session() -> Generator[Session, None, None]:
     if db_handler is None:

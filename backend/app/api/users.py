@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.api.dependencies import (
+from app.api.dependencies.auth import (
     UserServiceDep,
     AccessTokenDep,
     CurrentUserDep,
@@ -26,6 +26,7 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
     "Delete user account"
     user_service.delete_user(token.user_id)
 
+
 @users_router.get("/me", status_code=status.HTTP_200_OK)
 def get_my_account(user: CurrentUserDep):
     return {
@@ -34,6 +35,7 @@ def get_my_account(user: CurrentUserDep):
         "last_name": user.last_name,
         "email": user.email,
     }
+
 
 @users_router.get("/me/roles", status_code=status.HTTP_200_OK)
 def get_my_roles(
@@ -58,9 +60,11 @@ def set_my_roles(
 def get_all_users(user_service: UserServiceDep):
     return user_service.get_all_users()
 
+
 @users_router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(userId: int, user_service: UserServiceDep):
     user_service.delete_user(userId)
+
 
 @users_router.patch("/{userId}", status_code=status.HTTP_200_OK)
 def update_user(
@@ -69,6 +73,7 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
+
 
 @users_router.patch("/{userId}/roles", status_code=status.HTTP_200_OK)
 def set_user_roles(

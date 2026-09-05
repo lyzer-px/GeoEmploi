@@ -5,7 +5,7 @@ from app.db import User
 from app.schemas.input.user import UserCreate, UserIn
 from app.schemas.input.auth import AccessToken, RefreshTokenRequest
 from app.schemas.output.token import Token
-from app.api.dependencies import UserServiceDep, RefreshTokenDep, RoleServiceDep
+from app.api.dependencies.auth import UserServiceDep, RefreshTokenDep, RoleServiceDep
 from app.services.auth_service import AuthenticationService
 
 auth_router = APIRouter(tags=["auth"])

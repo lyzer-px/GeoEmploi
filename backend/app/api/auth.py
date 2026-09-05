@@ -22,8 +22,12 @@ def login_user(user_data: UserIn, user_service: UserServiceDep):
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
-@auth_router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-def create_user(new_user: UserCreate, user_service: UserServiceDep, role_service: RoleServiceDep):
+@auth_router.post(
+    "/register", response_model=Token, status_code=status.HTTP_201_CREATED
+)
+def create_user(
+    new_user: UserCreate, user_service: UserServiceDep, role_service: RoleServiceDep
+):
     user: User = user_service.create_user(new_user)
     role_service.assign_self_assignable_role_to_user(user, new_user.role)
     access_payload: AccessToken = AuthenticationService.create_access_token_payload(

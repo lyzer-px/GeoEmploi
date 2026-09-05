@@ -1,13 +1,16 @@
 from datetime import datetime, timezone
-from typing import Any, Optional, Sequence
+from typing import Any, Optional
 from fastapi import Depends, HTTPException, status
 from pyproj import Transformer
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
+from app.services.geography import BoundingBox
 from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
+from sqlalchemy.sql import Select
+from sqlalchemy import select
 
 
 class OfferNotFoundError(Exception):
@@ -26,15 +29,28 @@ class OfferService:
         statement = select(Offer).where(Offer.id == offer_id)
         return self._db.scalars(statement).first()
 
-    def get_all_offers(self, skip: int = 0, limit: int = 100) -> Sequence[Offer]:
+    def get_all_offers(self, skip: int = 0, limit: int = 100) -> list[Offer]:
         """Retrieves all offers with pagination."""
         statement = select(Offer).offset(skip).limit(limit)
         return self._db.scalars(statement).all()
 
-    def get_offers_by_employer(self, employer_id: int) -> Sequence[Offer]:
+    def get_offers_by_employer(self, employer_id: int) -> list[Offer]:
         """Retrieves all offers created by a specific employer."""
         statement = select(Offer).where(Offer.employer_id == employer_id)
         return self._db.scalars(statement).all()
+
+    @staticmethod
+    def get_offers_statement_by_location(
+        bounding_box: BoundingBox,
+    ) -> Select:
+        return (
+            select(Offer)
+            .where(
+                Offer.latitude.between(bounding_box.lat_min, bounding_box.lat_max),
+                Offer.longitude.between(bounding_box.lon_min, bounding_box.lon_max),
+            )
+            .order_by(Offer.id)
+        )
 
     def create_offer(self, offer_data: OfferCreate, employer: User) -> Offer:
         """Create a new offer by associating the geocoding metadata and the employer."""

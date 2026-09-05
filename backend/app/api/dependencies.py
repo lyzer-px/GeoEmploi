@@ -77,6 +77,7 @@ def verify_refresh_token(body: RefreshTokenRequest) -> RefreshToken:
 
 RefreshTokenDep = Annotated[RefreshToken, Depends(verify_refresh_token)]
 
+
 def require_permission(permission_name: str):
     def dependency(
         user: CurrentUserDep,
@@ -89,4 +90,5 @@ def require_permission(permission_name: str):
             )
 
         return user
+
     return dependency

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Optional, Sequence
+from typing import Any, Optional
 from fastapi import Depends, HTTPException, status
 from pyproj import Transformer
 from sqlalchemy.orm import Session
@@ -10,7 +10,7 @@ from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
 from sqlalchemy.sql import Select
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 
 class OfferNotFoundError(Exception):

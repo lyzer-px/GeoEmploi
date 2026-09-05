@@ -1,10 +1,8 @@
 from datetime import date
 from typing import Optional
 from enum import Enum
-from app.db.models import Offer
 
-from pydantic import BaseModel
-
+from pydantic import BaseModel, ConfigDict
 
 class ContractType(str, Enum):
     PART_TIME = "part-time"
@@ -13,7 +11,16 @@ class ContractType(str, Enum):
     VOLUNTEER = "volunteer"
 
 
+class EmployerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    first_name: str
+    last_name: str
+
+
 class OfferOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     description: str
@@ -23,21 +30,4 @@ class OfferOut(BaseModel):
     latitude: float
     longitude: float
     adress: str
-    employer_first_name: str
-    employer_last_name: str
-
-    @classmethod
-    def from_orm_model(cls, offer: Offer) -> "OfferOut":
-        return cls(
-            id=offer.id,
-            name=offer.name,
-            description=offer.description,
-            start_date=offer.start_date,
-            end_date=offer.end_date,
-            contract_type=offer.contract_type,
-            latitude=offer.latitude,
-            longitude=offer.longitude,
-            adress=offer.adress,
-            employer_first_name=offer.employer.first_name,
-            employer_last_name=offer.employer.last_name,
-        )
+    employer: EmployerOut

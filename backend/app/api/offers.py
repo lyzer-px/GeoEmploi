@@ -29,3 +29,10 @@ def update_offer(
 @offers_router.get("/", status_code=status.HTTP_200_OK)
 def get_all_offers(offer_service: OfferServiceDep):
     return offer_service.get_all_offers()
+
+@offers_router.delete("/{offerId}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_offer(
+    offerId: int,
+    offer_service: OfferServiceDep,
+):
+    offer_service.delete_offer(offerId)

@@ -29,6 +29,8 @@ type JobOffer = {
 type SelectedType = "users" | "job-offers";
 
 function Admin() {
+  const apiUrl = import.meta.env.VITE_API_BACKEND_URL;
+
   const [selectedType, setSelectedType] =
     useState<SelectedType>("users");
 
@@ -43,11 +45,8 @@ function Admin() {
 
   const [actionTop, setActionTop] = useState(0);
 
-  const [loadingUsers, setLoadingUsers] =
-    useState(true);
-
-  const [loadingJobOffers, setLoadingJobOffers] =
-    useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingJobOffers, setLoadingJobOffers] = useState(true);
 
   const [usersError, setUsersError] =
     useState<string | null>(null);
@@ -58,26 +57,18 @@ function Admin() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoadingUsers(true);
-        setUsersError(null);
-
-        const response = await fetch(`${import.meta.env.VITE_API_BACKEND_URL}/api/v1/users/`);
+        const response = await fetch(
+          `${apiUrl}/api/v1/users/`
+        );
 
         if (!response.ok) {
-          throw new Error(
-            `Erreur HTTP ${response.status}`
-          );
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data: User[] = await response.json();
-
         setUsers(data);
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement des utilisateurs :",
-          error
-        );
-
+        console.error(error);
         setUsersError(
           "Impossible de charger les utilisateurs."
         );
@@ -87,31 +78,23 @@ function Admin() {
     };
 
     fetchUsers();
-  }, []);
+  }, [apiUrl]);
 
   useEffect(() => {
     const fetchJobOffers = async () => {
       try {
-        setLoadingJobOffers(true);
-        setJobOffersError(null);
-
-        const response = await fetch(`${import.meta.env.VITE_API_BACKEND_URL}/api/v1/offers/`);
+        const response = await fetch(
+          `${apiUrl}/api/v1/offers/`
+        );
 
         if (!response.ok) {
-          throw new Error(
-            `Erreur HTTP ${response.status}`
-          );
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data: JobOffer[] = await response.json();
-
         setJobOffers(data);
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement des offres :",
-          error
-        );
-
+        console.error(error);
         setJobOffersError(
           "Impossible de charger les offres d'emploi."
         );
@@ -121,7 +104,7 @@ function Admin() {
     };
 
     fetchJobOffers();
-  }, []);
+  }, [apiUrl]);
 
   const handleTypeChange = (type: SelectedType) => {
     setSelectedType(type);
@@ -144,8 +127,7 @@ function Admin() {
     const element = event.currentTarget;
 
     setActionTop(
-      element.offsetTop +
-      element.offsetHeight / 2
+      element.offsetTop + element.offsetHeight / 2
     );
   };
 
@@ -164,9 +146,62 @@ function Admin() {
     const element = event.currentTarget;
 
     setActionTop(
-      element.offsetTop +
-      element.offsetHeight / 2
+      element.offsetTop + element.offsetHeight / 2
     );
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/v1/users/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      setUsers((users) =>
+        users.filter((user) => user.id !== userId)
+      );
+
+      setSelectedUser(null);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la suppression de l'utilisateur :",
+        error
+      );
+    }
+  };
+
+  const handleDeleteJobOffer = async (
+    offerId: number
+  ) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/v1/offers/${offerId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      setJobOffers((offers) =>
+        offers.filter((offer) => offer.id !== offerId)
+      );
+
+      setSelectedJobOffer(null);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la suppression de l'offre :",
+        error
+      );
+    }
   };
 
   return (
@@ -175,19 +210,12 @@ function Admin() {
 
       <main className="admin-page">
         <div className="admin-content">
-          <p className="admin-kicker">
-            Administration
-          </p>
+          <p className="admin-kicker">Administration</p>
 
           <h1>Panneau d’administration</h1>
 
           <div className="admin-box">
             <div className="admin-dashboard">
-
-              {/* =========================
-                  CATEGORY SELECTOR
-                  ========================= */}
-
               <div className="admin-selector">
                 <p className="admin-selector-title">
                   Changer la catégorie
@@ -223,10 +251,6 @@ function Admin() {
                   </button>
                 </div>
 
-                {/* =========================
-                    STATISTICS
-                    ========================= */}
-
                 <div className="admin-stats">
                   <h2>Statistiques</h2>
 
@@ -234,7 +258,6 @@ function Admin() {
                     <>
                       <div className="admin-stat">
                         <span>Utilisateurs</span>
-
                         <strong>
                           {loadingUsers
                             ? "..."
@@ -244,25 +267,18 @@ function Admin() {
 
                       <div className="admin-stat">
                         <span>Administrateurs</span>
-
-                        <strong>
-                          -
-                        </strong>
+                        <strong>-</strong>
                       </div>
 
                       <div className="admin-stat">
                         <span>Actifs</span>
-
-                        <strong>
-                          -
-                        </strong>
+                        <strong>-</strong>
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="admin-stat">
                         <span>Offres</span>
-
                         <strong>
                           {loadingJobOffers
                             ? "..."
@@ -272,27 +288,17 @@ function Admin() {
 
                       <div className="admin-stat">
                         <span>Offres actives</span>
-
-                        <strong>
-                          -
-                        </strong>
+                        <strong>-</strong>
                       </div>
 
                       <div className="admin-stat">
                         <span>Publiées ce mois</span>
-
-                        <strong>
-                          -
-                        </strong>
+                        <strong>-</strong>
                       </div>
                     </>
                   )}
                 </div>
               </div>
-
-              {/* =========================
-                  USERS / OFFERS
-                  ========================= */}
 
               <div className="admin-users-container">
                 <input
@@ -306,9 +312,6 @@ function Admin() {
                 />
 
                 <div className="admin-users">
-
-                  {/* USERS */}
-
                   {selectedType === "users" && (
                     <>
                       {loadingUsers && (
@@ -321,20 +324,14 @@ function Admin() {
                         </div>
                       )}
 
-                      {!loadingUsers &&
-                        usersError && (
-                          <div className="admin-user">
-                            <div className="admin-user-info">
-                              <strong>
-                                Erreur
-                              </strong>
-
-                              <span>
-                                {usersError}
-                              </span>
-                            </div>
+                      {!loadingUsers && usersError && (
+                        <div className="admin-user">
+                          <div className="admin-user-info">
+                            <strong>Erreur</strong>
+                            <span>{usersError}</span>
                           </div>
-                        )}
+                        </div>
+                      )}
 
                       {!loadingUsers &&
                         !usersError &&
@@ -353,11 +350,11 @@ function Admin() {
                         users.map((user) => (
                           <div
                             key={user.id}
-                            className={`admin-user ${selectedUser?.id ===
-                                user.id
+                            className={`admin-user ${
+                              selectedUser?.id === user.id
                                 ? "selected"
                                 : ""
-                              }`}
+                            }`}
                             onClick={(event) =>
                               handleUserClick(
                                 user,
@@ -375,16 +372,12 @@ function Admin() {
                                 {user.last_name}
                               </strong>
 
-                              <span>
-                                {user.email}
-                              </span>
+                              <span>{user.email}</span>
                             </div>
                           </div>
                         ))}
                     </>
                   )}
-
-                  {/* JOB OFFERS */}
 
                   {selectedType === "job-offers" && (
                     <>
@@ -402,10 +395,7 @@ function Admin() {
                         jobOffersError && (
                           <div className="admin-user">
                             <div className="admin-user-info">
-                              <strong>
-                                Erreur
-                              </strong>
-
+                              <strong>Erreur</strong>
                               <span>
                                 {jobOffersError}
                               </span>
@@ -430,12 +420,16 @@ function Admin() {
                         jobOffers.map((offer) => (
                           <div
                             key={offer.id}
-                            className={`admin-user ${selectedJobOffer?.id === offer.id
+                            className={`admin-user ${
+                              selectedJobOffer?.id === offer.id
                                 ? "selected"
                                 : ""
-                              }`}
+                            }`}
                             onClick={(event) =>
-                              handleJobOfferClick(offer, event)
+                              handleJobOfferClick(
+                                offer,
+                                event
+                              )
                             }
                           >
                             <div className="admin-user-avatar">
@@ -443,12 +437,11 @@ function Admin() {
                             </div>
 
                             <div className="admin-user-info">
-                              <strong>
-                                {offer.name}
-                              </strong>
+                              <strong>{offer.name}</strong>
 
                               <span>
-                                {offer.adress} · {offer.contract_type}
+                                {offer.adress} ·{" "}
+                                {offer.contract_type}
                               </span>
                             </div>
                           </div>
@@ -456,10 +449,6 @@ function Admin() {
                     </>
                   )}
                 </div>
-
-                {/* =========================
-                    ACTIONS BUBBLE
-                    ========================= */}
 
                 {selectedType === "users" &&
                   selectedUser && (
@@ -473,7 +462,14 @@ function Admin() {
                         Changer le rôle
                       </button>
 
-                      <button type="button">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteUser(
+                            selectedUser.id
+                          )
+                        }
+                      >
                         Supprimer l'utilisateur
                       </button>
 
@@ -491,7 +487,14 @@ function Admin() {
                         top: `${actionTop}px`,
                       }}
                     >
-                      <button type="button">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteJobOffer(
+                            selectedJobOffer.id
+                          )
+                        }
+                      >
                         Supprimer l'offre
                       </button>
 
@@ -511,4 +514,4 @@ function Admin() {
   );
 }
 
-export default Admin; 
+export default Admin;

@@ -58,3 +58,11 @@ def get_all_users(user_service: UserServiceDep):
 @users_router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(userId: int, user_service: UserServiceDep):
     user_service.delete_user(userId)
+
+@users_router.patch("/{userId}", status_code=status.HTTP_200_OK)
+def update_user(
+    userId: int,
+    user_update: UserUpdate,
+    user_service: UserServiceDep,
+):
+    return user_service.update_user(userId, user_update)

@@ -24,7 +24,7 @@ def update_offer(
     offer_service: OfferServiceDep,
     _: User = Depends(require_permission("update:offer")),
 ):
-    offer_service.update_offer(offerId, offer_update)
+    return offer_service.update_offer(offerId, offer_update)
 
 @offers_router.get("/", status_code=status.HTTP_200_OK)
 def get_all_offers(offer_service: OfferServiceDep):

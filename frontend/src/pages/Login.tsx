@@ -8,7 +8,7 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import { Link } from "react-router-dom";
 import { ROUTES } from '../routes';
 import '../Login.css'
-import MyHeader  from '../Header';
+import MyHeader from '../Header';
 import Footer from '../Footer';
 
 type Mode = "login" | "register";
@@ -21,7 +21,7 @@ export function Login() {
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
     const isLoginDisabled = loginEmail === "" || loginPassword === "";
-    
+
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [registerEmail, setRegisterEmail] = useState("");
@@ -33,17 +33,30 @@ export function Login() {
     const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
     console.log("API_BACKEND_URL:", API_BACKEND_URL);
     function sendLoginRequest() {
-        fetch(`${API_BACKEND_URL}/auth/login`, {
+        fetch(`${API_BACKEND_URL}/api/v1/auth/login`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: loginEmail,
+                password: loginPassword
+            }),
         })
             .then(async (response) => {
                 if (!response.ok) {
                     throw new Error("Échec de la connexion");
                 }
+
                 const data = await response.json();
-                 console.log("5. data =", data);
+
+                localStorage.setItem(
+                    "access_token",
+                    data.access_token
+                );
+
+                console.log("5. data =", data);
+
                 if (data.role === "employer") {
                     navigate("/employeur");
                 } else {
@@ -51,7 +64,10 @@ export function Login() {
                 }
             })
             .catch((error) => {
-                console.error("Erreur lors de la requête de connexion :", error);
+                console.error(
+                    "Erreur lors de la requête de connexion :",
+                    error
+                );
             });
     }
 
@@ -80,7 +96,7 @@ export function Login() {
 
     return (
         <div className="login-container">
-            <MyHeader/>
+            <MyHeader />
             {mode === "login" ? (
                 <div className="login-block">
                     <h1>Connexion à GeoEmploi</h1>
@@ -167,7 +183,7 @@ export function Login() {
                     </div>
                 </div>
             )}
-        <Footer/>
+            <Footer />
         </div>
     );
 }

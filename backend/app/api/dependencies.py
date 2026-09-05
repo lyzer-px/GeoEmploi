@@ -46,10 +46,15 @@ def get_current_user(
     payload: AccessTokenDep,
     user_service: UserServiceDep,
 ) -> User:
+    print("PAYLOAD USER ID:", payload.user_id)
+
     user = user_service.get_user_by_id(payload.user_id)
+
+    print("USER:", user)
 
     if not user:
         raise credentials_exception
+
     return user
 
 

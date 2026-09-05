@@ -27,7 +27,7 @@ def create_offer(
     offer_service: OfferServiceDep,
     user: User = Depends(require_permission("create:offer")),
 ):
-    offer_service.create_offer(offer_data, user)
+    return offer_service.create_offer(offer_data, user)
 
 
 @offers_router.patch("/{offerId}", status_code=status.HTTP_200_OK)
@@ -37,11 +37,22 @@ def update_offer(
     offer_service: OfferServiceDep,
     _: User = Depends(require_permission("update:offer")),
 ):
-    offer_service.update_offer(offerId, offer_update)
+    return offer_service.update_offer(offerId, offer_update)
 
+@offers_router.get("/", status_code=status.HTTP_200_OK)
+def get_all_offers(offer_service: OfferServiceDep):
+    return offer_service.get_all_offers()
+
+@offers_router.delete("/{offerId}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_offer(
+    offerId: int,
+    offer_service: OfferServiceDep,
+):
+    offer_service.delete_offer(offerId)
 @offers_router.get(
     "/", status_code=status.HTTP_200_OK, response_model=CursorPage[OfferOut]
 )
+
 def get_offers_by_position(
     latitude: float,
     longitude: float,

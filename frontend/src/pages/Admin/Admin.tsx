@@ -29,6 +29,19 @@ type JobOffer = {
   updated_at: string;
 };
 
+type Permission = {
+  id: number;
+  name: string;
+};
+
+type Role = {
+  id: number;
+  name: string;
+  description: string;
+  is_self_assignable: boolean;
+  permissions: Permission[];
+};
+
 type Category = "users" | "offers";
 
 type ListItemProps = {
@@ -51,9 +64,7 @@ function AdminListItem({
   return (
     <div
       className={
-        selected
-          ? "admin-user selected"
-          : "admin-user"
+        selected ? "admin-user selected" : "admin-user"
       }
       onClick={onClick}
     >
@@ -104,10 +115,7 @@ function EditLayout({
   return (
     <div className="admin-edit">
       <div className="admin-edit-header">
-        <span className="admin-edit-icon">
-          ✎
-        </span>
-
+        <span className="admin-edit-icon">✎</span>
         <h2>{title}</h2>
       </div>
 
@@ -146,14 +154,24 @@ function Admin() {
     useState<Category>("users");
 
   const [users, setUsers] = useState<User[]>([]);
+
   const [jobOffers, setJobOffers] =
     useState<JobOffer[]>([]);
+
+  const [permissions, setPermissions] =
+    useState<Permission[]>([]);
+
+  const [roles, setRoles] =
+    useState<Role[]>([]);
 
   const [selectedUser, setSelectedUser] =
     useState<User | null>(null);
 
   const [selectedJobOffer, setSelectedJobOffer] =
     useState<JobOffer | null>(null);
+
+  const [selectedAdminRole, setSelectedAdminRole] =
+    useState<Role | null>(null);
 
   const [editUser, setEditUser] =
     useState<User | null>(null);
@@ -170,17 +188,77 @@ function Admin() {
   const [search, setSearch] =
     useState("");
 
+  const [changingRole, setChangingRole] =
+    useState(false);
+
+  const [selectedRole, setSelectedRole] =
+    useState("user");
+
+  const [managingRoles, setManagingRoles] =
+    useState(false);
+
+  const [editingRole, setEditingRole] =
+    useState(false);
+
+  const [roleName, setRoleName] =
+    useState("");
+
+  const [roleDescription, setRoleDescription] =
+    useState("");
+
+  const [roleSelfAssignable, setRoleSelfAssignable] =
+    useState(false);
+
+  const [rolePermissions, setRolePermissions] =
+    useState<string[]>([]);
+
   const getToken = () =>
     localStorage.getItem("access_token");
+
+  const normalize = (value: string) =>
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [usersResponse, offersResponse] =
-          await Promise.all([
-            fetch(`${apiUrl}/api/v1/users/`),
-            fetch(`${apiUrl}/api/v1/offers/`),
-          ]);
+        const token = getToken();
+
+        const authHeaders: HeadersInit = {
+          ...(token
+            ? {
+              Authorization:
+                `Bearer ${token}`,
+            }
+            : {}),
+        };
+
+        const [
+          usersResponse,
+          offersResponse,
+          permissionsResponse,
+          rolesResponse,
+        ] = await Promise.all([
+          fetch(`${apiUrl}/api/v1/users/`),
+
+          fetch(`${apiUrl}/api/v1/offers/`),
+
+          fetch(
+            `${apiUrl}/api/v1/permissions/`,
+            {
+              headers: authHeaders,
+            }
+          ),
+
+          fetch(
+            `${apiUrl}/api/v1/roles/`,
+            {
+              headers: authHeaders,
+            }
+          ),
+        ]);
 
         if (!usersResponse.ok) {
           throw new Error(
@@ -194,14 +272,34 @@ function Admin() {
           );
         }
 
+        if (!permissionsResponse.ok) {
+          throw new Error(
+            `Permissions HTTP ${permissionsResponse.status}`
+          );
+        }
+
+        if (!rolesResponse.ok) {
+          throw new Error(
+            `Roles HTTP ${rolesResponse.status}`
+          );
+        }
+
         const usersData: User[] =
           await usersResponse.json();
 
         const offersData: JobOffer[] =
           await offersResponse.json();
 
+        const permissionsData: Permission[] =
+          await permissionsResponse.json();
+
+        const rolesData: Role[] =
+          await rolesResponse.json();
+
         setUsers(usersData);
         setJobOffers(offersData);
+        setPermissions(permissionsData);
+        setRoles(rolesData);
       } catch (error) {
         console.error(
           "Erreur lors du chargement :",
@@ -213,26 +311,14 @@ function Admin() {
     loadData();
   }, [apiUrl]);
 
-  const normalize = (value: string) =>
-    value
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-
   const filteredUsers = users.filter(
     (user) => {
       const query = normalize(search);
 
       return (
-        normalize(user.first_name).includes(
-          query
-        ) ||
-        normalize(user.last_name).includes(
-          query
-        ) ||
-        normalize(user.email).includes(
-          query
-        )
+        normalize(user.first_name).includes(query) ||
+        normalize(user.last_name).includes(query) ||
+        normalize(user.email).includes(query)
       );
     }
   );
@@ -243,55 +329,150 @@ function Admin() {
 
       return (
         normalize(offer.name).includes(query) ||
-        normalize(offer.description).includes(
-          query
-        ) ||
+        normalize(offer.description).includes(query) ||
         normalize(offer.adress).includes(query)
       );
     }
   );
 
+  const loadPermissions = async () => {
+    try {
+      const token = getToken();
+
+      const response = await fetch(
+        `${apiUrl}/api/v1/permissions/`,
+        {
+          headers: {
+            ...(token
+              ? {
+                Authorization:
+                  `Bearer ${token}`,
+              }
+              : {}),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Permissions HTTP ${response.status}`
+        );
+      }
+
+      const data: Permission[] =
+        await response.json();
+
+      setPermissions(data);
+    } catch (error) {
+      console.error(
+        "Erreur lors du chargement des permissions :",
+        error
+      );
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      const token = getToken();
+
+      const response = await fetch(
+        `${apiUrl}/api/v1/roles/`,
+        {
+          headers: {
+            ...(token
+              ? {
+                Authorization:
+                  `Bearer ${token}`,
+              }
+              : {}),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Roles HTTP ${response.status}`
+        );
+      }
+
+      const data: Role[] =
+        await response.json();
+
+      setRoles(data);
+    } catch (error) {
+      console.error(
+        "Erreur lors du chargement des rôles :",
+        error
+      );
+    }
+  };
+
+  const openRoleManagement = async () => {
+    setManagingRoles(true);
+    setEditingRole(false);
+    setSelectedAdminRole(null);
+
+    setSelectedUser(null);
+    setSelectedJobOffer(null);
+    setChangingRole(false);
+    setSearch("");
+
+    await Promise.all([
+      loadPermissions(),
+      loadRoles(),
+    ]);
+  };
+
   const changeCategory = (
     newCategory: Category
   ) => {
     setCategory(newCategory);
+    setManagingRoles(false);
+    setEditingRole(false);
+    setSelectedAdminRole(null);
+
     setSelectedUser(null);
     setSelectedJobOffer(null);
+
     setSearch("");
+    setChangingRole(false);
   };
 
   const selectUser = (user: User) => {
-    setSelectedUser(
-      selectedUser?.id === user.id
-        ? null
-        : user
-    );
+    if (selectedUser?.id === user.id) {
+      setSelectedUser(null);
+      setChangingRole(false);
+      return;
+    }
+
+    setSelectedUser(user);
     setSelectedJobOffer(null);
+    setChangingRole(false);
   };
 
   const selectOffer = (offer: JobOffer) => {
-    setSelectedJobOffer(
-      selectedJobOffer?.id === offer.id
-        ? null
-        : offer
-    );
+    if (selectedJobOffer?.id === offer.id) {
+      setSelectedJobOffer(null);
+      return;
+    }
+
+    setSelectedJobOffer(offer);
     setSelectedUser(null);
   };
 
   const startUserEdit = () => {
-    if (!selectedUser) {
-      return;
-    }
+    if (!selectedUser) return;
 
-    setEditUser({ ...selectedUser });
+    setEditUser({
+      ...selectedUser,
+    });
+
     setEditJobOffer(null);
     setEditing(true);
   };
 
   const startOfferEdit = () => {
-    if (!selectedJobOffer) {
-      return;
-    }
+    if (!selectedJobOffer) return;
 
     setEditJobOffer({
       ...selectedJobOffer,
@@ -301,6 +482,16 @@ function Admin() {
     setEditing(true);
   };
 
+  const startRoleChange = () => {
+    if (!selectedUser) return;
+
+    setSelectedRole(
+      "user"
+    );
+
+    setChangingRole(true);
+  };
+
   const cancelEdit = () => {
     setEditUser(null);
     setEditJobOffer(null);
@@ -308,9 +499,7 @@ function Admin() {
   };
 
   const saveUser = async () => {
-    if (!editUser) {
-      return;
-    }
+    if (!editUser) return;
 
     try {
       setSaving(true);
@@ -322,27 +511,29 @@ function Admin() {
         {
           method: "PATCH",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
             ...(token
               ? {
-                  Authorization:
-                    `Bearer ${token}`,
-                }
+                Authorization:
+                  `Bearer ${token}`,
+              }
               : {}),
           },
           body: JSON.stringify({
-            first_name: editUser.first_name,
-            last_name: editUser.last_name,
-            email: editUser.email,
+            first_name:
+              editUser.first_name,
+            last_name:
+              editUser.last_name,
+            email:
+              editUser.email,
           }),
         }
       );
 
       if (!response.ok) {
         throw new Error(
-          `HTTP ${response.status}: ${
-            await response.text()
-          }`
+          `HTTP ${response.status}: ${await response.text()}`
         );
       }
 
@@ -357,11 +548,12 @@ function Admin() {
         )
       );
 
+      setSelectedUser(updatedUser);
+
       cancelEdit();
     } catch (error) {
       console.error(
-        "Erreur lors de l'enregistrement "
-          + "de l'utilisateur :",
+        "Erreur lors de l'enregistrement de l'utilisateur :",
         error
       );
     } finally {
@@ -370,9 +562,7 @@ function Admin() {
   };
 
   const saveOffer = async () => {
-    if (!editJobOffer) {
-      return;
-    }
+    if (!editJobOffer) return;
 
     try {
       setSaving(true);
@@ -384,12 +574,13 @@ function Admin() {
         {
           method: "PATCH",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
             ...(token
               ? {
-                  Authorization:
-                    `Bearer ${token}`,
-                }
+                Authorization:
+                  `Bearer ${token}`,
+              }
               : {}),
           },
           body: JSON.stringify({
@@ -402,7 +593,8 @@ function Admin() {
               editJobOffer.end_date,
             contract_type:
               editJobOffer.contract_type,
-            adress: editJobOffer.adress,
+            adress:
+              editJobOffer.adress,
             geocoding_source:
               editJobOffer.geocoding_source,
             geocoding_score:
@@ -417,9 +609,7 @@ function Admin() {
 
       if (!response.ok) {
         throw new Error(
-          `HTTP ${response.status}: ${
-            await response.text()
-          }`
+          `HTTP ${response.status}: ${await response.text()}`
         );
       }
 
@@ -427,9 +617,9 @@ function Admin() {
         currentOffers.map((offer) =>
           offer.id === editJobOffer.id
             ? {
-                ...offer,
-                ...editJobOffer,
-              }
+              ...offer,
+              ...editJobOffer,
+            }
             : offer
         )
       );
@@ -437,8 +627,65 @@ function Admin() {
       cancelEdit();
     } catch (error) {
       console.error(
-        "Erreur lors de l'enregistrement "
-          + "de l'offre :",
+        "Erreur lors de l'enregistrement de l'offre :",
+        error
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveRole = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setSaving(true);
+
+      const token = getToken();
+
+      const response = await fetch(
+        `${apiUrl}/api/v1/users/`
+        + `${selectedUser.id}/roles`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type":
+              "application/json",
+            ...(token
+              ? {
+                Authorization:
+                  `Bearer ${token}`,
+              }
+              : {}),
+          },
+          body: JSON.stringify({
+            roles: [selectedRole],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: ${await response.text()}`
+        );
+      }
+
+      const updatedUser: User =
+        await response.json();
+
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === updatedUser.id
+            ? updatedUser
+            : user
+        )
+      );
+
+      setSelectedUser(updatedUser);
+      setChangingRole(false);
+    } catch (error) {
+      console.error(
+        "Erreur lors du changement de rôle :",
         error
       );
     } finally {
@@ -447,9 +694,7 @@ function Admin() {
   };
 
   const deleteUser = async () => {
-    if (!selectedUser) {
-      return;
-    }
+    if (!selectedUser) return;
 
     try {
       const token = getToken();
@@ -461,9 +706,9 @@ function Admin() {
           headers: {
             ...(token
               ? {
-                  Authorization:
-                    `Bearer ${token}`,
-                }
+                Authorization:
+                  `Bearer ${token}`,
+              }
               : {}),
           },
         }
@@ -485,31 +730,29 @@ function Admin() {
       setSelectedUser(null);
     } catch (error) {
       console.error(
-        "Erreur lors de la suppression "
-          + "de l'utilisateur :",
+        "Erreur lors de la suppression de l'utilisateur :",
         error
       );
     }
   };
 
   const deleteOffer = async () => {
-    if (!selectedJobOffer) {
-      return;
-    }
+    if (!selectedJobOffer) return;
 
     try {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/offers/${selectedJobOffer.id}`,
+        `${apiUrl}/api/v1/offers/`
+        + `${selectedJobOffer.id}`,
         {
           method: "DELETE",
           headers: {
             ...(token
               ? {
-                  Authorization:
-                    `Bearer ${token}`,
-                }
+                Authorization:
+                  `Bearer ${token}`,
+              }
               : {}),
           },
         }
@@ -524,17 +767,156 @@ function Admin() {
       setJobOffers((currentOffers) =>
         currentOffers.filter(
           (offer) =>
-            offer.id !== selectedJobOffer.id
+            offer.id !==
+            selectedJobOffer.id
         )
       );
 
       setSelectedJobOffer(null);
     } catch (error) {
       console.error(
-        "Erreur lors de la suppression "
-          + "de l'offre :",
+        "Erreur lors de la suppression de l'offre :",
         error
       );
+    }
+  };
+
+  const selectAdminRole = (role: Role) => {
+    if (
+      selectedAdminRole?.id === role.id
+    ) {
+      setSelectedAdminRole(null);
+      return;
+    }
+
+    setSelectedAdminRole(role);
+    setEditingRole(false);
+  };
+
+  const startRoleCreation = () => {
+    setSelectedAdminRole(null);
+
+    setRoleName("");
+    setRoleDescription("");
+    setRoleSelfAssignable(false);
+    setRolePermissions([]);
+
+    setEditingRole(true);
+  };
+
+  const startRoleEdit = () => {
+    if (!selectedAdminRole) return;
+
+    setRoleName(
+      selectedAdminRole.name
+    );
+
+    setRoleDescription(
+      selectedAdminRole.description
+    );
+
+    setRoleSelfAssignable(
+      selectedAdminRole.is_self_assignable
+    );
+
+    setRolePermissions(
+      (selectedAdminRole.permissions ?? []).map(
+        (permission) =>
+          permission.name
+      )
+    );
+
+    setEditingRole(true);
+  };
+
+  const cancelRoleEdit = () => {
+    setSelectedAdminRole(null);
+    setEditingRole(false);
+
+    setRoleName("");
+    setRoleDescription("");
+    setRoleSelfAssignable(false);
+    setRolePermissions([]);
+  };
+
+  const toggleRolePermission = (
+    permissionName: string
+  ) => {
+    setRolePermissions(
+      (currentPermissions) =>
+        currentPermissions.includes(
+          permissionName
+        )
+          ? currentPermissions.filter(
+            (permission) =>
+              permission !==
+              permissionName
+          )
+          : [
+            ...currentPermissions,
+            permissionName,
+          ]
+    );
+  };
+
+  const saveAdminRole = async () => {
+    if (!roleName.trim()) return;
+
+    try {
+      setSaving(true);
+
+      const token = getToken();
+
+      const body = {
+        name: roleName.trim(),
+        description:
+          roleDescription.trim(),
+        permissions:
+          rolePermissions,
+        is_self_assignable:
+          roleSelfAssignable,
+      };
+
+      const url = selectedAdminRole
+        ? `${apiUrl}/api/v1/roles/${selectedAdminRole.id}`
+        : `${apiUrl}/api/v1/roles/`;
+
+      const response = await fetch(
+        url,
+        {
+          method: selectedAdminRole
+            ? "PATCH"
+            : "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            ...(token
+              ? {
+                Authorization:
+                  `Bearer ${token}`,
+              }
+              : {}),
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: ${await response.text()}`
+        );
+      }
+
+      await loadRoles();
+
+      cancelRoleEdit();
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'enregistrement du rôle :",
+        error
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -600,7 +982,9 @@ function Admin() {
                     <EditField label="Email">
                       <input
                         type="email"
-                        value={editUser.email}
+                        value={
+                          editUser.email
+                        }
                         onChange={(event) =>
                           setEditUser({
                             ...editUser,
@@ -625,7 +1009,9 @@ function Admin() {
                     >
                       <input
                         type="text"
-                        value={editJobOffer.name}
+                        value={
+                          editJobOffer.name
+                        }
                         onChange={(event) =>
                           setEditJobOffer({
                             ...editJobOffer,
@@ -753,12 +1139,15 @@ function Admin() {
                     <button
                       type="button"
                       className={
-                        category === "users"
+                        category === "users" &&
+                          !managingRoles
                           ? "admin-category-button active"
                           : "admin-category-button"
                       }
                       onClick={() =>
-                        changeCategory("users")
+                        changeCategory(
+                          "users"
+                        )
                       }
                     >
                       Utilisateurs
@@ -767,147 +1156,497 @@ function Admin() {
                     <button
                       type="button"
                       className={
-                        category === "offers"
+                        category === "offers" &&
+                          !managingRoles
                           ? "admin-category-button active"
                           : "admin-category-button"
                       }
                       onClick={() =>
-                        changeCategory("offers")
+                        changeCategory(
+                          "offers"
+                        )
                       }
                     >
                       Offres d'emploi
                     </button>
+
+                    <button
+                      type="button"
+                      className={
+                        managingRoles
+                          ? "admin-category-button active"
+                          : "admin-category-button"
+                      }
+                      onClick={
+                        openRoleManagement
+                      }
+                    >
+                      Rôles et permissions
+                    </button>
                   </div>
 
-                  <div className="admin-stats">
-                    <div className="admin-stat">
-                      <strong>
-                        {users.length}
-                      </strong>
-                      <span>
-                        Utilisateurs
-                      </span>
-                    </div>
+                  {!managingRoles && (
+                    <div className="admin-stats">
+                      <div className="admin-stat">
+                        <strong>
+                          {users.length}
+                        </strong>
 
-                    <div className="admin-stat">
-                      <strong>
-                        {jobOffers.length}
-                      </strong>
-                      <span>Offres</span>
+                        <span>
+                          Utilisateurs
+                        </span>
+                      </div>
+
+                      <div className="admin-stat">
+                        <strong>
+                          {jobOffers.length}
+                        </strong>
+
+                        <span>
+                          Offres
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="admin-users-container">
-                  <input
-                    type="search"
-                    className="admin-search"
-                    placeholder={
-                      category === "users"
-                        ? "Rechercher un utilisateur..."
-                        : "Rechercher une offre..."
-                    }
-                    value={search}
-                    onChange={(event) =>
-                      setSearch(event.target.value)
-                    }
-                  />
+                {managingRoles ? (
+                  <div className="admin-users-container">
+                    {!editingRole ? (
+                      <>
+                        <div className="admin-users">
+                          {roles.map(
+                            (role) => (
+                              <div
+                                key={
+                                  role.id
+                                }
+                                className={
+                                  selectedAdminRole?.id ===
+                                    role.id
+                                    ? "admin-user selected"
+                                    : "admin-user"
+                                }
+                                onClick={() =>
+                                  selectAdminRole(
+                                    role
+                                  )
+                                }
+                              >
+                                <div className="admin-avatar">
+                                  {role.name
+                                    .charAt(
+                                      0
+                                    )
+                                    .toUpperCase()}
+                                </div>
 
-                  <div className="admin-users">
-                    {category === "users" &&
-                      filteredUsers.map((user) => (
-                        <AdminListItem
-                          key={user.id}
-                          title={
-                            `${user.first_name} `
-                            + `${user.last_name}`
-                          }
-                          subtitle={user.email}
-                          avatar={
-                            user.first_name.charAt(0)
-                            + user.last_name.charAt(0)
-                          }
-                          selected={
-                            selectedUser?.id ===
-                            user.id
-                          }
-                          onClick={() =>
-                            selectUser(user)
+                                <div className="admin-user-info">
+                                  <strong>
+                                    {
+                                      role.name
+                                    }
+                                  </strong>
+
+                                  <span>
+                                    {
+                                      role.description
+                                    }
+                                  </span>
+                                </div>
+
+                                {selectedAdminRole?.id ===
+                                  role.id && (
+                                    <div className="admin-action-bubble">
+                                      <button
+                                        type="button"
+                                        onClick={(
+                                          event
+                                        ) => {
+                                          event.stopPropagation();
+                                          startRoleEdit();
+                                        }}
+                                      >
+                                        Modifier le rôle
+                                      </button>
+                                    </div>
+                                  )}
+                              </div>
+                            )
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={
+                            startRoleCreation
                           }
                         >
-                          <div className="admin-action-bubble">
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                startUserEdit();
-                              }}
-                            >
-                              Modifier l'utilisateur
-                            </button>
+                          Créer un rôle
+                        </button>
+                      </>
+                    ) : (
+                      <div className="admin-edit">
+                        <div className="admin-edit-header">
+                          <span className="admin-edit-icon">
+                            ✎
+                          </span>
 
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                deleteUser();
-                              }}
-                            >
-                              Supprimer l'utilisateur
-                            </button>
+                          <h2>
+                            {selectedAdminRole
+                              ? `Modifier ${selectedAdminRole.name}`
+                              : "Créer un rôle"}
+                          </h2>
+                        </div>
 
-                            <button
-                              type="button"
-                              onClick={(event) =>
-                                event.stopPropagation()
+                        <hr />
+
+                        <h3>
+                          Édition
+                        </h3>
+
+                        <EditField label="Nom du rôle">
+                          <input
+                            type="text"
+                            value={
+                              roleName
+                            }
+                            onChange={(event) =>
+                              setRoleName(
+                                event.target
+                                  .value
+                              )
+                            }
+                          />
+                        </EditField>
+
+                        <EditField label="Description">
+                          <textarea
+                            value={
+                              roleDescription
+                            }
+                            onChange={(event) =>
+                              setRoleDescription(
+                                event.target
+                                  .value
+                              )
+                            }
+                          />
+                        </EditField>
+
+                        <EditField label="Auto-attribuable">
+                          <input
+                            type="checkbox"
+                            checked={
+                              roleSelfAssignable
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              setRoleSelfAssignable(
+                                event.target
+                                  .checked
+                              )
+                            }
+                          />
+                        </EditField>
+
+                        <h3>
+                          Permissions
+                        </h3>
+
+                        <div className="admin-role-permissions-editor">
+                          {permissions.map(
+                            (
+                              permission
+                            ) => (
+                              <label
+                                key={
+                                  permission.id
+                                }
+                                className="admin-permission-option"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={rolePermissions.includes(
+                                    permission.name
+                                  )}
+                                  onChange={() =>
+                                    toggleRolePermission(
+                                      permission.name
+                                    )
+                                  }
+                                />
+
+                                <span>
+                                  {
+                                    permission.name
+                                  }
+                                </span>
+                              </label>
+                            )
+                          )}
+                        </div>
+
+                        <div className="admin-edit-actions">
+                          <button
+                            type="button"
+                            onClick={
+                              cancelRoleEdit
+                            }
+                            disabled={
+                              saving
+                            }
+                          >
+                            Annuler
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={
+                              saveAdminRole
+                            }
+                            disabled={
+                              saving ||
+                              !roleName.trim()
+                            }
+                          >
+                            {saving
+                              ? "Enregistrement..."
+                              : "Enregistrer"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="admin-users-container">
+                    <input
+                      type="search"
+                      className="admin-search"
+                      placeholder={
+                        category === "users"
+                          ? "Rechercher un utilisateur..."
+                          : "Rechercher une offre..."
+                      }
+                      value={search}
+                      onChange={(event) =>
+                        setSearch(
+                          event.target
+                            .value
+                        )
+                      }
+                    />
+
+                    <div className="admin-users">
+                      {category === "users" &&
+                        filteredUsers.map(
+                          (user) => (
+                            <AdminListItem
+                              key={user.id}
+                              title={
+                                `${user.first_name} `
+                                + `${user.last_name}`
+                              }
+                              subtitle={
+                                user.email
+                              }
+                              avatar={
+                                user.first_name.charAt(
+                                  0
+                                ) +
+                                user.last_name.charAt(
+                                  0
+                                )
+                              }
+                              selected={
+                                selectedUser?.id ===
+                                user.id
+                              }
+                              onClick={() =>
+                                selectUser(
+                                  user
+                                )
                               }
                             >
-                              Changer le rôle
-                            </button>
-                          </div>
-                        </AdminListItem>
-                      ))}
+                              <div className="admin-action-bubble">
+                                {!changingRole ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={(
+                                        event
+                                      ) => {
+                                        event.stopPropagation();
+                                        startUserEdit();
+                                      }}
+                                    >
+                                      Modifier
+                                      l'utilisateur
+                                    </button>
 
-                    {category === "offers" &&
-                      filteredOffers.map((offer) => (
-                        <AdminListItem
-                          key={offer.id}
-                          title={offer.name}
-                          subtitle={offer.adress}
-                          avatar={offer.name.charAt(0)}
-                          selected={
-                            selectedJobOffer?.id ===
-                            offer.id
-                          }
-                          onClick={() =>
-                            selectOffer(offer)
-                          }
-                        >
-                          <div className="admin-action-bubble">
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                startOfferEdit();
-                              }}
-                            >
-                              Modifier l'offre
-                            </button>
+                                    <button
+                                      type="button"
+                                      onClick={(
+                                        event
+                                      ) => {
+                                        event.stopPropagation();
+                                        deleteUser();
+                                      }}
+                                    >
+                                      Supprimer
+                                      l'utilisateur
+                                    </button>
 
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                deleteOffer();
-                              }}
+                                    <button
+                                      type="button"
+                                      onClick={(
+                                        event
+                                      ) => {
+                                        event.stopPropagation();
+                                        startRoleChange();
+                                      }}
+                                    >
+                                      Changer le rôle
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <select
+                                      value={
+                                        selectedRole
+                                      }
+                                      onChange={(
+                                        event
+                                      ) =>
+                                        setSelectedRole(
+                                          event
+                                            .target
+                                            .value
+                                        )
+                                      }
+                                      onClick={(
+                                        event
+                                      ) =>
+                                        event.stopPropagation()
+                                      }
+                                    >
+                                      {roles.map(
+                                        (
+                                          role
+                                        ) => (
+                                          <option
+                                            key={
+                                              role.id
+                                            }
+                                            value={
+                                              role.name
+                                            }
+                                          >
+                                            {
+                                              role.name
+                                            }
+                                          </option>
+                                        )
+                                      )}
+                                    </select>
+
+                                    <button
+                                      type="button"
+                                      onClick={(
+                                        event
+                                      ) => {
+                                        event.stopPropagation();
+                                        saveRole();
+                                      }}
+                                      disabled={
+                                        saving
+                                      }
+                                    >
+                                      {saving
+                                        ? "Enregistrement..."
+                                        : "Enregistrer"}
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={(
+                                        event
+                                      ) => {
+                                        event.stopPropagation();
+                                        setChangingRole(
+                                          false
+                                        );
+                                      }}
+                                    >
+                                      Annuler
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </AdminListItem>
+                          )
+                        )}
+
+                      {category === "offers" &&
+                        filteredOffers.map(
+                          (offer) => (
+                            <AdminListItem
+                              key={offer.id}
+                              title={
+                                offer.name
+                              }
+                              subtitle={
+                                offer.adress
+                              }
+                              avatar={
+                                offer.name.charAt(
+                                  0
+                                )
+                              }
+                              selected={
+                                selectedJobOffer?.id ===
+                                offer.id
+                              }
+                              onClick={() =>
+                                selectOffer(
+                                  offer
+                                )
+                              }
                             >
-                              Supprimer l'offre
-                            </button>
-                          </div>
-                        </AdminListItem>
-                      ))}
+                              <div className="admin-action-bubble">
+                                <button
+                                  type="button"
+                                  onClick={(
+                                    event
+                                  ) => {
+                                    event.stopPropagation();
+                                    startOfferEdit();
+                                  }}
+                                >
+                                  Modifier
+                                  l'offre
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={(
+                                    event
+                                  ) => {
+                                    event.stopPropagation();
+                                    deleteOffer();
+                                  }}
+                                >
+                                  Supprimer
+                                  l'offre
+                                </button>
+                              </div>
+                            </AdminListItem>
+                          )
+                        )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </section>

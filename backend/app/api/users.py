@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.api.dependencies import (
@@ -66,3 +66,23 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
+
+@users_router.patch("/{userId}/roles", status_code=status.HTTP_200_OK)
+def set_user_roles(
+    userId: int,
+    roles_data: UserRolesUpdate,
+    user_service: UserServiceDep,
+    role_service: RoleServiceDep,
+):
+    user = user_service.get_user_by_id(userId)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {userId} not found",
+        )
+
+    return role_service.set_user_roles(
+        user,
+        roles_data.roles,
+    )

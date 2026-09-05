@@ -21,23 +21,24 @@ set_page(CursorPage[OfferOut])
 set_params(CursorParams(size=10))
 
 
-@offers_router.post("/", status_code=status.HTTP_201_CREATED)
+@offers_router.post("/", status_code=status.HTTP_201_CREATED, response_model=OfferOut)
 def create_offer(
     offer_data: OfferCreate,
     offer_service: OfferServiceDep,
     user: User = Depends(require_permission("create:offer")),
 ):
-    offer_service.create_offer(offer_data, user)
+    return offer_service.create_offer(offer_data, user)
 
 
-@offers_router.patch("/{offerId}", status_code=status.HTTP_200_OK)
+@offers_router.patch("/{offerId}", status_code=status.HTTP_200_OK, response_model=OfferOut)
 def update_offer(
     offerId: int,
     offer_update: OfferUpdate,
     offer_service: OfferServiceDep,
-    _: User = Depends(require_permission("update:offer")),
+    user: User = Depends(require_permission("update:offer")),
 ):
-    offer_service.update_offer(offerId, offer_update)
+    offer: Offer = offer_service.get_offer_by_id(offerId)
+    
 
 @offers_router.get(
     "/", status_code=status.HTTP_200_OK, response_model=CursorPage[OfferOut]

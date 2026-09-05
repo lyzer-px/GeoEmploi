@@ -3,9 +3,10 @@ from typing import Generator
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
+
 from .models.base import Base
 from app.core.settings import Settings
-
+from .setup import init_permissions
 
 class DatabaseHandler:
     engine: Engine
@@ -35,9 +36,15 @@ class DatabaseHandler:
 
 def init_db(settings: Settings) -> DatabaseHandler:
     global db_handler
-    db_handler = DatabaseHandler(settings)
-    return db_handler
 
+    db_handler = DatabaseHandler(settings)
+    db_handler.create_tables()
+    session = db_handler.session_factory()
+    try:
+        init_permissions(session)
+    finally:
+        session.close()
+    return db_handler
 
 def get_db_session() -> Generator[Session, None, None]:
     if db_handler is None:

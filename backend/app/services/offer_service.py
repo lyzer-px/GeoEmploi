@@ -82,6 +82,7 @@ class OfferService:
                 detail="Error during the creation of the offer.",
             )
 
+    
     def update_offer(self, offer_id: int, offer_data: OfferUpdate) -> Offer:
         """Updates an existing offer."""
         offer = self.get_offer_by_id(offer_id)

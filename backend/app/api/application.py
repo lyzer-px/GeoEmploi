@@ -1,3 +1,3 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 applications_router = APIRouter(tags=["applications"])

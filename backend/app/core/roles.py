@@ -19,6 +19,9 @@ ROLES_DEFINITION = {
             perm(Action.READ_ANY, Resource.OFFER),
             perm(Action.READ_ANY, Resource.SKILL),
             perm(Action.READ_ANY, Resource.EXPERIENCE),
+            perm(Action.DELETE, Resource.APPLICATION),
+            perm(Action.DELETE, Resource.SKILL),
+            perm(Action.DELETE, Resource.EXPERIENCE)
         },
     },
     "employer": {

@@ -13,7 +13,7 @@ from .api.offers import offers_router
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
-from .db.database import init_db, get_db_session
+from .db.database import init_db
 
 VERSION_API: str = "v1"
 

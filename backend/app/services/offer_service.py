@@ -10,7 +10,6 @@ from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
 from sqlalchemy.sql import Select
-from sqlalchemy import select
 
 
 class OfferNotFoundError(Exception):

@@ -15,9 +15,8 @@ from app.db.database import get_db_session
 from app.api.dependencies.auth import (
     require_permission,
     OfferServiceDep,
-    require_ownership,
 )
-from app.db.models import User, Offer
+from app.db.models import User
 from app.services.geography import get_bounding_box, perimeter_to_radius, BoundingBox
 from app.services.offer_service import OfferService
 
@@ -37,8 +36,7 @@ def create_offer(
 
 
 @offers_router.patch(
-    "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut
-)
+    "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut)
 def update_offer(
     offer_data: OfferUpdate, offer: OfferUpdateDep, offer_service: OfferServiceDep
 ):

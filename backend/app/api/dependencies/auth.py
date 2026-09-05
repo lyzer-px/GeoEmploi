@@ -9,7 +9,7 @@ from app.schemas.input.auth import AccessToken, RefreshToken, RefreshTokenReques
 from app.services.user_service import UserService, get_user_service
 from app.services.roles_service import RoleService, get_role_service
 from app.services.offer_service import OfferService, get_offer_service
-from app.core.permissions import Resource, Action, perm, ANY_ACTION
+from app.core.permissions import Resource, Action, perm
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -50,15 +50,10 @@ def get_current_user(
     payload: AccessTokenDep,
     user_service: UserServiceDep,
 ) -> User:
-    print("PAYLOAD USER ID:", payload.user_id)
-
     user = user_service.get_user_by_id(payload.user_id)
-
-    print("USER:", user)
 
     if not user:
         raise credentials_exception
-
     return user
 
 

@@ -16,7 +16,7 @@ class OfferCreate(BaseModel):
     name: str
     description: str
     start_date: date
-    end_date: Optional[date]
+    end_date: Optional[date] = None
     contract_type: ContractType
     adress: str
     geocoding_source: str
@@ -24,15 +24,14 @@ class OfferCreate(BaseModel):
     latitude: float
     longitude: float
 
-
 class OfferUpdate(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    start_date: Optional[date]
-    end_date: Optional[date]
-    contract_type: Optional[ContractType]
-    adress: Optional[str]
-    geocoding_source: Optional[str]
-    geocoding_score: Optional[float]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    name: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    contract_type: Optional[ContractType] = None
+    adress: Optional[str] = None
+    geocoding_source: Optional[str] = None
+    geocoding_score: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None

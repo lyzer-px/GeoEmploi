@@ -8,6 +8,7 @@ from app.core.settings import Settings
 from .setup import init_permissions, init_roles
 from app.core.roles import ROLES_DEFINITION
 
+
 class DatabaseHandler:
     engine: Engine
 

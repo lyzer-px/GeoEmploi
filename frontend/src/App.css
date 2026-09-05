@@ -29,6 +29,41 @@
   justify-content: center;
 }
 
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.app-main,
+.about-page {
+  flex: 1;
+}
+
+.about-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.about-page h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.about-description {
+  max-width: 75ch;
+  margin: 0 0 1.5rem;
+}
+
+.about-description:last-child {
+  margin-bottom: 0;
+}
+
 .hero {
   position: relative;
 

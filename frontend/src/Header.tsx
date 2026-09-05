@@ -23,8 +23,8 @@ function MyHeader() {
             text: 'Se connecter'
             }
         ]}
-        navigation={[{ text: "Accueil", linkProps: {href: "/",}, },
-            { text: "À propos", linkProps: { href: "/a-propos",}, },
+        navigation={[{ text: "Accueil", linkProps: {href: ROUTES.HOME,}, },
+            { text: "À propos", linkProps: { href: ROUTES.ABOUT,}, },
         ]}
         />
     );

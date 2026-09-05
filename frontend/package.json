@@ -33,6 +33,6 @@
     "@rolldown/binding-linux-x64-gnu": "^1.2.7"
   },
   "allowScripts": {
-    "@gouvfr/dsfr@1.15.2": true
+    "@gouvfr/dsfr": true
   }
 }

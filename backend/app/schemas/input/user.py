@@ -24,3 +24,10 @@ class UserIn(BaseModel):
 
 class UserRolesUpdate(BaseModel):
     roles: list[str]
+
+
+class UserAdminResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str

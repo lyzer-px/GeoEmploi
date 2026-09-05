@@ -7,4 +7,5 @@ export const ROUTES = {
   EMPLOYER_REGISTER: '/register/employer',
   FORGOT_PASSWORD: '/forgot-password',
   ADMIN: '/admin'
+  ABOUT: '/a-propos'
 } as const;

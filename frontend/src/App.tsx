@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Admin from './pages/Admin/Admin';
+import About from './pages/About';
 import HomePage from './HomePage';
 import { ROUTES } from './routes';
 import MyHeader from './Header';
@@ -28,6 +29,7 @@ function App() {
         <Route path={ROUTES.LOGIN} element={<Login />} />
         <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={ROUTES.ADMIN} element={<Admin />} />
+        <Route path={ROUTES.ABOUT} element={<About />} />
       </Routes>
     </BrowserRouter>
   );

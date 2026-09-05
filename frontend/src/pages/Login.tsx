@@ -33,7 +33,7 @@ export function Login() {
     const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
     console.log("API_BACKEND_URL:", API_BACKEND_URL);
     function sendLoginRequest() {
-        fetch(`${API_BACKEND_URL}/api/v1/auth/login`, {
+        fetch(`${API_BACKEND_URL}/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -29,7 +29,7 @@ function Map({ searchArea }: MapProps) {
         const map = L.map(mapElementRef.current).setView([46.6, 2.3], 6);
         mapRef.current = map;
 
-        L.tileLayer(`${API_BACKEND_URL}/api/v1/tiles/{z}/{x}/{y}.png`, {
+        L.tileLayer(`${API_BACKEND_URL}/tiles/{z}/{x}/{y}.png`, {
             attribution: "&copy; https://data.geopf.fr",
         }).addTo(map);
 

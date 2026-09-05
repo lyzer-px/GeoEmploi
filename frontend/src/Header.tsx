@@ -95,36 +95,29 @@ function MyHeader() {
                             text: "Se connecter",
                         },
                     ]
-                    : currentUser.roles.includes("admin")
-                        ? [
-                            {
-                                buttonProps: {
-                                    onClick: () => navigate("/admin"),
-                                },
-                                iconId: "ri-account-box-line" as const,
-                                text: "Panel admin",
-
+                    : [
+                        {
+                            buttonProps: {
+                                onClick: () => navigate("/admin"),
                             },
-                        ]
-                        : currentUser.roles.includes("recruiter")
-                            ? [
-                                {
-                                    buttonProps: {
-                                        onClick: () => navigate("/offres"),
-                                    },
-                                    iconId: "ri-account-box-line" as const,
-                                    text: "Gestion des offres",
+                            text: currentUser.roles.includes("admin")
+                                ? "🛡️ Panel admin"
+                                : currentUser.roles.includes("recruiter")
+                                    ? "Gestion des offres"
+                                    : `Bonjour ${currentUser.first_name} ${currentUser.last_name}`,
+                        },
+                        {
+                            buttonProps: {
+                                onClick: () => {
+                                    localStorage.removeItem("access_token");
+                                    localStorage.removeItem("refresh_token");
+                                    window.location.href = "/";
                                 },
-                            ]
-                            : [
-                                {
-                                    buttonProps: {
-                                        onClick: () => { },
-                                    },
-                                    iconId: "ri-account-box-line" as const,
-                                    text: `Bonjour ${currentUser.first_name} ${currentUser.last_name}`,
-                                },
-                            ]
+                                className: "geoemploi-logout",
+                            },
+                            text: "➜] Se déconnecter",
+                        },
+                    ]
             }
             navigation={[
                 {

@@ -273,6 +273,10 @@
   }
 }
 
+.geoemploi-logout {
+  color: #e1000f !important;
+}
+
 .ticks {
   position: relative;
   width: 100%;

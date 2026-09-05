@@ -24,6 +24,7 @@ class OfferCreate(BaseModel):
     latitude: float
     longitude: float
 
+
 class OfferUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None

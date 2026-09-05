@@ -34,6 +34,7 @@ def init_roles(
             db=db,
             role_name=role_name,
             description=definition["description"],
+            is_self_assignable=definition["is_self_assignable"],
         )
         permission_names = definition["permissions"]
         if role_name == "admin":

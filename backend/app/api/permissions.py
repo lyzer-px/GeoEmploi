@@ -6,7 +6,9 @@ from app.schemas.output.roles import PermissionOut
 permissions_router = APIRouter(tags=["Permissions"])
 
 
-@permissions_router.get("/", status_code=status.HTTP_200_OK, response_model=list[PermissionOut])
+@permissions_router.get(
+    "/", status_code=status.HTTP_200_OK, response_model=list[PermissionOut]
+)
 def get_permissions(
     role_service: RoleServiceDep,
     _: AccessTokenDep,

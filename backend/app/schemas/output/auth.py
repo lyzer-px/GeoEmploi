@@ -1,10 +1,10 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 
+
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "Bearer"
-
 
 
 class UserOut(BaseModel):
@@ -20,6 +20,7 @@ class UserOut(BaseModel):
     @classmethod
     def extract_role_names(cls, roles):
         return [role.name for role in roles]
+
 
 class RegisterResponse(BaseModel):
     user: UserOut

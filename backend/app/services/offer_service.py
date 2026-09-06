@@ -28,6 +28,10 @@ class OfferService:
         statement = select(Offer).where(Offer.id == offer_id)
         return self._db.scalars(statement).first()
 
+    @staticmethod
+    def get_offer_statement() -> Select:
+        return select(Offer).order_by(Offer.id)
+
     def get_all_offers(self, skip: int = 0, limit: int = 100) -> list[Offer]:
         """Retrieves all offers with pagination."""
         statement = select(Offer).offset(skip).limit(limit)
@@ -39,17 +43,27 @@ class OfferService:
         return self._db.scalars(statement).all()
 
     @staticmethod
-    def get_offers_statement_by_location(
+    def filter_by_location(
+        statement: Select,
         bounding_box: BoundingBox,
     ) -> Select:
-        return (
-            select(Offer)
-            .where(
-                Offer.latitude.between(bounding_box.lat_min, bounding_box.lat_max),
-                Offer.longitude.between(bounding_box.lon_min, bounding_box.lon_max),
-            )
-            .order_by(Offer.id)
+        return statement.where(
+            Offer.latitude.between(
+                bounding_box.lat_min,
+                bounding_box.lat_max,
+            ),
+            Offer.longitude.between(
+                bounding_box.lon_min,
+                bounding_box.lon_max,
+            ),
         )
+
+    @staticmethod
+    def filter_by_name(
+        statement: Select,
+        name: str,
+    ) -> Select:
+        return statement.where(Offer.name.ilike(f"%{name}%"))
 
     def create_offer(self, offer_data: OfferCreate, employer: User) -> Offer:
         """Create a new offer by associating the geocoding metadata and the employer."""

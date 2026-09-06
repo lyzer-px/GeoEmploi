@@ -12,7 +12,7 @@ from app.schemas.output.auth import RegisterResponse, UserOut
 auth_router = APIRouter(tags=["auth"])
 
 
-@auth_router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@auth_router.post("/login", response_model=RegisterResponse, status_code=status.HTTP_200_OK)
 def login_user(user_data: UserIn, user_service: UserServiceDep):
     user: User = AuthenticationService.authenticate_user(user_data, user_service)
     access_payload: AccessToken = AuthenticationService.create_access_token_payload(
@@ -20,7 +20,10 @@ def login_user(user_data: UserIn, user_service: UserServiceDep):
     )
     access_token: str = AuthenticationService.create_access_token(access_payload)
     refresh_token: str = AuthenticationService.create_refresh_token(user.id)
-    return Token(access_token=access_token, refresh_token=refresh_token)
+    return RegisterResponse(
+        user=UserOut.model_validate(user),
+        tokens=Token(access_token=access_token, refresh_token=refresh_token),
+    )
 
 
 @auth_router.post(

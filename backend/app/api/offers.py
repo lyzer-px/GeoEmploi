@@ -1,3 +1,5 @@
+from typing import Optional
+
 import logging
 from fastapi import APIRouter, Depends, status
 from fastapi_pagination import set_params, set_page
@@ -25,9 +27,7 @@ set_page(CursorPage[OfferOut])
 set_params(CursorParams(size=10))
 
 
-@offers_router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=OfferOut
-)
+@offers_router.post("/", status_code=status.HTTP_201_CREATED, response_model=OfferOut)
 def create_offer(
     offer_data: OfferCreate,
     offer_service: OfferServiceDep,
@@ -53,18 +53,28 @@ def delete_offer(
     offer_service.delete_offer(offer)
 
 
+@offers_router.get("/{offer_id}", status_code=status.HTTP_200_OK)
+def get_offers_by_id(offer_id: int):
+    pass
+
+
 @offers_router.get(
     "/", status_code=status.HTTP_200_OK, response_model=CursorPage[OfferOut]
 )
 def get_offers_by_position(
-    latitude: float,
-    longitude: float,
-    perimeter: float,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
+    perimeter: Optional[float] = None,
+    name: Optional[str] = None,
     session: Session = Depends(get_db_session),
 ):
-    logging.info(f"Get offers by position: {latitude=}, {longitude=}")
-    bounding_box: BoundingBox = get_bounding_box(
-        latitude, longitude, perimeter_to_radius(perimeter)
-    )
-    statement: Select = OfferService.get_offers_statement_by_location(bounding_box)
+    statement = OfferService.get_offer_statement()
+
+    if latitude and longitude and perimeter:
+        bounding_box: BoundingBox = get_bounding_box(
+            latitude, longitude, perimeter_to_radius(perimeter)
+        )
+        statement: Select = OfferService.filter_by_location(statement, bounding_box)
+    if name:
+        statement = OfferService.filter_by_name(statement, name)
     return paginate(session, statement)

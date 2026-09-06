@@ -11,9 +11,7 @@ from app.services.application_service import ApplicationService, get_application
 owner_name: str = "user_id"
 
 
-ApplicationServiceDep = Annotated[
-    ApplicationService, Depends(get_application_service)
-]
+ApplicationServiceDep = Annotated[ApplicationService, Depends(get_application_service)]
 
 
 def get_application(

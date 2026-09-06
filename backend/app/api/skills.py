@@ -54,9 +54,7 @@ def remove_my_skill(entry: MySkillDep, skill_service: SkillServiceDep):
     skill_service.remove_skill_from_user(entry)
 
 
-@skills_router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=SkillOut
-)
+@skills_router.post("/", status_code=status.HTTP_201_CREATED, response_model=SkillOut)
 def create_skill(
     skill_data: SkillCreate,
     skill_service: SkillServiceDep,

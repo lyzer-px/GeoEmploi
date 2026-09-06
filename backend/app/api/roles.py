@@ -27,16 +27,12 @@ def set_my_roles(
         role_service.assign_self_assignable_role_to_user(user, role)
 
 
-@roles_router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=RoleOut
-)
+@roles_router.post("/", status_code=status.HTTP_201_CREATED, response_model=RoleOut)
 def create_role(role_data: RoleCreate, role_service: RoleServiceDep):
     return role_service.create_role(role_data)
 
 
-@roles_router.get(
-    "/", status_code=status.HTTP_200_OK, response_model=list[RoleOut]
-)
+@roles_router.get("/", status_code=status.HTTP_200_OK, response_model=list[RoleOut])
 def get_roles(role_service: RoleServiceDep, _: AccessTokenDep):
     return role_service.get_all_roles()
 

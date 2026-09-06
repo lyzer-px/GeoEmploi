@@ -3,140 +3,58 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ROUTES } from "./routes";
 
-type CurrentUser = {
-    first_name: string;
-    last_name: string;
-    roles: string[];
-};
+type CurrentUser = { first_name: string; last_name: string; roles: string[] };
+const API = import.meta.env.VITE_API_BACKEND_URL;
 
 function MyHeader() {
-    const navigate = useNavigate();
-    const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("access_token");
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setCurrentUser(null);
+      return;
+    }
 
-        if (!token) {
-            return;
+    fetch(`${API}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        if (response.status === 401) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          setCurrentUser(null);
+          return;
         }
-
-        async function loadCurrentUser() {
-            try {
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                };
-
-                console.log(
-                    "ME URL:",
-                    `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`
-                );
-
-                const [userResponse, rolesResponse] = await Promise.all([
-                    fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`,
-                        {
-                            headers,
-                            cache: "no-store",
-                        }
-                    ),
-                    fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me/roles`,
-                        { headers }
-                    ),
-                ]);
-
-                if (!userResponse.ok || !rolesResponse.ok) {
-                    return;
-                }
-
-                console.log("USER RESPONSE:", userResponse.status, await userResponse.clone().text());
-                console.log("ROLES RESPONSE:", rolesResponse.status, await rolesResponse.clone().text());
-
-                const user = await userResponse.json();
-                const roles = await rolesResponse.json();
-
-                setCurrentUser({
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    roles,
-                });
-            } catch (error) {
-                console.error(
-                    "Erreur lors du chargement de l'utilisateur :",
-                    error
-                );
-            }
+        if (!response.ok) {
+          throw new Error(`GET /me HTTP ${response.status}`);
         }
+        const user = await response.json();
+        setCurrentUser({
+          first_name: user.first_name,
+          last_name: user.last_name,
+          roles: Array.isArray(user.roles) ? user.roles : [],
+        });
+      })
+      .catch((error) => {
+        console.error("Erreur lors du chargement de l'utilisateur :", error);
+      });
+  }, []);
 
-        loadCurrentUser();
-    }, []);
-
-    return (
-        <Header
-            brandTop={
-                <>
-                    Ministère <br /> du Job et <br /> Bonheur
-                </>
-            }
-            homeLinkProps={{
-                href: "/",
-                title: "Accueil - GeoEmploi",
-            }}
-            serviceTitle="GeoEmploi"
-            id="fr-header-header-with-quick-access-items"
-            quickAccessItems={
-                !currentUser
-                    ? [
-                        {
-                            buttonProps: {
-                                onClick: () => navigate(ROUTES.LOGIN),
-                            },
-                            iconId: "ri-account-box-line" as const,
-                            text: "Se connecter",
-                        },
-                    ]
-                    : [
-                        {
-                            buttonProps: {
-                                onClick: () => navigate("/admin"),
-                            },
-                            iconId: "ri-dashboard-line" as const,
-                            text: currentUser.roles.includes("admin")
-                                ? "🛡️ Panel admin"
-                                : currentUser.roles.includes("recruiter")
-                                    ? "Gestion des offres"
-                                    : `Bonjour ${currentUser.first_name} ${currentUser.last_name}`,
-                        },
-                        {
-                            buttonProps: {
-                                onClick: () => {
-                                    localStorage.removeItem("access_token");
-                                    localStorage.removeItem("refresh_token");
-                                    window.location.href = "/";
-                                },
-                                className: "geoemploi-logout",
-                            },
-                            iconId: "ri-logout-box-line" as const,
-                            text: "➜] Se déconnecter",
-                        },
-                    ]
-            }
-            navigation={[
-                {
-                    text: "Accueil",
-                    linkProps: {
-                        href: "/",
-                    },
-                },
-                {
-                    text: "À propos",
-                    linkProps: {
-                        href: "/a-propos",
-                    },
-                },
-            ]}
-        />
-    );
+  const roleLabel = currentUser?.roles.includes("employer") ? "Employeur" : "Chercheur d'emploi";
+  return <Header
+    brandTop={<>Ministère <br /> du Job et <br /> Bonheur</>}
+    homeLinkProps={{ href: "/", title: "Accueil - GeoEmploi" }}
+    serviceTitle="GeoEmploi"
+    id="fr-header-header-with-quick-access-items"
+    quickAccessItems={!currentUser ? [{ buttonProps: { onClick: () => navigate(ROUTES.LOGIN) }, iconId: "ri-account-box-line" as const, text: "Se connecter" }] : [
+      { buttonProps: { onClick: () => navigate(ROUTES.PROFILE) }, iconId: "ri-user-line" as const, text: `${currentUser.first_name} ${currentUser.last_name} · ${roleLabel}` },
+      ...(currentUser.roles.includes("admin") ? [{ buttonProps: { onClick: () => navigate(ROUTES.ADMIN) }, iconId: "ri-dashboard-line" as const, text: "Panel admin" }] : []),
+      { buttonProps: { onClick: () => { localStorage.removeItem("access_token"); localStorage.removeItem("refresh_token"); window.location.href = "/"; }, className: "geoemploi-logout" }, iconId: "ri-logout-box-line" as const, text: "Se déconnecter" },
+    ]}
+    navigation={[{ text: "Accueil", linkProps: { href: "/" } }, { text: "À propos", linkProps: { href: "/a-propos" } }]}
+  />;
 }
-
 export default MyHeader;

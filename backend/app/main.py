@@ -10,6 +10,8 @@ from .api.tiles import tiles_router
 from .api.roles import roles_router
 from .api.permissions import permissions_router
 from .api.offers import offers_router
+from .api.skills import skills_router
+from .api.experiences import experiences_router
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
@@ -64,8 +66,10 @@ def get_health():
 
 
 app.include_router(router=tiles_router, prefix=f"/api/{VERSION_API}/tiles")
-app.include_router(router=users_router, prefix=f"/api/{VERSION_API}/users")
+app.include_router(router=users_router, prefix=f"/api/{VERSION_API}")
 app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
-app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}/roles")
+app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}")
 app.include_router(router=permissions_router, prefix=f"/api/{VERSION_API}/permissions")
-app.include_router(router=offers_router, prefix=f"/api/{VERSION_API}/offers")
+app.include_router(router=offers_router, prefix=f"/api/{VERSION_API}")
+app.include_router(router=skills_router, prefix=f"/api/{VERSION_API}")
+app.include_router(router=experiences_router, prefix=f"/api/{VERSION_API}")

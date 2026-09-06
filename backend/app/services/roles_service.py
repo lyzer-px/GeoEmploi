@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlmodel import select
@@ -56,9 +56,7 @@ class RoleService:
         return user
 
     def get_self_assignable_role(self, role_name: str) -> Role:
-        role = self._db.scalar(
-            select(Role).where(Role.name == role_name)
-        )
+        role = self._db.scalar(select(Role).where(Role.name == role_name))
         if role is None:
             raise HTTPException(
                 status_code=400,
@@ -267,7 +265,7 @@ class RoleService:
                 detail="Error updating role.",
             )
 
-    def get_all_permissions(self) -> Sequence[Permission]:
+    def get_all_permissions(self) -> list[Permission]:
         statement = select(Permission)
         return self._db.scalars(statement).all()
 

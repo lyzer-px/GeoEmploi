@@ -28,19 +28,19 @@ function MyHeader() {
 
                 console.log(
                     "ME URL:",
-                    `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/users/me`
+                    `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`
                 );
 
                 const [userResponse, rolesResponse] = await Promise.all([
                     fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/users/me`,
+                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`,
                         {
                             headers,
                             cache: "no-store",
                         }
                     ),
                     fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/users/me/roles`,
+                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me/roles`,
                         { headers }
                     ),
                 ]);
@@ -100,6 +100,7 @@ function MyHeader() {
                             buttonProps: {
                                 onClick: () => navigate("/admin"),
                             },
+                            iconId: "ri-dashboard-line" as const,
                             text: currentUser.roles.includes("admin")
                                 ? "🛡️ Panel admin"
                                 : currentUser.roles.includes("recruiter")
@@ -115,6 +116,7 @@ function MyHeader() {
                                 },
                                 className: "geoemploi-logout",
                             },
+                            iconId: "ri-logout-box-line" as const,
                             text: "➜] Se déconnecter",
                         },
                     ]

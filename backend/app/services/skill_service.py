@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -93,7 +93,7 @@ class SkillService:
                 detail="Error deleting the skill.",
             )
 
-    def get_user_skills(self, user_id: int) -> Sequence[UsersSkills]:
+    def get_user_skills(self, user_id: int) -> list[UsersSkills]:
         """Retrieve all skills (with level) associated with a given user."""
         statement = select(UsersSkills).where(UsersSkills.user_id == user_id)
         return self._db.scalars(statement).all()

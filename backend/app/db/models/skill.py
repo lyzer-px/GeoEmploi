@@ -20,6 +20,7 @@ class Skill(Base):
         secondary="users_skills", back_populates="skills"
     )
 
+
 class UsersSkills(Base):
     __tablename__ = "users_skills"
 
@@ -32,6 +33,7 @@ class UsersSkills(Base):
     level: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     skill: Mapped["Skill"] = relationship(viewonly=True)
+
 
 class Experience(Base):
     __tablename__ = "experiences"

@@ -4,7 +4,6 @@ from fastapi import Depends
 
 from app.db.models import UsersSkills, Skill
 from app.core.permissions import Resource, Action
-from app.db.models import Skill
 from app.api.dependencies.auth import require_ownership, CurrentUserDep
 from app.services.skill_service import get_skill_service, SkillService
 

@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlmodel import select
@@ -265,7 +265,7 @@ class RoleService:
                 detail="Error updating role.",
             )
 
-    def get_all_permissions(self) -> Sequence[Permission]:
+    def get_all_permissions(self) -> list[Permission]:
         statement = select(Permission)
         return self._db.scalars(statement).all()
 

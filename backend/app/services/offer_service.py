@@ -141,6 +141,13 @@ class OfferService:
             )
         return offer.applications
 
+    def get_offers_applied_to(self, user_id: int) -> list[Offer]:
+        statement = (
+            select(Offer)
+            .join(Application, Application.offer_id == Offer.id)
+            .where(Application.user_id == user_id)
+        )
+        return self._db.scalars(statement).all()
 
 def get_offer_service(session: Session = Depends(get_db_session)) -> OfferService:
     return OfferService(session)

@@ -30,13 +30,9 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
 
 
 @users_router.get("/me", status_code=status.HTTP_200_OK)
-def get_my_account(user: CurrentUserDep):
-    return {
-        "id": user.id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "email": user.email,
-    }
+def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
+    """Get user information"""
+    user_service
 
 
 #

@@ -21,14 +21,14 @@ skills_router = APIRouter(tags=["skills"])
 
 
 @skills_router.get(
-    "/me/skills", response_model=list[SkillUserOut], status_code=status.HTTP_200_OK
+    "/me", response_model=list[SkillUserOut], status_code=status.HTTP_200_OK
 )
 def get_my_skills(user: CurrentUserDep, skill_service: SkillServiceDep):
     return skill_service.get_user_skills(user.id)
 
 
 @skills_router.post(
-    "/me/skills", response_model=SkillUserOut, status_code=status.HTTP_201_CREATED
+    "/me", response_model=SkillUserOut, status_code=status.HTTP_201_CREATED
 )
 def add_my_skill(
     skill_data: UserSkillCreate,
@@ -39,7 +39,7 @@ def add_my_skill(
 
 
 @skills_router.patch(
-    "/me/skills/{skill_id}", response_model=SkillUserOut, status_code=status.HTTP_200_OK
+    "/{skill_id}/me", response_model=SkillUserOut, status_code=status.HTTP_200_OK
 )
 def update_my_skill(
     skill_data: UserSkillUpdate,
@@ -49,14 +49,14 @@ def update_my_skill(
     return skill_service.update_user_skill(entry, skill_data)
 
 
-@skills_router.delete(
-    "/me/skills/{skill_id}", status_code=status.HTTP_204_NO_CONTENT
-)
+@skills_router.delete("/{skill_id}/me", status_code=status.HTTP_204_NO_CONTENT)
 def remove_my_skill(entry: MySkillDep, skill_service: SkillServiceDep):
     skill_service.remove_skill_from_user(entry)
 
 
-@skills_router.post("/skills/", status_code=status.HTTP_201_CREATED, response_model=SkillOut)
+@skills_router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=SkillOut
+)
 def create_skill(
     skill_data: SkillCreate,
     skill_service: SkillServiceDep,
@@ -65,12 +65,12 @@ def create_skill(
     return skill_service.create_skill(skill_data)
 
 
-@skills_router.get("/skills/{skill_id}", response_model=SkillOut)
+@skills_router.get("/{skill_id}", response_model=SkillOut)
 def get_skill_by_id(skill: SkillDep):
     return skill
 
 
-@skills_router.get("/skills/", response_model=list[SkillOut])
+@skills_router.get("/", response_model=list[SkillOut])
 def list_skills(
     skill_service: SkillServiceDep,
     skip: int = 0,
@@ -79,7 +79,7 @@ def list_skills(
     return skill_service.get_all_skills(skip=skip, limit=limit)
 
 
-@skills_router.patch("/skills/{skill_id}", response_model=SkillOut)
+@skills_router.patch("/{skill_id}", response_model=SkillOut)
 def update_skill(
     skill_data: SkillUpdate,
     skill: SkillDep,
@@ -89,7 +89,7 @@ def update_skill(
     return skill_service.update_skill(skill, skill_data)
 
 
-@skills_router.delete("/skills/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
+@skills_router.delete("/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_skill(
     skill: SkillDep,
     skill_service: SkillServiceDep,
@@ -98,7 +98,7 @@ def delete_skill(
     skill_service.delete_skill(skill)
 
 
-@skills_router.get("/skills/users/{user_id}", response_model=list[SkillUserOut])
+@skills_router.get("/users/{user_id}", response_model=list[SkillUserOut])
 def get_user_skills(
     user_id: int,
     skill_service: SkillServiceDep,
@@ -107,7 +107,7 @@ def get_user_skills(
 
 
 @skills_router.delete(
-    "/skills/users/{user_id}/{skill_id}", status_code=status.HTTP_204_NO_CONTENT
+    "/users/{user_id}/{skill_id}", status_code=status.HTTP_204_NO_CONTENT
 )
 def remove_skill_from_user(
     entry: UserSkillDeleteDep,

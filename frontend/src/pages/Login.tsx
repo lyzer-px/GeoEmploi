@@ -31,7 +31,7 @@ export function Login() {
         firstName === "" || lastName === "" || registerEmail === "" || registerPassword === "";
 
     const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
-    console.log("API_BACKEND_URL:", API_BACKEND_URL);
+
     function sendLoginRequest() {
         fetch(`${API_BACKEND_URL}/auth/login`, {
             method: "POST",

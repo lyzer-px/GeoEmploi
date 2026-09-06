@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db_session
 
-TILE_CACHE_DIR = Path("app/services/tile_cache")
+TILE_CACHE_DIR = Path("storage/tile_cache")
 TILE_CACHE_DIR.mkdir(exist_ok=True)
 
 WMTS_URL = "https://data.geopf.fr/wmts"

@@ -29,7 +29,6 @@ T = TypeVar("T")
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 RoleServiceDep = Annotated[RoleService, Depends(get_role_service)]
-OfferServiceDep = Annotated[OfferService, Depends(get_offer_service)]
 
 
 def get_current_token_payload(

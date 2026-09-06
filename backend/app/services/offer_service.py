@@ -3,13 +3,13 @@ from typing import Any, Optional
 from fastapi import Depends, HTTPException, status
 from pyproj import Transformer
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import Select
 from sqlmodel import select
 
 from app.services.geography import BoundingBox
 from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
-from sqlalchemy.sql import Select
 
 
 class OfferNotFoundError(Exception):
@@ -148,6 +148,7 @@ class OfferService:
             .where(Application.user_id == user_id)
         )
         return self._db.scalars(statement).all()
+
 
 def get_offer_service(session: Session = Depends(get_db_session)) -> OfferService:
     return OfferService(session)

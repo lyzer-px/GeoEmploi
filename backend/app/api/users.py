@@ -1,16 +1,23 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
+from app.api.dependencies.skills import SkillServiceDep, MySkillDep
+from app.schemas.input.skills import UserSkillCreate, UserSkillUpdate
+from app.schemas.output.skills import SkillUserOut
+from app.schemas.input.user import UserUpdate, UserRolesUpdate
 from app.api.dependencies.auth import (
     UserServiceDep,
     AccessTokenDep,
     CurrentUserDep,
     RoleServiceDep,
 )
-from app.schemas.input.user import UserAdminResponse, UserUpdate, UserRolesUpdate
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+#
+#   USER Account
+#
 
 
 @users_router.patch("/me", status_code=status.HTTP_200_OK)
@@ -37,10 +44,11 @@ def get_my_account(user: CurrentUserDep):
     }
 
 
+# Roles
+
+
 @users_router.get("/me/roles", status_code=status.HTTP_200_OK)
-def get_my_roles(
-    token: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep
-):
+def get_my_roles(_: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep):
     return user_service.get_stringify_roles_of_user(user)
 
 
@@ -52,13 +60,51 @@ def set_my_roles(
         role_service.assign_self_assignable_role_to_user(user, role)
 
 
+# Skills
+
+
 @users_router.get(
-    "/",
-    response_model=list[UserAdminResponse],
-    status_code=status.HTTP_200_OK,
+    "/me/skills", response_model=list[SkillUserOut], status_code=status.HTTP_200_OK
 )
-def get_all_users(user_service: UserServiceDep):
-    return user_service.get_all_users()
+def get_my_skills(user: CurrentUserDep, skill_service: SkillServiceDep):
+    return skill_service.get_user_skills(user.id)
+
+
+@users_router.post(
+    "/me/skills",
+    response_model=SkillUserOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_my_skill(
+    skill_data: UserSkillCreate,
+    user: CurrentUserDep,
+    skill_service: SkillServiceDep,
+):
+    return skill_service.add_skill_to_user(user, skill_data)
+
+
+@users_router.patch(
+    "/me/skills/{skill_id}", response_model=SkillUserOut, status_code=status.HTTP_200_OK
+)
+def update_my_skill(
+    skill_data: UserSkillUpdate,
+    entry: MySkillDep,
+    skill_service: SkillServiceDep,
+):
+    return skill_service.update_user_skill(entry, skill_data)
+
+
+@users_router.delete("/me/skills/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_my_skill(
+    entry: MySkillDep,
+    skill_service: SkillServiceDep,
+):
+    skill_service.remove_skill_from_user(entry)
+
+
+#
+#   OTHER ACCOUNT
+#
 
 
 @users_router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
@@ -73,24 +119,3 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
-
-
-@users_router.patch("/{userId}/roles", status_code=status.HTTP_200_OK)
-def set_user_roles(
-    userId: int,
-    roles_data: UserRolesUpdate,
-    user_service: UserServiceDep,
-    role_service: RoleServiceDep,
-):
-    user = user_service.get_user_by_id(userId)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User {userId} not found",
-        )
-
-    return role_service.set_user_roles(
-        user,
-        roles_data.roles,
-    )

@@ -10,6 +10,7 @@ from .api.tiles import tiles_router
 from .api.roles import roles_router
 from .api.permissions import permissions_router
 from .api.offers import offers_router
+from .api.skills import skills_router
 
 from .core.loggings import setup_logging
 from .core.settings import Settings
@@ -69,3 +70,4 @@ app.include_router(router=auth_router, prefix=f"/api/{VERSION_API}/auth")
 app.include_router(router=roles_router, prefix=f"/api/{VERSION_API}/roles")
 app.include_router(router=permissions_router, prefix=f"/api/{VERSION_API}/permissions")
 app.include_router(router=offers_router, prefix=f"/api/{VERSION_API}/offers")
+app.include_router(router=skills_router, prefix=f"/api/{VERSION_API}/skills")

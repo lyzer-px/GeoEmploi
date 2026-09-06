@@ -56,9 +56,7 @@ class RoleService:
         return user
 
     def get_self_assignable_role(self, role_name: str) -> Role:
-        role = self._db.scalar(
-            select(Role).where(Role.name == role_name)
-        )
+        role = self._db.scalar(select(Role).where(Role.name == role_name))
         if role is None:
             raise HTTPException(
                 status_code=400,

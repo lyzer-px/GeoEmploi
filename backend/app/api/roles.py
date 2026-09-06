@@ -1,8 +1,9 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 
-from app.api.dependencies.auth import RoleServiceDep, AccessTokenDep
+from app.api.dependencies.auth import RoleServiceDep, AccessTokenDep, UserServiceDep
 from app.schemas.input.roles import RoleCreate
 from app.schemas.output.roles import RoleOut
+from app.schemas.input.user import UserRolesUpdate
 
 
 roles_router = APIRouter(tags=["roles"])
@@ -28,3 +29,24 @@ def update_role(
     _: AccessTokenDep,
 ):
     return role_service.update_role(role_id, role_data)
+
+
+@roles_router.patch("/{userId}", status_code=status.HTTP_200_OK)
+def set_user_roles(
+    userId: int,
+    roles_data: UserRolesUpdate,
+    user_service: UserServiceDep,
+    role_service: RoleServiceDep,
+):
+    user = user_service.get_user_by_id(userId)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {userId} not found",
+        )
+
+    return role_service.set_user_roles(
+        user,
+        roles_data.roles,
+    )

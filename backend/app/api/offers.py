@@ -26,7 +26,6 @@ set_page(CursorPage[OfferOut])
 set_params(CursorParams(size=10))
 
 
-@offers_router.post("/me/offers", status_code=status.HTTP_201_CREATED, response_model=OfferOut)
 @offers_router.post("/offers/", status_code=status.HTTP_201_CREATED, response_model=OfferOut)
 def create_offer(
     offer_data: OfferCreate,
@@ -36,9 +35,7 @@ def create_offer(
     return offer_service.create_offer(offer_data, user)
 
 
-@offers_router.patch(
-    "/me/offers/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut
-)
+
 @offers_router.patch(
     "/offers/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut
 )
@@ -48,7 +45,6 @@ def update_offer(
     return offer_service.update_offer(offer, offer_data)
 
 
-@offers_router.delete("/me/offers/{offer_id}", status_code=status.HTTP_204_NO_CONTENT)
 @offers_router.delete("/offers/{offer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_offer(
     offer: OfferDeleteDep,

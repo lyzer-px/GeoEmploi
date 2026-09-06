@@ -12,63 +12,16 @@ type CurrentUser = {
 function MyHeader() {
     const navigate = useNavigate();
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-
+    
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
+        const stored = localStorage.getItem("current_user");
+        if (!stored) return;
 
-        if (!token) {
-            return;
+        try {
+            setCurrentUser(JSON.parse(stored));
+        } catch {
+            setCurrentUser(null);
         }
-
-        async function loadCurrentUser() {
-            try {
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                };
-
-                console.log(
-                    "ME URL:",
-                    `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`
-                );
-
-                const [userResponse, rolesResponse] = await Promise.all([
-                    fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me`,
-                        {
-                            headers,
-                            cache: "no-store",
-                        }
-                    ),
-                    fetch(
-                        `${import.meta.env.VITE_API_BACKEND_URL}/api/v1/me/roles`,
-                        { headers }
-                    ),
-                ]);
-
-                if (!userResponse.ok || !rolesResponse.ok) {
-                    return;
-                }
-
-                console.log("USER RESPONSE:", userResponse.status, await userResponse.clone().text());
-                console.log("ROLES RESPONSE:", rolesResponse.status, await rolesResponse.clone().text());
-
-                const user = await userResponse.json();
-                const roles = await rolesResponse.json();
-
-                setCurrentUser({
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    roles,
-                });
-            } catch (error) {
-                console.error(
-                    "Erreur lors du chargement de l'utilisateur :",
-                    error
-                );
-            }
-        }
-
-        loadCurrentUser();
     }, []);
 
     return (
@@ -103,7 +56,7 @@ function MyHeader() {
                             iconId: "ri-dashboard-line" as const,
                             text: currentUser.roles.includes("admin")
                                 ? "🛡️ Panel admin"
-                                : currentUser.roles.includes("recruiter")
+                                : currentUser.roles.includes("employer")
                                     ? "Gestion des offres"
                                     : `Bonjour ${currentUser.first_name} ${currentUser.last_name}`,
                         },
@@ -112,6 +65,7 @@ function MyHeader() {
                                 onClick: () => {
                                     localStorage.removeItem("access_token");
                                     localStorage.removeItem("refresh_token");
+                                    localStorage.removeItem("current_user");
                                     window.location.href = "/";
                                 },
                                 className: "geoemploi-logout",

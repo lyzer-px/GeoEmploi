@@ -13,7 +13,7 @@ experiences_router = APIRouter(tags=["experiences"])
 
 
 @experiences_router.get(
-    "/me/experiences",
+    "/me",
     response_model=list[ExperienceOut],
     status_code=status.HTTP_200_OK,
 )
@@ -22,7 +22,7 @@ def get_my_experiences(user: CurrentUserDep, experience_service: ExperienceServi
 
 
 @experiences_router.get(
-    "/users/{user_id}/experiences",
+    "/{user_id}",
     response_model=list[ExperienceOut],
     status_code=status.HTTP_200_OK,
 )
@@ -31,7 +31,7 @@ def get_user_experiences(user_id: int, experience_service: ExperienceServiceDep)
 
 
 @experiences_router.post(
-    "/me/experiences",
+    "/me",
     response_model=ExperienceOut,
     status_code=status.HTTP_201_CREATED,
 )
@@ -45,12 +45,7 @@ def create_experience(
 
 
 @experiences_router.patch(
-    "/me/experiences/{experience_id}",
-    response_model=ExperienceOut,
-    status_code=status.HTTP_200_OK,
-)
-@experiences_router.patch(
-    "/{experience_id}",
+    "/{experience_id}/me",
     response_model=ExperienceOut,
     status_code=status.HTTP_200_OK,
 )
@@ -63,7 +58,7 @@ def update_experience(
 
 
 @experiences_router.delete(
-    "/me/experiences/{experience_id}", status_code=status.HTTP_204_NO_CONTENT
+    "/{experience_id}/me", status_code=status.HTTP_204_NO_CONTENT
 )
 @experiences_router.delete("/{experience_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_experience(

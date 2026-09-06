@@ -148,6 +148,8 @@ function EditLayout({
 }
 
 function Admin() {
+  const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
+
   const apiUrl = import.meta.env.VITE_API_BACKEND_URL;
 
   const [category, setCategory] =
@@ -241,19 +243,19 @@ function Admin() {
           permissionsResponse,
           rolesResponse,
         ] = await Promise.all([
-          fetch(`${apiUrl}/api/v1/users/`),
+          fetch(`${apiUrl}/users/`),
 
-          fetch(`${apiUrl}/api/v1/offers/`),
+          fetch(`${apiUrl}/offers/`),
 
           fetch(
-            `${apiUrl}/api/v1/permissions/`,
+            `${apiUrl}/permissions/`,
             {
               headers: authHeaders,
             }
           ),
 
           fetch(
-            `${apiUrl}/api/v1/roles/`,
+            `${apiUrl}/roles/`,
             {
               headers: authHeaders,
             }
@@ -340,7 +342,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/permissions/`,
+        `${apiUrl}/permissions/`,
         {
           headers: {
             ...(token
@@ -376,7 +378,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/roles/`,
+        `${apiUrl}/roles/`,
         {
           headers: {
             ...(token
@@ -507,7 +509,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/users/${editUser.id}`,
+        `${apiUrl}/users/${editUser.id}`,
         {
           method: "PATCH",
           headers: {
@@ -570,7 +572,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/offers/${editJobOffer.id}`,
+        `${apiUrl}/offers/${editJobOffer.id}`,
         {
           method: "PATCH",
           headers: {
@@ -644,7 +646,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/users/`
+        `${apiUrl}/users/`
         + `${selectedUser.id}/roles`,
         {
           method: "PATCH",
@@ -700,7 +702,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/users/${selectedUser.id}`,
+        `${apiUrl}/users/${selectedUser.id}`,
         {
           method: "DELETE",
           headers: {
@@ -743,7 +745,7 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/api/v1/offers/`
+        `${apiUrl}/offers/`
         + `${selectedJobOffer.id}`,
         {
           method: "DELETE",
@@ -878,8 +880,8 @@ function Admin() {
       };
 
       const url = selectedAdminRole
-        ? `${apiUrl}/api/v1/roles/${selectedAdminRole.id}`
-        : `${apiUrl}/api/v1/roles/`;
+        ? `${apiUrl}/roles/${selectedAdminRole.id}`
+        : `${apiUrl}/roles/`;
 
       const response = await fetch(
         url,

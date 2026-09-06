@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
+from enum import Enum
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -10,12 +11,21 @@ if TYPE_CHECKING:
     from .rbac import User
 
 
+class ApplicationStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
+
 class Application(Base):
     __tablename__ = "applications"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    # resume_path: Mapped[str] = mapped_column(String(256))
-    # resume_original_filename: Mapped[str] = mapped_column(String(1024))
+    resume_path: Mapped[str] = mapped_column(String(1024))
+    resume_original_filename: Mapped[str] = mapped_column(String(1024))
+    status: Mapped[ApplicationStatus] = mapped_column(
+        SQLEnum(ApplicationStatus), nullable=False, default=ApplicationStatus.PENDING
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )

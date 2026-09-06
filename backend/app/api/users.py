@@ -15,6 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 #   USER Account
 #
 
+
 @users_router.patch("/me", status_code=status.HTTP_200_OK)
 def update_my_account(
     user: UserUpdate, user_service: UserServiceDep, token: AccessTokenDep
@@ -40,12 +41,12 @@ def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
 #
 
 
-@users_router.delete("/users/{userId}", status_code=status.HTTP_204_NO_CONTENT)
+@users_router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(userId: int, user_service: UserServiceDep):
     user_service.delete_user(userId)
 
 
-@users_router.patch("/users/{userId}", status_code=status.HTTP_200_OK)
+@users_router.patch("/{userId}", status_code=status.HTTP_200_OK)
 def update_user(
     userId: int,
     user_update: UserUpdate,

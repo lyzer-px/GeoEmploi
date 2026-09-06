@@ -13,6 +13,5 @@ class SkillOut(BaseModel):
 class SkillUserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    user_id: int
-    skill_id: int
+    skill: SkillOut
     level: int

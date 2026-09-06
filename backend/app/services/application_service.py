@@ -32,7 +32,7 @@ def write_upload_file(file: UploadFile):
 class ApplicationService:
     def __init__(self, session: Session):
         self._db: Session = session
-        CV_TECH.mkdir(exist_ok=True)
+        CV_TECH.mkdir(parents=True, exist_ok=True)
 
     def get_application_by_id(self, application_id: int) -> Application:
         statement = select(Application).where(Application.id == application_id)

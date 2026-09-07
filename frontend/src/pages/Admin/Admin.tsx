@@ -332,7 +332,7 @@ function Admin() {
       return (
         normalize(offer.name).includes(query) ||
         normalize(offer.description).includes(query) ||
-        normalize(offer.adress).includes(query)
+        normalize(offer.address).includes(query)
       );
     }
   );
@@ -596,7 +596,7 @@ function Admin() {
             contract_type:
               editJobOffer.contract_type,
             adress:
-              editJobOffer.adress,
+              editJoboffer.address,
             geocoding_source:
               editJobOffer.geocoding_source,
             geocoding_score:
@@ -1116,7 +1116,7 @@ function Admin() {
                       <input
                         type="text"
                         value={
-                          editJobOffer.adress
+                          editJoboffer.address
                         }
                         onChange={(event) =>
                           setEditJobOffer({
@@ -1599,7 +1599,7 @@ function Admin() {
                                 offer.name
                               }
                               subtitle={
-                                offer.adress
+                                offer.address
                               }
                               avatar={
                                 offer.name.charAt(

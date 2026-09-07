@@ -1,7 +1,7 @@
 from typing import Optional
 
 import logging
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi_pagination import set_params, set_page
 from fastapi_pagination.cursor import CursorPage, CursorParams
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -53,9 +53,13 @@ def delete_offer(
     offer_service.delete_offer(offer)
 
 
-@offers_router.get("/{offer_id}", status_code=status.HTTP_200_OK)
-def get_offers_by_id(offer_id: int):
-    pass
+
+@offers_router.get("/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut)
+def get_offer_by_id(offer_id: int, offer_service: OfferServiceDep):
+    offer = offer_service.get_offer_by_id(offer_id)
+    if not offer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Offer {offer_id} not found")   
+    return offer
 
 
 @offers_router.get(

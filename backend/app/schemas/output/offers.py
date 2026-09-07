@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 from enum import Enum
 
@@ -35,22 +35,17 @@ class OfferOut(BaseModel):
     employer: EmployerOut
 
 
-class UserOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class ApplicationOut(BaseModel):
+    model_config = {"from_attributes": True}
 
     first_name: str
     last_name: str
     email: EmailStr
-
-
-class ApplicationOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    user: UserOut
     status: ApplicationStatus
-    created_at: datetime
+    created_at: date
     resume_original_filename: str
     resume_path: str
+
 
 class CreatorOfferOut(BaseModel):
     offer: OfferOut

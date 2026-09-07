@@ -39,20 +39,11 @@ def get_full_application(
 async def apply_to_offer(
     offer_id: int,
     application_service: ApplicationServiceDep,
-    resume: UploadFile = File(...),
-    cover_letter: UploadFile = File(...),
+    file: UploadFile = File(...),
     user: User = Depends(require_permission(perm(Action.CREATE, Resource.APPLICATION))),
 ):
-    application = application_service.save_application(
-        offer_id=offer_id,
-        user=user,
-        resume=resume,
-        cover_letter=cover_letter,
-    )    
-    return {
-        "application": application,
-        "offer": application.offer
-    }
+    return application_service.save_application(offer_id, user, file)
+
 
 @applications_router.delete("/{application_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_application(

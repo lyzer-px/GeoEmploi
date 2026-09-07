@@ -5,6 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Link } from "react-router-dom";
 import { ROUTES } from '../routes';
 import '../Login.css'
@@ -15,8 +16,15 @@ type Mode = "login" | "register";
 type Role = "job_seeker" | "employer";
 
 export function Login() {
+    // URL absolue du back + préfixe /api/v1 vu dans les routes FastAPI
+    const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
+    const LOGIN_PATH = `/auth/login`;
+    const REGISTER_PATH = `/auth/register`;
+
     const navigate = useNavigate();
     const [mode, setMode] = useState<Mode>("login");
+
+    const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
 
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
@@ -30,10 +38,9 @@ export function Login() {
     const isRegisterDisabled =
         firstName === "" || lastName === "" || registerEmail === "" || registerPassword === "";
 
-    const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
-    console.log("API_BACKEND_URL:", API_BACKEND_URL);
     function sendLoginRequest() {
-        fetch(`${API_BACKEND_URL}/auth/login`, {
+        setFeedback(null);
+        fetch(API_BACKEND_URL + LOGIN_PATH, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -45,25 +52,21 @@ export function Login() {
         })
             .then(async (response) => {
                 if (!response.ok) {
-                    throw new Error("Échec de la connexion");
+                    throw new Error("Email ou mot de passe incorrect");
                 }
-
                 const data = await response.json();
-
-                localStorage.setItem(
-                    "access_token",
-                    data.access_token
-                );
-
-                console.log("5. data =", data);
-
-                if (data.role === "employer") {
-                    navigate("/employeur");
+                localStorage.setItem("access_token", data.tokens.access_token);
+                localStorage.setItem("refresh_token", data.tokens.refresh_token);
+                localStorage.setItem("current_user", JSON.stringify(data.user));
+                setFeedback({ severity: "success", message: "Connexion réussie, redirection..." });
+                if (data.user.roles.includes("employer")) {
+                    navigate(ROUTES.EMPLOYER);
                 } else {
                     navigate(ROUTES.HOME);
                 }
             })
-            .catch((error) => {
+            .catch((error: Error) => {
+                setFeedback({ severity: "error", message: error.message });
                 console.error(
                     "Erreur lors de la requête de connexion :",
                     error
@@ -72,7 +75,8 @@ export function Login() {
     }
 
     function sendRegisterRequest() {
-        fetch(`${API_BACKEND_URL}/auth/register`, {
+        setFeedback(null);
+        fetch(API_BACKEND_URL + REGISTER_PATH, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -85,11 +89,25 @@ export function Login() {
         })
             .then(async (response) => {
                 if (!response.ok) {
-                    throw new Error("Échec de l'inscription");
+                    throw new Error("Échec de l'inscription, vérifiez vos informations");
                 }
-                setMode("login");
+                const data = await response.json().catch(() => null);
+                if (data?.tokens?.access_token) {
+                    localStorage.setItem("access_token", data.tokens.access_token);
+                    localStorage.setItem("refresh_token", data.tokens.refresh_token);
+                    localStorage.setItem("current_user", JSON.stringify(data.user));
+                }
+
+                setFeedback({ severity: "success", message: "Compte créé, redirection..." });
+
+                if (role === "employer") {
+                    navigate(ROUTES.EMPLOYER);
+                } else {
+                    navigate(ROUTES.HOME);
+                }
             })
-            .catch((error) => {
+            .catch((error: Error) => {
+                setFeedback({ severity: "error", message: error.message });
                 console.error("Erreur lors de la requête d'inscription :", error);
             });
     }
@@ -100,6 +118,16 @@ export function Login() {
             {mode === "login" ? (
                 <div className="login-block">
                     <h1>Connexion à GeoEmploi</h1>
+                    {feedback && (
+                        <Alert
+                            severity={feedback.severity}
+                            title={feedback.severity === "success" ? "Succès" : "Erreur"}
+                            description={feedback.message}
+                            closable
+                            onClose={() => setFeedback(null)}
+                            className="fr-mb-2w"
+                        />
+                    )}
                     <Input
                         label="Adresse mail"
                         state="default"
@@ -122,7 +150,7 @@ export function Login() {
                         </Button>
                     </div>
                     <div className="login-space">
-                        <Button priority="secondary" onClick={() => setMode("register")}>
+                        <Button priority="secondary" onClick={() => { setMode("register"); setFeedback(null); }}>
                             Créer un compte
                         </Button>
                     </div>
@@ -130,6 +158,16 @@ export function Login() {
             ) : (
                 <div className="login-block">
                     <h1>Créer un compte GeoEmploi</h1>
+                    {feedback && (
+                        <Alert
+                            severity={feedback.severity}
+                            title={feedback.severity === "success" ? "Succès" : "Erreur"}
+                            description={feedback.message}
+                            closable
+                            onClose={() => setFeedback(null)}
+                            className="fr-mb-2w"
+                        />
+                    )}
                     <Select
                         label="Je suis"
                         nativeSelectProps={{
@@ -177,7 +215,7 @@ export function Login() {
                         </Button>
                     </div>
                     <div className="login-space">
-                        <Button priority="secondary" onClick={() => setMode("login")}>
+                        <Button priority="secondary" onClick={() => { setMode("login"); setFeedback(null); }}>
                             J'ai déjà un compte
                         </Button>
                     </div>

@@ -6,6 +6,7 @@ export const ROUTES = {
   JOB_SEEKER_REGISTER: '/register/job-seeker',
   EMPLOYER_REGISTER: '/register/employer',
   FORGOT_PASSWORD: '/forgot-password',
+  EMPLOYER: '/employeur',
   ADMIN: '/admin',
   ABOUT: '/a-propos',
   PROFILE: '/profil'

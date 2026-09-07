@@ -9,6 +9,7 @@ import { ROUTES } from './routes';
 import MyHeader from './Header';
 import Footer from './Footer';
 import './App.css'
+import EmployerPage from './pages/Employer';
 
 function Home() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path={ROUTES.ADMIN} element={<Admin />} />
         <Route path={ROUTES.ABOUT} element={<About />} />
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+        <Route path={ROUTES.EMPLOYER} element={<EmployerPage/>} />
       </Routes>
     </BrowserRouter>
   );

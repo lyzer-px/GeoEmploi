@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, DateTime, Enum as SQLEnum, ForeignKey, String
+from sqlalchemy import Date, DateTime, Enum as SQLEnum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -24,7 +24,7 @@ class Offer(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
-    description: Mapped[str] = mapped_column(String(16382), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
@@ -50,7 +50,7 @@ class Offer(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
     adress: Mapped[str] = mapped_column(String(1024), nullable=True)
-    geocoding_source: Mapped[str] = mapped_column(String(16382))
+    geocoding_source: Mapped[str] = mapped_column(Text)
     geocoding_score: Mapped[float] = mapped_column(nullable=True)
     latitude: Mapped[float] = mapped_column(nullable=False)
     longitude: Mapped[float] = mapped_column(nullable=False)

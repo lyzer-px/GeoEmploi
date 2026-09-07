@@ -47,9 +47,9 @@ function ProfilePage() {
     setError(null);
     try {
       const [userResponse, skillsResponse, experiencesResponse] = await Promise.all([
-        fetch(`${API}/me`, { headers: authHeaders() }),
-        fetch(`${API}/me/skills`, { headers: authHeaders() }),
-        fetch(`${API}/me/experiences`, { headers: authHeaders() }),
+        fetch(`${API}/users/me`, { headers: authHeaders() }),
+        fetch(`${API}/skills/me`, { headers: authHeaders() }),
+        fetch(`${API}/experiences/me`, { headers: authHeaders() }),
       ]);
       if ([userResponse, skillsResponse, experiencesResponse].some((response) => response.status === 401)) {
         localStorage.removeItem("access_token");
@@ -84,8 +84,8 @@ function ProfilePage() {
     setIsSaving(true); setError(null);
     try {
       const response = editingSkillId === null
-        ? await fetch(`${API}/me/skills`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ name: skillName.trim(), level: Number(skillLevel) }) })
-        : await fetch(`${API}/me/skills/${editingSkillId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
+        ? await fetch(`${API}/skills/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ name: skillName.trim(), level: Number(skillLevel) }) })
+        : await fetch(`${API}/users/me/skills/${editingSkillId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer la compétence.");
       setSkillName(""); setSkillLevel("3"); setEditingSkillId(null);
       await loadProfile();
@@ -102,7 +102,7 @@ function ProfilePage() {
   async function deleteSkill(id: number) {
     if (!window.confirm("Supprimer cette compétence de votre profil ?")) return;
     setError(null);
-    const response = await fetch(`${API}/me/skills/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/users/me/skills/${id}`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer la compétence."); return; }
     setSkills((current) => current.filter((item) => item.skill.id !== id));
     if (editingSkillId === id) { setEditingSkillId(null); setSkillName(""); }
@@ -116,8 +116,8 @@ function ProfilePage() {
     const payload = { name: experience.name.trim(), description: experience.description.trim() || null, start_date: experience.start_date, end_date: experience.end_date || null };
     try {
       const response = editingExperienceId === null
-        ? await fetch(`${API}/me/experiences`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) })
-        : await fetch(`${API}/me/experiences/${editingExperienceId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
+        ? await fetch(`${API}/experiences/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) })
+        : await fetch(`${API}/users/me/experiences/${editingExperienceId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer l'expérience.");
       setExperience({ name: "", description: "", start_date: "", end_date: "" }); setEditingExperienceId(null);
       await loadProfile();
@@ -135,7 +135,7 @@ function ProfilePage() {
   async function deleteExperience(id: number) {
     if (!window.confirm("Supprimer cette expérience ?")) return;
     setError(null);
-    const response = await fetch(`${API}/me/experiences/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/users/me/experiences/${id}`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer l'expérience."); return; }
     setExperiences((current) => current.filter((item) => item.id !== id));
     if (editingExperienceId === id) { setEditingExperienceId(null); setExperience({ name: "", description: "", start_date: "", end_date: "" }); }

@@ -1,5 +1,6 @@
 from typing import Generator
 
+from contextlib import contextmanager
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -24,7 +25,18 @@ class DatabaseHandler:
     def create_tables(self):
         Base.metadata.create_all(self.engine)
 
+    @contextmanager
     def get_session(self) -> Generator[Session, None, None]:
+        session = self.session_factory()
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def get_session_dependency(self):
         session = self.session_factory()
         try:
             yield session
@@ -52,4 +64,4 @@ def init_db(settings: Settings) -> DatabaseHandler:
 def get_db_session() -> Generator[Session, None, None]:
     if db_handler is None:
         raise RuntimeError("Database not initialized")
-    yield from db_handler.get_session()
+    yield from db_handler.get_session_dependency()

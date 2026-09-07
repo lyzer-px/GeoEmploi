@@ -1,13 +1,18 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.schemas.input.user import UserUpdate
-from app.schemas.output.auth import UserOut
+from app.schemas.output.user import UserOut
+from app.db.models import User
+from app.api.dependencies.auth import require_permission, perm, Action, Resource
+
 from app.api.dependencies.auth import (
     UserServiceDep,
     AccessTokenDep,
     CurrentUserDep,
 )
+from app.core.permissions import Action, perm, perm
+from app.core.permissions import Resource
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -31,10 +36,10 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
     user_service.delete_user(token.user_id)
 
 
-@users_router.get("/me", response_model=UserOut, status_code=status.HTTP_200_OK)
+@users_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserOut)
 def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
     """Get user information"""
-    return UserOut.model_validate(user)
+    return user_service.get_user_by_id(user.id)
 
 
 #
@@ -54,3 +59,12 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
+
+
+@users_router.get(
+    "/",
+    response_model=list[UserOut],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_users(user_service: UserServiceDep, _: CurrentUserDep):
+    return user_service.get_all_users()

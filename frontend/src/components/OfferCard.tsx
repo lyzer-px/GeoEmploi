@@ -21,7 +21,7 @@ export function OfferCard({ offer, applicantsCount, isSelected, onClick }: Offer
         </Badge>
       </div>
       <p className="fr-text--sm fr-mb-1v offer-card-address">
-        {offer.adress ?? "Adresse non renseignée"}
+        {offer.address ?? "Adresse non renseignée"}
       </p>
       <p className="fr-text--sm fr-mb-0">
         {applicantsCount} candidature{applicantsCount > 1 ? "s" : ""}

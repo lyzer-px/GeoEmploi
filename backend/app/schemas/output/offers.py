@@ -2,7 +2,8 @@ from datetime import date
 from typing import Optional
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
+from app.db.models.application import ApplicationStatus
 
 
 class ContractType(str, Enum):
@@ -32,3 +33,23 @@ class OfferOut(BaseModel):
     longitude: float
     adress: str
     employer: EmployerOut
+
+
+class ApplicationOut(BaseModel):
+    model_config = {"from_attributes": True}
+
+    first_name: str
+    last_name: str
+    email: EmailStr
+    status: ApplicationStatus
+    created_at: date
+    resume_original_filename: str
+    resume_path: str
+
+
+class CreatorOfferOut(BaseModel):
+    offer: OfferOut
+    first_name: str
+    last_name: str
+    email: EmailStr
+    applications: list[ApplicationOut]

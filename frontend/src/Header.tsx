@@ -18,7 +18,7 @@ function MyHeader() {
       return;
     }
 
-    fetch(`${API}/me`, {
+    fetch(`${API}/users/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -1,39 +1,52 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, File, UploadFile, status, Depends
+from fastapi.responses import FileResponse
 
-from app.api.dependencies.offers import OfferServiceDep
+from app.schemas.output.applications import MyApplicationOut
+from app.api.dependencies.auth import CurrentUserDep
 from app.api.dependencies.application import ApplicationServiceDep, ApplicationDeleteDep
-from app.schemas.output.offers import OfferOut
-from app.schemas.input.application import ApplicationIn
 from app.db.models import User
 from app.api.dependencies.auth import require_permission, perm, Action, Resource
+from app.services import application_service
 
 
 applications_router = APIRouter(tags=["applications"])
 
 
 @applications_router.get(
-    "/me",
-    response_model=list[OfferOut],
-    status_code=status.HTTP_200_OK,
+    "/me", response_model=list[MyApplicationOut], status_code=status.HTTP_200_OK
 )
 def get_my_applications(
-    offer_service: OfferServiceDep,
+    application_service: ApplicationServiceDep, user: CurrentUserDep
 ):
-    return offer_service
+    return application_service.get_application_by_user(user)
 
 
-@applications_router.post("/{offer_id}")
-def apply_to_offer(
-    offer_id: int,
-    application_data: ApplicationIn,
+@applications_router.get(
+    "/{application_id}/resume",
+    status_code=status.HTTP_200_OK,
+    response_class=FileResponse,
+)
+def get_full_application(
+    application_id: int,
     application_service: ApplicationServiceDep,
-    user: User = Depends(require_permission(perm(Action.CREATE, Resource.OFFER))),
 ):
-    return application_service.save_application(offer_id, user, application_data)
+    return application_service.get_resume_file(application_id)
 
 
-@applications_router.delete("/{application_id}")
-def delete_offer(
+@applications_router.post(
+    "/{offer_id}", status_code=status.HTTP_201_CREATED, response_model=MyApplicationOut
+)
+async def apply_to_offer(
+    offer_id: int,
+    application_service: ApplicationServiceDep,
+    file: UploadFile = File(...),
+    user: User = Depends(require_permission(perm(Action.CREATE, Resource.APPLICATION))),
+):
+    return application_service.save_application(offer_id, user, file)
+
+
+@applications_router.delete("/{application_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_application(
     application_service: ApplicationServiceDep, application: ApplicationDeleteDep
 ):
     application_service.delete_application(application)

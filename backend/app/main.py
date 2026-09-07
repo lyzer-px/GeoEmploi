@@ -13,10 +13,12 @@ from .api.offers import offers_router
 from .api.skills import skills_router
 from .api.experiences import experiences_router
 from .api.application import applications_router
-
 from .core.loggings import setup_logging
 from .core.settings import Settings
 from .db.database import init_db
+from .core.admin import create_admin_user
+from .services.user_service import UserService
+from .services.roles_service import RoleService
 
 VERSION_API: str = "v1"
 
@@ -27,7 +29,12 @@ async def lifespan(app: FastAPI):
     app.state.settings = Settings()
     db_handler = init_db(app.state.settings)
     logging.info("Creation of tables in %s database.", app.state.settings.db_name)
-    db_handler.create_tables()
+
+    with db_handler.get_session() as session:
+        user_service = UserService(session)
+        role_service = RoleService(session, user_service)
+        create_admin_user(user_service, role_service, app.state.settings)
+
     yield
     logging.info("Shutting down...")
     db_handler.engine.dispose()

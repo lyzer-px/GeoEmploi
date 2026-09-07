@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, File, UploadFile, status, Depends
 
 from app.api.dependencies.offers import OfferServiceDep
 from app.api.dependencies.application import ApplicationServiceDep, ApplicationDeleteDep
@@ -6,6 +6,7 @@ from app.schemas.output.offers import OfferOut
 from app.schemas.input.application import ApplicationIn
 from app.db.models import User
 from app.api.dependencies.auth import require_permission, perm, Action, Resource
+from app.services import application_service
 
 
 applications_router = APIRouter(tags=["applications"])
@@ -23,13 +24,17 @@ def get_my_applications(
 
 
 @applications_router.post("/{offer_id}")
-def apply_to_offer(
-    offer_id: int,
-    application_data: ApplicationIn,
-    application_service: ApplicationServiceDep,
-    user: User = Depends(require_permission(perm(Action.CREATE, Resource.OFFER))),
+def apply_to_offer(offer_id: int,  resume: UploadFile = File(...), cover_letter: UploadFile = File(...),
+    application_service: ApplicationServiceDep = Depends(),
+    user: User = Depends(require_permission(perm(Action.CREATE, Resource.APPLICATION)))
 ):
-    return application_service.save_application(offer_id, user, application_data)
+    application = ApplicationIn(resume=resume, cover_letter=cover_letter)
+
+    return application_service.save_application(
+        offer_id,
+        user,
+        application,
+    )
 
 
 @applications_router.delete("/{application_id}")

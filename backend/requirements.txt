@@ -8,3 +8,11 @@ pymysql==1.0.2
 passlib
 python-jose
 cryptography
+sqlmodel
+alembic
+psycopg2-binary
+starlette
+pyproj
+fastapi_pagination
+geopy
+sqlakeyset

@@ -1,29 +1,21 @@
 from .database import DatabaseHandler
 from .models import (
     Application,
-    Availability,
-    AvailabilityDay,
     Base,
     Experience,
     Offer,
-    OfferAvailability,
-    OfferStatus,
     Permission,
     Role,
     RolePermission,
     Skill,
     User,
-    UserAvailability,
     UserRole,
     UsersSkills,
-    Weekday,
 )
 
 __all__ = [
     "DatabaseHandler",
     "Base",
-    "Weekday",
-    "OfferStatus",
     "User",
     "Role",
     "UserRole",
@@ -32,10 +24,6 @@ __all__ = [
     "Skill",
     "UsersSkills",
     "Experience",
-    "Availability",
-    "AvailabilityDay",
-    "UserAvailability",
-    "OfferAvailability",
     "Offer",
     "Application",
 ]

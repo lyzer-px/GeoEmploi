@@ -32,6 +32,8 @@ class UsersSkills(Base):
     )
     level: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
+    skill: Mapped["Skill"] = relationship(viewonly=True)
+
 
 class Experience(Base):
     __tablename__ = "experiences"

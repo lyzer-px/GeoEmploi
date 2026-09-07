@@ -1,0 +1,29 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.login-block {
+    width: 490px;
+}
+
+.login-space {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+}
+
+.login-hidden {
+    visibility: hidden;
+}
+
+.login-card {
+    width: 360px;
+}
+
+.login-center-title {
+    margin: 0;
+}

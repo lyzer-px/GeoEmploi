@@ -1,16 +1,28 @@
 from fastapi import APIRouter, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.api.dependencies import UserServiceDep, AccessTokenDep, CurrentUserDep
-from app.schemas.user import UserUpdate
+from app.schemas.input.user import UserUpdate
+from app.schemas.output.user import UserOut
 from app.db.models import User
+
+from app.api.dependencies.auth import (
+    UserServiceDep,
+    AccessTokenDep,
+    CurrentUserDep,
+)
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
+#
+#   USER Account
+#
+
 
 @users_router.patch("/me", status_code=status.HTTP_200_OK)
-def update_my_account(user: UserUpdate, user_service: UserServiceDep, token: AccessTokenDep):
+def update_my_account(
+    user: UserUpdate, user_service: UserServiceDep, token: AccessTokenDep
+):
     """Update user information"""
     user_service.update_user(token.user_id, user)
 
@@ -20,11 +32,26 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
     "Delete user account"
     user_service.delete_user(token.user_id)
 
-@users_router.get("/me")
-def get_my_account(user: CurrentUserDep):
-    """Retrieve information about a user"""
-    return { "response": "ok" }
 
-@users_router.get("/me/roles", status_code=status.HTTP_200_OK)
-def get_my_roles(token: AccessTokenDep, user: CurrentUserDep, user_service: UserServiceDep):
-    return user_service.get_stringify_roles_of_user(user)
+@users_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserOut)
+def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
+    """Get user information"""
+    return user_service.get_user_by_id(user.id)
+
+#
+#   OTHER ACCOUNT
+#
+
+
+@users_router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(userId: int, user_service: UserServiceDep):
+    user_service.delete_user(userId)
+
+
+@users_router.patch("/{userId}", status_code=status.HTTP_200_OK)
+def update_user(
+    userId: int,
+    user_update: UserUpdate,
+    user_service: UserServiceDep,
+):
+    return user_service.update_user(userId, user_update)

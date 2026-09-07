@@ -1,10 +1,13 @@
 from typing import Generator
 
+from contextlib import contextmanager
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from .models.base import Base
 from app.core.settings import Settings
+from .setup import init_permissions, init_roles
+from app.core.roles import ROLES_DEFINITION
 
 
 class DatabaseHandler:
@@ -22,7 +25,18 @@ class DatabaseHandler:
     def create_tables(self):
         Base.metadata.create_all(self.engine)
 
+    @contextmanager
     def get_session(self) -> Generator[Session, None, None]:
+        session = self.session_factory()
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def get_session_dependency(self):
         session = self.session_factory()
         try:
             yield session
@@ -35,11 +49,19 @@ class DatabaseHandler:
 
 def init_db(settings: Settings) -> DatabaseHandler:
     global db_handler
+
     db_handler = DatabaseHandler(settings)
+    db_handler.create_tables()
+    session = db_handler.session_factory()
+    try:
+        init_permissions(session)
+        init_roles(session, ROLES_DEFINITION)
+    finally:
+        session.close()
     return db_handler
 
 
 def get_db_session() -> Generator[Session, None, None]:
     if db_handler is None:
         raise RuntimeError("Database not initialized")
-    yield from db_handler.get_session()
+    yield from db_handler.get_session_dependency()

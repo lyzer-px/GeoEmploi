@@ -6,15 +6,17 @@ from sqlmodel import select
 from fastapi import Depends, HTTPException
 
 from app.db.models import User, Role
-from app.schemas.user import UserUpdate, UserCreate
+from app.schemas.input.user import UserUpdate, UserCreate
 from app.db.database import get_db_session
 
 
 class UserNotFoundError(Exception):
     pass
 
+
 class UserAlreadyExistsError(Exception):
     pass
+
 
 class UserService:
     def __init__(self, session: Session):
@@ -36,22 +38,35 @@ class UserService:
         statement = select(User).join(User.roles).where(Role.name == role_name)
         return list(self._db.scalars(statement).all())
 
+    def get_roles_of_user(self, user: User) -> list[Role]:
+        return user.roles
+    
     def get_stringify_roles_of_user(self, user: User) -> list[str]:
         return [role.name for role in user.roles]
 
-    def create_user(self, user: UserCreate) -> User:
-        new_user: User = User(
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.email,
+    def create_user(
+        self,
+        user_data: UserCreate,
+        role: Optional[Role] = None,
+    ) -> User:
+        new_user = User(
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            email=user_data.email,
         )
-        new_user.set_password(user.password)
+
+        new_user.set_password(user_data.password)
+        if role:
+            new_user.roles.append(role)
         self._db.add(new_user)
         try:
             self._db.commit()
         except Exception:
             self._db.rollback()
-            raise HTTPException(status_code=409, detail="This user already exists.")
+            raise HTTPException(
+                status_code=409,
+                detail="This user already exists.",
+            )
         self._db.refresh(new_user)
         return new_user
 
@@ -59,9 +74,7 @@ class UserService:
         user: Optional[User] = self.get_user_by_id(user_id)
 
         if not user:
-            raise HTTPException(
-                status_code=404, detail=f"User {user_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"User {user_id} not found")
         update_data: dict[str, Any] = user_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             if field == "password":
@@ -90,10 +103,7 @@ class UserService:
             self._db.commit()
         except Exception:
             self._db.rollback()
-            raise HTTPException(
-            status_code=404, 
-            detail="User not found"
-        ) 
+            raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_user_service(session: Session = Depends(get_db_session)) -> UserService:

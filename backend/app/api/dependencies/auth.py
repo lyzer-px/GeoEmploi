@@ -8,7 +8,6 @@ from app.db.models.rbac import User
 from app.schemas.input.auth import AccessToken, RefreshToken, RefreshTokenRequest
 from app.services.user_service import UserService, get_user_service
 from app.services.roles_service import RoleService, get_role_service
-from app.services.offer_service import OfferService, get_offer_service
 from app.core.permissions import Resource, Action, perm
 
 

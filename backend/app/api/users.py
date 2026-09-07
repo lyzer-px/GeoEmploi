@@ -2,6 +2,8 @@ from fastapi import APIRouter, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.schemas.input.user import UserUpdate
+from app.schemas.output.user import UserOut
+
 from app.api.dependencies.auth import (
     UserServiceDep,
     AccessTokenDep,
@@ -14,7 +16,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 #
 #   USER Account
 #
-
 
 @users_router.patch("/me", status_code=status.HTTP_200_OK)
 def update_my_account(
@@ -30,10 +31,10 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
     user_service.delete_user(token.user_id)
 
 
-@users_router.get("/me", status_code=status.HTTP_200_OK)
+@users_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserOut)
 def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
     """Get user information"""
-    user_service
+    return user
 
 
 #

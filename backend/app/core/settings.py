@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     db_host: str
     db_port: int
 
+    admin_email: str
+    admin_password: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @property

@@ -44,7 +44,7 @@ class UserService:
     def create_user(
         self,
         user_data: UserCreate,
-        role: Role,
+        role: Optional[Role] = None,
     ) -> User:
         new_user = User(
             first_name=user_data.first_name,
@@ -53,7 +53,8 @@ class UserService:
         )
 
         new_user.set_password(user_data.password)
-        new_user.roles.append(role)
+        if role:
+            new_user.roles.append(role)
         self._db.add(new_user)
         try:
             self._db.commit()

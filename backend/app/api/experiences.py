@@ -60,7 +60,6 @@ def update_experience(
 @experiences_router.delete(
     "/{experience_id}/me", status_code=status.HTTP_204_NO_CONTENT
 )
-@experiences_router.delete("/{experience_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_experience(
     experiences: ExperienceDeleteDep,
     experience_service: ExperienceServiceDep,

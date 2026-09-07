@@ -394,7 +394,7 @@ function HomePage() {
                             <Card
                                 key={offer.id}
                                 title={offer.name}
-                                desc={`${offer.address} · ${offer.contract_type}`}
+                                desc={`${offer.adress} · ${offer.contract_type}`}
                                 linkProps={{
                                     href: "#",
                                     onClick: (event) => {
@@ -470,7 +470,7 @@ function HomePage() {
 
                         <p>
                             <strong>Lieu :</strong>{" "}
-                            {selectedoffer.address}
+                            {selectedOffer.adress}
                         </p>
 
                         <p>

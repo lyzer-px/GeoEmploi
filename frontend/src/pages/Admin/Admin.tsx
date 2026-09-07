@@ -133,14 +133,12 @@ function EditLayout({
           Annuler
         </button>
 
-        <button
+       <button
           type="button"
           onClick={onSave}
           disabled={saving}
-        >
-          {saving
-            ? "Enregistrement..."
-            : "Enregistrer"}loaddata
+    >
+        {saving ? "Enregistrement..." : "Enregistrer"}
         </button>
       </div>
     </div>
@@ -1598,7 +1596,7 @@ function Admin() {
                                 offer.name
                               }
                               subtitle={
-                                offer.address
+                                offer.adress
                               }
                               avatar={
                                 offer.name.charAt(

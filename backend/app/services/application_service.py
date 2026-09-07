@@ -122,9 +122,11 @@ class ApplicationService:
             media_type="application/octet-stream",
         )
 
-    def get_application_by_user(self, user: User) -> list[Application]:
+
+    def get_application_by_user(self, user: User) -> list[MyApplicationOut]:
         statement = select(Application).where(Application.user_id == user.id)
-        return self._db.scalars(statement).all()
+        applications = self._db.scalars(statement).all()
+        return [self._to_my_application_out(app) for app in applications]
 
     def get_application_by_user_and_offer(
         self, user_id: int, offer_id: int

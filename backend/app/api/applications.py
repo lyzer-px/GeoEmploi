@@ -39,7 +39,7 @@ def get_resume(
     status_code=status.HTTP_200_OK,
     response_class=FileResponse,
 )
-def get_full_application(
+def get_cover_letter(
     application_id: int,
     application_service: ApplicationServiceDep,
 ):

@@ -1,5 +1,4 @@
-from fastapi import APIRouter, status, Depends
-from fastapi import File, UploadFile
+from fastapi import APIRouter, File, UploadFile, status, Depends
 from fastapi.responses import FileResponse
 
 from app.schemas.output.applications import MyApplicationOut
@@ -7,6 +6,7 @@ from app.api.dependencies.auth import CurrentUserDep
 from app.api.dependencies.application import ApplicationServiceDep, ApplicationDeleteDep
 from app.db.models import User
 from app.api.dependencies.auth import require_permission, perm, Action, Resource
+from app.services import application_service
 
 
 applications_router = APIRouter(tags=["applications"])

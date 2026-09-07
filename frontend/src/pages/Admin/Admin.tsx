@@ -140,7 +140,7 @@ function EditLayout({
         >
           {saving
             ? "Enregistrement..."
-            : "Enregistrer"}
+            : "Enregistrer"}loaddata
         </button>
       </div>
     </div>
@@ -289,8 +289,15 @@ function Admin() {
         const usersData: User[] =
           await usersResponse.json();
 
-        const offersData: JobOffer[] =
-          await offersResponse.json();
+        const offersData = await offersResponse.json() as {
+          items: JobOffer[];
+        };
+
+        console.log("OFFERS DATA:", offersData);
+        console.log("OFFERS ITEMS:", offersData.items);
+        console.log("IS ARRAY:", Array.isArray(offersData.items));
+
+        setJobOffers(offersData.items);
 
         const permissionsData: Permission[] =
           await permissionsResponse.json();
@@ -299,7 +306,6 @@ function Admin() {
           await rolesResponse.json();
 
         setUsers(usersData);
-        setJobOffers(offersData);
         setPermissions(permissionsData);
         setRoles(rolesData);
       } catch (error) {
@@ -332,7 +338,7 @@ function Admin() {
       return (
         normalize(offer.name).includes(query) ||
         normalize(offer.description).includes(query) ||
-        normalize(offer.adress).includes(query)
+        normalize(offer.address).includes(query)
       );
     }
   );
@@ -596,7 +602,7 @@ function Admin() {
             contract_type:
               editJobOffer.contract_type,
             adress:
-              editJobOffer.adress,
+              editJoboffer.address,
             geocoding_source:
               editJobOffer.geocoding_source,
             geocoding_score:
@@ -1116,7 +1122,7 @@ function Admin() {
                       <input
                         type="text"
                         value={
-                          editJobOffer.adress
+                          editJoboffer.address
                         }
                         onChange={(event) =>
                           setEditJobOffer({
@@ -1599,7 +1605,7 @@ function Admin() {
                                 offer.name
                               }
                               subtitle={
-                                offer.adress
+                                offer.address
                               }
                               avatar={
                                 offer.name.charAt(

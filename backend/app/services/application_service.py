@@ -71,7 +71,7 @@ class ApplicationService:
 
     def get_application_by_user(self, user: User) -> list[Application]:
         statement = select(Application).where(Application.user_id == user.id)
-        return self._db.scalars(statement)
+        return self._db.scalars(statement).all()
 
     def get_application_by_user_and_offer(
         self, user_id: int, offer_id: int
@@ -108,6 +108,7 @@ class ApplicationService:
         write_upload_file(file, file_destination)
         self._db.add(new_application)
         try:
+            self._db.add(new_application)
             self._db.commit()
             self._db.refresh(new_application)
             return new_application
@@ -131,7 +132,5 @@ class ApplicationService:
             )
 
 
-def get_application_service(
-    session: Session = Depends(get_db_session),
-) -> ApplicationService:
+def get_application_service(session: Session = Depends(get_db_session),) -> ApplicationService:
     return ApplicationService(session)

@@ -1,15 +1,18 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.schemas.input.user import UserUpdate
 from app.schemas.output.user import UserOut
 from app.db.models import User
+from app.api.dependencies.auth import require_permission, perm, Action, Resource
 
 from app.api.dependencies.auth import (
     UserServiceDep,
     AccessTokenDep,
     CurrentUserDep,
 )
+from backend.app.core.permissions import Action, perm, perm
+from backend.app.core.permissions import Resource
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -55,3 +58,11 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
+
+@users_router.get(
+    "/",
+    response_model=list[UserOut],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_users(user_service: UserServiceDep, user: User = Depends(require_permission(perm(Action.READ, Resource.USER)))):
+    return user_service.get_all_users()

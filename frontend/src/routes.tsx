@@ -8,5 +8,6 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   EMPLOYER: '/employeur',
   ADMIN: '/admin',
-  ABOUT: '/a-propos'
+  ABOUT: '/a-propos',
+  PROFILE: '/profil'
 } as const;

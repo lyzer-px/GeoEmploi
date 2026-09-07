@@ -300,6 +300,36 @@
   min-height: 0;
 }
 
+#map .geoemploi-map-pin,
+#map .geoemploi-map-cluster {
+  background: transparent;
+  border: 0;
+}
+
+#map .geoemploi-map-pin span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #000091;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 35%);
+  transform: rotate(-45deg);
+}
+
+#map .geoemploi-map-cluster span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  background: #000091;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 35%);
+}
+
 #spacer {
   height: 88px;
   border-top: 1px solid var(--border);
@@ -332,4 +362,140 @@
     right: 0;
     border-right-color: var(--border);
   }
+}
+
+.geoemploi-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgb(0 0 0 / 45%);
+}
+
+.geoemploi-modal {
+  position: relative;
+  width: min(800px, 100%);
+  max-height: 85vh;
+  padding: 2rem;
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 25%);
+}
+
+.geoemploi-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 2rem;
+  line-height: 1;
+  color: #161616;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.geoemploi-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(2px);
+}
+
+.geoemploi-modal {
+  position: relative;
+  width: min(800px, 100%);
+  max-height: 85vh;
+  padding: 2.5rem;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 30%);
+}
+
+.geoemploi-modal h2 {
+  margin-bottom: 1.5rem;
+  padding-right: 3rem;
+}
+
+.geoemploi-modal h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.geoemploi-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: #161616;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.geoemploi-modal-close:hover {
+  background: #eeeeee;
+}
+
+.geoemploi-file-upload {
+  margin-top: 1.5rem;
+}
+
+.geoemploi-file-upload label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.geoemploi-file-upload input[type="file"] {
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  color: #161616;
+  background: #f5f5fe;
+  border: 2px dashed #000091;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.geoemploi-file-upload input[type="file"]:hover {
+  background: #e3e3fd;
+}
+
+.geoemploi-file-upload input[type="file"]::file-selector-button {
+  margin-right: 1rem;
+  padding: 0.65rem 1rem;
+  color: #fff;
+  background: #000091;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.geoemploi-file-upload input[type="file"]::file-selector-button:hover {
+  background: #1212a0;
+}
+
+.geoemploi-file-upload p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.geoemploi-modal > button:last-child {
+  margin-top: 2rem;
 }

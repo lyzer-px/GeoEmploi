@@ -140,7 +140,7 @@ function EditLayout({
         >
           {saving
             ? "Enregistrement..."
-            : "Enregistrer"}
+            : "Enregistrer"}loaddata
         </button>
       </div>
     </div>
@@ -289,8 +289,15 @@ function Admin() {
         const usersData: User[] =
           await usersResponse.json();
 
-        const offersData: JobOffer[] =
-          await offersResponse.json();
+        const offersData = await offersResponse.json() as {
+          items: JobOffer[];
+        };
+
+        console.log("OFFERS DATA:", offersData);
+        console.log("OFFERS ITEMS:", offersData.items);
+        console.log("IS ARRAY:", Array.isArray(offersData.items));
+
+        setJobOffers(offersData.items);
 
         const permissionsData: Permission[] =
           await permissionsResponse.json();
@@ -299,7 +306,6 @@ function Admin() {
           await rolesResponse.json();
 
         setUsers(usersData);
-        setJobOffers(offersData);
         setPermissions(permissionsData);
         setRoles(rolesData);
       } catch (error) {

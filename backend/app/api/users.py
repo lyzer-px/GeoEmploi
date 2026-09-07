@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.schemas.input.user import UserUpdate
+from app.schemas.input.user import UserAdminResponse, UserUpdate
 from app.schemas.output.auth import UserOut
 from app.api.dependencies.auth import (
     UserServiceDep,
@@ -54,3 +54,11 @@ def update_user(
     user_service: UserServiceDep,
 ):
     return user_service.update_user(userId, user_update)
+
+@users_router.get(
+    "/",
+    response_model=list[UserAdminResponse],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_users(user_service: UserServiceDep):
+    return user_service.get_all_users()

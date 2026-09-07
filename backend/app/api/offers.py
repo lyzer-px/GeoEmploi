@@ -59,11 +59,17 @@ def get_created_offers(offer_service: OfferServiceDep, user: CurrentUserDep):
 @offers_router.get(
     "/me/{offer_id}",
     status_code=status.HTTP_200_OK,
-    response_model=list[CreatorOfferOut],
+    response_model=CreatorOfferOut,
 )
-def get_created_offers(offer_id: int, offer_service: OfferServiceDep):
-    return offer_service.get_offer_applications(offer_id)
-
+def get_application_by_offer(offer_id: int, offer_service: OfferServiceDep):
+    offer = offer_service.get_offer_by_id(offer_id)
+    return {
+        "offer": offer,
+        "first_name": offer.employer.first_name,
+        "last_name": offer.employer.last_name,
+        "email": offer.employer.email,
+        "applications": offer.applications,
+    }
 
 @offers_router.get(
     "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut

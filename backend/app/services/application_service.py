@@ -87,7 +87,7 @@ class ApplicationService:
         return self._db.scalars(statement).all()
 
     def save_application(
-        self, offer_id: int, user: User, file: UploadFile
+        self, offer_id: int, user: User, resume: UploadFile, cover_letter: UploadFile
     ) -> Application:
         offer = self._db.get(Offer, offer_id)
         if not offer:
@@ -95,18 +95,30 @@ class ApplicationService:
         if self.get_application_by_user_and_offer(user.id, offer_id):
             raise multiple_apply
 
-        storage_file_name: str = str(uuid4())
-        file_destination: Path = CV_TECH / storage_file_name
+        resume_storage_filename: str = f"cv_{uuid4()}"
+        resume_destination: Path = CV_TECH / resume_storage_filename
+
+        cover_letter_storage_filename: str = f"cl_{uuid4()}"
+        cover_letter_destination: Path = CV_TECH / cover_letter_storage_filename
+
+        write_upload_file(resume, resume_destination)
+        try:
+            write_upload_file(cover_letter, cover_letter_destination)
+        except Exception:
+            if resume_destination.exists():
+                os.remove(resume_destination)
+            raise
+
         new_application = Application(
-            resume_path=file_destination,
-            resume_original_filename=file.filename,
+            resume_path=str(resume_destination),
+            resume_original_filename=resume.filename or "cv.pdf",
+            cover_letter_path=str(cover_letter_destination),
+            cover_letter_original_filename=cover_letter.filename or "cover_letter.pdf",
             user_id=user.id,
             offer_id=offer_id,
             offer=offer,
         )
 
-        write_upload_file(file, file_destination)
-        self._db.add(new_application)
         try:
             self._db.add(new_application)
             self._db.commit()
@@ -114,6 +126,10 @@ class ApplicationService:
             return new_application
         except Exception:
             self._db.rollback()
+            if resume_destination.exists():
+                os.remove(resume_destination)
+            if cover_letter_destination.exists():
+                os.remove(cover_letter_destination)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error during the creation of the application",

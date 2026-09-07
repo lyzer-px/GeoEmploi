@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr
 
+from app.schemas.output.user import UserOut
 from app.schemas.output.offers import OfferOut
 
 
@@ -14,16 +15,14 @@ class ApplicationStatus(str, Enum):
 
 class ApplicationOut(BaseModel):
     model_config = {"from_attributes": True}
-
-    first_name: str
-    last_name: str
-    email: EmailStr
+    user: UserOut
     status: ApplicationStatus
-    created_at: date
+    created_at: datetime
     resume_original_filename: str
-    resume_path: str
-
+    cover_letter_original_filename: str
 
 class MyApplicationOut(BaseModel):
+    model_config = {"from_attributes": True}
+
     application: ApplicationOut
     offer: OfferOut

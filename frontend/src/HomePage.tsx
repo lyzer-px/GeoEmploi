@@ -216,6 +216,39 @@ function HomePage() {
         setCoverLetterFile(null);
     }
 
+    async function handleApply() {
+          if (!selectedOffer || !cvFile || !coverLetterFile) return;
+
+          const formData = new FormData();
+          formData.append("resume", cvFile);
+          formData.append("cover_letter", coverLetterFile);
+
+          try {
+            const token = localStorage.getItem("access_token");
+            const response = await fetch(
+              `${import.meta.env.VITE_API_BACKEND_URL}/applications/${selectedOffer.id}`,
+              {
+                method: "POST",
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                body: formData,
+              }
+            );
+        
+            if (!response.ok) {
+              const errorData = (await response.json().catch(() => null)) as { detail?: string } | null;
+              throw new Error(
+                errorData?.detail ?? "Impossible d'envoyer votre candidature."
+              );
+            }
+        
+            alert("Votre candidature a bien été envoyée !");
+            closeOffer();
+          } catch (error) {
+            console.error("Erreur de candidature :", error);
+            alert((error as Error).message);
+          }
+        }
+
     function handleCvChange(
         event: React.ChangeEvent<HTMLInputElement>,
     ) {
@@ -545,6 +578,7 @@ function HomePage() {
                                 disabled:
                                     !cvFile ||
                                     !coverLetterFile,
+                                onClick: handleApply
                             }}
                         >
                             Postuler

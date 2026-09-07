@@ -86,12 +86,14 @@ export default function EmployerPage() {
       if (applicantsByOffer[offerId]) return;
       setIsLoadingApplicants(true);
       try {
-        const response = await fetch(`${OFFERS_BASE}/${offerId}/applications`, {
+        const response = await fetch(`${OFFERS_BASE}/me/${offerId}`, {
           headers: authHeaders(),
         });
         if (!response.ok) throw new Error("Impossible de récupérer les candidatures");
-        const applicants = (await response.json()) as Applicant[];
-        setApplicantsByOffer((prev) => ({ ...prev, [offerId]: applicants }));
+
+        const data = (await response.json()) as { applications: Applicant[] };
+
+        setApplicantsByOffer((prev) => ({ ...prev, [offerId]: data.applications ?? [] }));
       } catch (err) {
         setError((err as Error).message);
       } finally {

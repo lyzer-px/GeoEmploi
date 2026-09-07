@@ -85,7 +85,7 @@ function ProfilePage() {
     try {
       const response = editingSkillId === null
         ? await fetch(`${API}/skills/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ name: skillName.trim(), level: Number(skillLevel) }) })
-        : await fetch(`${API}/users/me/skills/${editingSkillId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
+        : await fetch(`${API}/skills/${editingSkillId}/me`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer la compétence.");
       setSkillName(""); setSkillLevel("3"); setEditingSkillId(null);
       await loadProfile();
@@ -102,7 +102,7 @@ function ProfilePage() {
   async function deleteSkill(id: number) {
     if (!window.confirm("Supprimer cette compétence de votre profil ?")) return;
     setError(null);
-    const response = await fetch(`${API}/users/me/skills/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/skills/${editingSkillId}/me`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer la compétence."); return; }
     setSkills((current) => current.filter((item) => item.skill.id !== id));
     if (editingSkillId === id) { setEditingSkillId(null); setSkillName(""); }
@@ -117,7 +117,7 @@ function ProfilePage() {
     try {
       const response = editingExperienceId === null
         ? await fetch(`${API}/experiences/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) })
-        : await fetch(`${API}/users/me/experiences/${editingExperienceId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
+        : await fetch(`${API}/experiences/${editingExperienceId}/me`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer l'expérience.");
       setExperience({ name: "", description: "", start_date: "", end_date: "" }); setEditingExperienceId(null);
       await loadProfile();
@@ -135,7 +135,7 @@ function ProfilePage() {
   async function deleteExperience(id: number) {
     if (!window.confirm("Supprimer cette expérience ?")) return;
     setError(null);
-    const response = await fetch(`${API}/users/me/experiences/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/experiences/${id}/me`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer l'expérience."); return; }
     setExperiences((current) => current.filter((item) => item.id !== id));
     if (editingExperienceId === id) { setEditingExperienceId(null); setExperience({ name: "", description: "", start_date: "", end_date: "" }); }

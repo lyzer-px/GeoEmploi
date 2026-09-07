@@ -55,7 +55,6 @@ class ExperienceService:
         for field, value in update_dict.items():
             setattr(experience, field, value)
 
-        logging.info(experience)
         try:
             self._db.commit()
             self._db.refresh(experience)

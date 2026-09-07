@@ -10,6 +10,8 @@ from app.services.geography import BoundingBox
 from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
+from app.schemas.output.offers import OfferOut
+from app.schemas.output.applications import ApplicationOut, CreatorOfferOut
 
 
 class OfferNotFoundError(Exception):
@@ -145,15 +147,36 @@ class OfferService:
             "y": round(y_lambert, 2),
         }
 
-    def get_offer_applications(self, offer_id: int) -> list[Application]:
-        """Retrieve all applications associated with a job posting."""
+
+    def get_offer_applications(self, offer_id: int) -> CreatorOfferOut:
+        """Retrieve one offer with the employer's info and all its applications."""
         offer = self.get_offer_by_id(offer_id)
         if not offer:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Offer {offer_id} not found.",
             )
-        return offer.applications
+
+        employer = offer.employer
+
+        return CreatorOfferOut(
+            offer=OfferOut.model_validate(offer),
+            first_name=employer.first_name,
+            last_name=employer.last_name,
+            email=employer.email,
+            applications=[
+                ApplicationOut(
+                    id=app.id,
+                    first_name=app.user.first_name,
+                    last_name=app.user.last_name,
+                    email=app.user.email,
+                    status=app.status,
+                    created_at=app.created_at,
+                    resume_original_filename=app.resume_original_filename,
+                )
+                for app in offer.applications
+            ],
+        )
 
     def get_offers_applied_to(self, user_id: int) -> list[Offer]:
         statement = (

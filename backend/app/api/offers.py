@@ -8,11 +8,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
 
+from app.schemas.output.applications import CreatorOfferOut
 from app.api.dependencies.auth import CurrentUserDep
 from app.api.dependencies.offers import OfferDeleteDep, OfferUpdateDep, OfferServiceDep
 from app.core.permissions import perm, Action, Resource
 from app.schemas.input.offers import OfferCreate, OfferUpdate
-from app.schemas.output.offers import OfferOut, CreatorOfferOut
+from app.schemas.output.offers import OfferOut
 from app.db.database import get_db_session
 from app.api.dependencies.auth import require_permission, require_ownership
 from app.db.models import User
@@ -55,15 +56,13 @@ def delete_offer(
 def get_created_offers(offer_service: OfferServiceDep, user: CurrentUserDep):
     return offer_service.get_offers_by_employer(user.id)
 
-
 @offers_router.get(
     "/me/{offer_id}",
     status_code=status.HTTP_200_OK,
-    response_model=list[CreatorOfferOut],
+    response_model=CreatorOfferOut,
 )
-def get_created_offers(offer_id: int, offer_service: OfferServiceDep):
+def get_application_by_offers(offer_id: int, offer_service: OfferServiceDep):
     return offer_service.get_offer_applications(offer_id)
-
 
 @offers_router.get(
     "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut

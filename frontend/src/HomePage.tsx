@@ -21,21 +21,133 @@ type GeoPfResponse = {
 };
 
 function HomePage() {
+    const API = import.meta.env.VITE_API_BACKEND_URL;
+
+    // Search fields
+    const [jobName, setJobName] = useState("");
     const [location, setLocation] = useState("");
     const [radiusKm, setRadiusKm] = useState(25);
-    const [searchArea, setSearchArea] = useState<MapSearchArea | null>(null);
-    const [locationError, setLocationError] = useState<string | null>(null);
+
+    // Search location
+    const [searchArea, setSearchArea] =
+        useState<MapSearchArea | null>(null);
+
+    const [locationError, setLocationError] =
+        useState<string | null>(null);
+
     const [isSearching, setIsSearching] = useState(false);
-    const [suggestions, setSuggestions] = useState<GeoPfFeature[]>([]);
+
+    const [suggestions, setSuggestions] =
+        useState<GeoPfFeature[]>([]);
+
     const [selectedLocation, setSelectedLocation] =
         useState<GeoPfFeature | null>(null);
 
+    // Offers
     const [offers, setOffers] = useState<JobOffer[]>([]);
-    const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
+    const [offersError, setOffersError] =
+        useState<string | null>(null);
 
-    const [cvFile, setCvFile] = useState<File | null>(null);
-    const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
+    const [isLoadingOffers, setIsLoadingOffers] =
+        useState(true);
 
+    /**
+     * Load offers.
+     *
+     * Possible requests:
+     *
+     * GET /offers/
+     * GET /offers/?name=frontend
+     * GET /offers/?latitude=...&longitude=...&perimeter=25
+     * GET /offers/?name=frontend&latitude=...&longitude=...&perimeter=25
+     */
+    useEffect(() => {
+        const controller = new AbortController();
+
+        const url = new URL(`${API}/offers/`);
+
+        const name = jobName.trim();
+
+        if (name) {
+            url.searchParams.set("name", name);
+        }
+
+        if (searchArea) {
+            url.searchParams.set(
+                "latitude",
+                String(searchArea.latitude),
+            );
+
+            url.searchParams.set(
+                "longitude",
+                String(searchArea.longitude),
+            );
+
+            url.searchParams.set(
+                "perimeter",
+                String(searchArea.radiusKm),
+            );
+        }
+
+        setIsLoadingOffers(true);
+        setOffersError(null);
+
+        fetch(url, {
+            signal: controller.signal,
+        })
+            .then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(
+                        `GET /offers/ HTTP ${response.status}`,
+                    );
+                }
+
+                const data = await response.json();
+
+                return data.items ?? [];
+            })
+            .then((items) => {
+                setOffers(items);
+            })
+            .catch((error) => {
+                if (
+                    error instanceof DOMException &&
+                    error.name === "AbortError"
+                ) {
+                    return;
+                }
+
+                console.error(
+                    "Erreur lors du chargement des offres:",
+                    error,
+                );
+
+                setOffersError(
+                    "Les offres ne sont pas disponibles pour le moment.",
+                );
+            })
+            .finally(() => {
+                setIsLoadingOffers(false);
+            });
+
+        return () => controller.abort();
+    }, [API, jobName, searchArea]);
+
+    /**
+     * Select an offer from the map.
+     */
+    function selectOfferOnMap(offerId: number) {
+        document
+            .getElementById(`offer-${offerId}`)
+            ?.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+    }
+
+    /**
+     * Location autocomplete.
+     */
     useEffect(() => {
         const query = location.trim();
 
@@ -60,15 +172,19 @@ function HomePage() {
                 });
 
                 if (!response.ok) {
+                    setSuggestions([]);
                     return;
                 }
 
-                const data = (await response.json()) as GeoPfResponse;
+                const data =
+                    (await response.json()) as GeoPfResponse;
 
                 setSuggestions(
                     (data.features ?? []).filter((feature) => {
-                        const [longitude, latitude] =
-                            feature.geometry?.coordinates ?? [];
+                        const [
+                            longitude,
+                            latitude,
+                        ] = feature.geometry?.coordinates ?? [];
 
                         return (
                             typeof latitude === "number" &&
@@ -94,36 +210,13 @@ function HomePage() {
         };
     }, [location, selectedLocation]);
 
-    useEffect(() => {
-        async function loadOffers() {
-            try {
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_BACKEND_URL}/offers/`,
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Impossible de récupérer les offres.",
-                    );
-                }
-
-                const data = await response.json();
-
-                setOffers(data.items ?? []);
-            } catch (error) {
-                console.error(
-                    "Erreur lors du chargement des offres :",
-                    error,
-                );
-            }
-        }
-
-        loadOffers();
-    }, []);
-
+    /**
+     * Select an autocomplete location.
+     */
     function selectLocation(feature: GeoPfFeature) {
         const label =
-            feature.properties?.label ?? feature.properties?.name;
+            feature.properties?.label ??
+            feature.properties?.name;
 
         if (!label) {
             return;
@@ -135,28 +228,78 @@ function HomePage() {
         setLocationError(null);
     }
 
-    async function handleSearch(event: FormEvent<HTMLFormElement>) {
+    /**
+     * Search button.
+     *
+     * Supports:
+     *
+     * 1. Nothing:
+     *    → all offers
+     *
+     * 2. Job name only:
+     *    → offers filtered by name
+     *
+     * 3. Location only:
+     *    → offers filtered geographically
+     *
+     * 4. Job name + location:
+     *    → offers filtered by both
+     */
+    async function handleSearch(
+        event: FormEvent<HTMLFormElement>,
+    ) {
         event.preventDefault();
 
-        const query = location.trim();
+        const job = jobName.trim();
+        const city = location.trim();
 
-        if (!query) {
-            setLocationError("Saisissez une ville ou une adresse.");
+        setLocationError(null);
+
+        /**
+         * No search criteria.
+         *
+         * Reset the geographic filter.
+         * The offers useEffect will request:
+         *
+         * GET /offers/
+         */
+        if (!job && !city) {
+            setSearchArea(null);
+            setSelectedLocation(null);
             return;
         }
 
+        /**
+         * Job name only.
+         *
+         * The offers useEffect will request:
+         *
+         * GET /offers/?name=...
+         */
+        if (job && !city) {
+            setSearchArea(null);
+            setSelectedLocation(null);
+            return;
+        }
+
+        /**
+         * From this point, we know there is a location.
+         */
         setIsSearching(true);
-        setLocationError(null);
 
         try {
             let feature = selectedLocation;
 
+            /**
+             * If the user typed a location but didn't select
+             * an autocomplete suggestion, geocode it manually.
+             */
             if (!feature) {
                 const url = new URL(
                     "https://data.geopf.fr/geocodage/search",
                 );
 
-                url.searchParams.set("q", query);
+                url.searchParams.set("q", city);
                 url.searchParams.set("limit", "1");
 
                 const response = await fetch(url);
@@ -167,12 +310,16 @@ function HomePage() {
                     );
                 }
 
-                const data = (await response.json()) as GeoPfResponse;
+                const data =
+                    (await response.json()) as GeoPfResponse;
+
                 feature = data.features?.[0] ?? null;
             }
 
-            const [longitude, latitude] =
-                feature?.geometry?.coordinates ?? [];
+            const [
+                longitude,
+                latitude,
+            ] = feature?.geometry?.coordinates ?? [];
 
             if (
                 typeof latitude !== "number" ||
@@ -181,9 +328,13 @@ function HomePage() {
                 setLocationError(
                     "Aucune localisation trouvée. Précisez votre recherche.",
                 );
+
                 return;
             }
 
+            /**
+             * Setting searchArea triggers the offers useEffect.
+             */
             setSearchArea({
                 latitude,
                 longitude,
@@ -191,7 +342,7 @@ function HomePage() {
                 label:
                     feature?.properties?.label ??
                     feature?.properties?.name ??
-                    query,
+                    city,
             });
         } catch (error) {
             setLocationError(
@@ -202,46 +353,6 @@ function HomePage() {
         } finally {
             setIsSearching(false);
         }
-    }
-
-    function openOffer(offer: JobOffer) {
-        setSelectedOffer(offer);
-        setCvFile(null);
-        setCoverLetterFile(null);
-    }
-
-    function closeOffer() {
-        setSelectedOffer(null);
-        setCvFile(null);
-        setCoverLetterFile(null);
-    }
-
-    function handleCvChange(
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) {
-        const file = event.target.files?.[0] ?? null;
-
-        if (file && file.type !== "application/pdf") {
-            event.target.value = "";
-            setCvFile(null);
-            return;
-        }
-
-        setCvFile(file);
-    }
-
-    function handleCoverLetterChange(
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) {
-        const file = event.target.files?.[0] ?? null;
-
-        if (file && file.type !== "application/pdf") {
-            event.target.value = "";
-            setCoverLetterFile(null);
-            return;
-        }
-
-        setCoverLetterFile(file);
     }
 
     return (
@@ -259,6 +370,10 @@ function HomePage() {
                     nativeInputProps={{
                         placeholder:
                             "Ex : développeur, comptable...",
+                        value: jobName,
+                        onChange: (event) => {
+                            setJobName(event.target.value);
+                        },
                     }}
                 />
 
@@ -274,6 +389,7 @@ function HomePage() {
                             onChange: (event) => {
                                 setLocation(event.target.value);
                                 setSelectedLocation(null);
+                                setLocationError(null);
                             },
                             role: "combobox",
                             "aria-autocomplete": "list",
@@ -337,18 +453,27 @@ function HomePage() {
                         label="Périmètre"
                         nativeSelectProps={{
                             value: String(radiusKm),
-                            onChange: (event) =>
+                            onChange: (event) => {
                                 setRadiusKm(
                                     Number(
                                         event.target.value,
                                     ),
-                                ),
+                                );
+                            },
                         }}
                     >
-                        <option value="10">10 km</option>
-                        <option value="25">25 km</option>
-                        <option value="50">50 km</option>
-                        <option value="100">100 km</option>
+                        <option value="10">
+                            10 km
+                        </option>
+                        <option value="25">
+                            25 km
+                        </option>
+                        <option value="50">
+                            50 km
+                        </option>
+                        <option value="100">
+                            100 km
+                        </option>
                     </Select>
                 </div>
 
@@ -390,19 +515,40 @@ function HomePage() {
                     </h2>
 
                     <div className="geoemploi-offers-list">
+                        {isLoadingOffers && (
+                            <p>
+                                Chargement des offres…
+                            </p>
+                        )}
+
+                        {offersError && (
+                            <p className="fr-alert fr-alert--error">
+                                {offersError}
+                            </p>
+                        )}
+
+                        {!isLoadingOffers &&
+                            !offersError &&
+                            offers.length === 0 && (
+                                <p>
+                                    Aucune offre dans cette
+                                    zone.
+                                </p>
+                            )}
+
                         {offers.map((offer) => (
-                            <Card
+                            <div
+                                id={`offer-${offer.id}`}
                                 key={offer.id}
-                                title={offer.name}
-                                desc={`${offer.adress} · ${offer.contract_type}`}
-                                linkProps={{
-                                    href: "#",
-                                    onClick: (event) => {
-                                        event.preventDefault();
-                                        openOffer(offer);
-                                    },
-                                }}
-                            />
+                            >
+                                <Card
+                                    title={offer.name}
+                                    desc={`${offer.adress} · ${offer.contract_type}`}
+                                    linkProps={{
+                                        href: `/offres/${offer.id}`,
+                                    }}
+                                />
+                            </div>
                         ))}
                     </div>
                 </section>
@@ -421,137 +567,10 @@ function HomePage() {
                     <Map
                         searchArea={searchArea}
                         offers={offers}
-                        onOfferSelect={(offerId) => {
-                            const offer = offers.find(
-                                (item) => item.id === offerId,
-                            );
-
-                            if (offer) {
-                                openOffer(offer);
-                            }
-                        }}
+                        onOfferSelect={selectOfferOnMap}
                     />
                 </section>
             </div>
-
-            {selectedOffer !== null && (
-                <div
-                    className="geoemploi-modal-overlay"
-                    onMouseDown={(event) => {
-                        if (event.target === event.currentTarget) {
-                            closeOffer();
-                        }
-                    }}
-                >
-                    <div
-                        className="geoemploi-modal"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="offer-modal-title"
-                    >
-                        <button
-                            type="button"
-                            className="geoemploi-modal-close"
-                            onClick={closeOffer}
-                            aria-label="Fermer"
-                        >
-                            ×
-                        </button>
-
-                        <h2 id="offer-modal-title">
-                            {selectedOffer.name}
-                        </h2>
-
-                        <p>
-                            <strong>Employeur :</strong>{" "}
-                            {selectedOffer.employer.first_name}{" "}
-                            {selectedOffer.employer.last_name}
-                        </p>
-
-                        <p>
-                            <strong>Lieu :</strong>{" "}
-                            {selectedOffer.adress}
-                        </p>
-
-                        <p>
-                            <strong>Contrat :</strong>{" "}
-                            {selectedOffer.contract_type}
-                        </p>
-
-                        <p>
-                            <strong>Date de début :</strong>{" "}
-                            {selectedOffer.start_date}
-                        </p>
-
-                        {selectedOffer.end_date && (
-                            <p>
-                                <strong>Date de fin :</strong>{" "}
-                                {selectedOffer.end_date}
-                            </p>
-                        )}
-
-                        <div>
-                            <h3>Description</h3>
-                            <p>
-                                {selectedOffer.description}
-                            </p>
-                        </div>
-
-                        <div className="geoemploi-file-upload">
-                            <label htmlFor="cv-file">
-                                CV
-                            </label>
-
-                            <input
-                                id="cv-file"
-                                type="file"
-                                accept=".pdf,application/pdf"
-                                onChange={handleCvChange}
-                            />
-
-                            {cvFile && (
-                                <p>
-                                    Fichier sélectionné :{" "}
-                                    {cvFile.name}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="geoemploi-file-upload">
-                            <label htmlFor="cover-letter-file">
-                                Lettre de motivation
-                            </label>
-
-                            <input
-                                id="cover-letter-file"
-                                type="file"
-                                accept=".pdf,application/pdf"
-                                onChange={
-                                    handleCoverLetterChange
-                                }
-                            />
-
-                            {coverLetterFile && (
-                                <p>
-                                    Fichier sélectionné :{" "}
-                                    {coverLetterFile.name}
-                                </p>
-                            )}
-                        </div>
-
-                        <Button
-                            nativeButtonProps={{
-                                type: "button",
-                                disabled:
-                                    !cvFile ||
-                                    !coverLetterFile,
-                            }}
-                        >
-                            Postuler
-                        </Button>
-                    </div>
-                </div>
-            )}
         </main>
     );
 }

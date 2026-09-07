@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import Map, { type MapSearchArea } from "./Map.tsx";
+import Map, { type JobOffer, type MapSearchArea } from "./Map.tsx";
+
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
@@ -21,6 +22,68 @@ function HomePage() {
     const [isSearching, setIsSearching] = useState(false);
     const [suggestions, setSuggestions] = useState<GeoPfFeature[]>([]);
     const [selectedLocation, setSelectedLocation] = useState<GeoPfFeature | null>(null);
+    const [offers, setOffers] = useState<JobOffer[]>([]);
+    const [offersError, setOffersError] = useState<string | null>(null);
+    const [isLoadingOffers, setIsLoadingOffers] = useState(false);
+
+useEffect(() => {
+    if (!searchArea) {
+        setOffers([]);
+        setIsLoadingOffers(false);
+        return;
+    }
+
+    const controller = new AbortController();
+
+    const url = new URL(
+        `${import.meta.env.VITE_API_BACKEND_URL}/offers/`
+    );
+
+    url.searchParams.set("latitude", String(searchArea.latitude));
+    url.searchParams.set("longitude", String(searchArea.longitude));
+    url.searchParams.set("perimeter", String(searchArea.radiusKm));
+
+    setIsLoadingOffers(true);
+    setOffersError(null);
+
+    fetch(url, {
+        signal: controller.signal,
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP ${response.status}`);
+            }
+
+            return response.json();
+        })
+        .then((data) => {
+            setOffers(data.items ?? []);
+        })
+        .catch((error) => {
+            if (
+                !(error instanceof DOMException &&
+                error.name === "AbortError")
+            ) {
+                setOffersError(
+                    "Les offres ne sont pas disponibles pour le moment."
+                );
+            }
+        })
+        .finally(() => {
+            setIsLoadingOffers(false);
+        });
+
+    return () => controller.abort();
+}, [searchArea]);
+
+    function selectOfferOnMap(offerId: number) {
+        document
+            .getElementById(`offer-${offerId}`)
+            ?.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+    }
 
     useEffect(() => {
         const query = location.trim();
@@ -162,93 +225,138 @@ function HomePage() {
                         if (!label) {
                             return null;
                         }
-
-                        return (
-                            <li key={`${label}-${index}`} role="option" aria-selected="false">
-                                <button type="button" onMouseDown={() => selectLocation(feature)}>
-                                    {label}
-                                </button>
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-            <Select
-            label="Périmètre"
-            nativeSelectProps={{
-                value: String(radiusKm),
-                onChange: (event) => setRadiusKm(Number(event.target.value)),
-            }}
-            >
-            <option value="10">10 km</option>
-            <option value="25">25 km</option>
-            <option value="50">50 km</option>
-            <option value="100">100 km</option>
-            </Select>
-        </div>
-        <div className="geoemploi-geolocation">
-            <Checkbox
-            options={[{
-                label: "Utiliser ma position actuelle",
-                nativeInputProps: {
-                    name: "use-geolocation",
-                },},]}
-            />
-        </div>
-            <div className="geoemploi-search-button">
-                <Button nativeButtonProps={{ type: "submit", disabled: isSearching }}>
-                    {isSearching ? "Recherche..." : "Rechercher"}
-                </Button>
+                                    return (
+                                        <li
+                                            key={`${label}-${index}`}
+                                            role="option"
+                                            aria-selected="false"
+                                        >
+                                            <button
+                                                type="button"
+                                                onMouseDown={() =>
+                                                    selectLocation(
+                                                        feature
+                                                    )
+                                                }
+                                            >
+                                                {label}
+                                            </button>
+                                        </li>
+                                    );
+                                }
+                            )}
+                        </ul>
+                    )}
+                    <Select
+                        label="Périmètre"
+                        nativeSelectProps={{
+                            value:
+                                String(radiusKm),
+                            onChange: (
+                                event
+                            ) =>
+                                setRadiusKm(
+                                    Number(
+                                        event.target.value
+                                    )
+                                ),
+                        }}
+                    >
+                        <option value="10">
+                            10 km
+                        </option>
+                        <option value="25">
+                            25 km
+                        </option>
+                        <option value="50">
+                            50 km
+                        </option>
+                        <option value="100">
+                            100 km
+                        </option>
+                    </Select>
+                </div>
+                <div className="geoemploi-geolocation">
+                    <Checkbox
+                        options={[
+                            {
+                                label:
+                                    "Utiliser ma position actuelle",
+                                nativeInputProps: {
+                                    name:
+                                        "use-geolocation",
+                                },
+                            },
+                        ]}
+                    />
+                </div>
+                <div className="geoemploi-search-button">
+                    <Button
+                        nativeButtonProps={{
+                            type: "submit",
+                            disabled: isSearching,
+                        }}
+                    >
+                        {isSearching
+                            ? "Recherche..."
+                            : "Rechercher"}
+                    </Button>
+                </div>
+            </form>
+            <div className="geoemploi-results">
+                <section
+                    aria-labelledby="offers-title"
+                    className="geoemploi-offers"
+                >
+                    <h2 id="offers-title">
+                        Offres d'emploi
+                    </h2>
+                    <div className="geoemploi-offers-list">
+                        {isLoadingOffers && (
+                            <p>
+                                Chargement des offres…
+                            </p>
+                        )}
+                        {offersError && (
+                            <p
+                                className="fr-alert fr-alert--error"
+                            >
+                                {offersError}
+                            </p>
+                        )}
+                        {!isLoadingOffers &&
+                            !offersError &&
+                            searchArea &&
+                            offers.length === 0 && (
+                                <p>
+                                    Aucune offre dans cette zone.
+                                </p>
+                            )}
+                        {offers.map((offer) => (
+                            <div
+                                id={`offer-${offer.id}`}
+                                key={offer.id}
+                            >
+                                <Card
+                                    title={offer.name}
+                                    desc={`${offer.adress} · ${offer.contract_type}`}
+                                    linkProps={{
+                                        href: `/offres/${offer.id}`,
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                <section
+                    aria-labelledby="map-title"
+                    className="geoemploi-map"
+                >
+                    <h2 id="map-title" className="fr-sr-only"> Carte des offres d'emploi </h2>
+                    <Map searchArea={searchArea} offers={offers} onOfferSelect={ selectOfferOnMap } />
+                </section>
             </div>
-        </form>
-        <div className="geoemploi-results">
-        <section
-            aria-labelledby="offers-title"
-            className="geoemploi-offers"
-        >
-            <h2 id="offers-title"> Offres d'emploi </h2>
-            <div className="geoemploi-offers-list">
-            <Card
-                title="Développeur Web"
-                desc="Paris · CDI"
-                linkProps={{ href: "/offres/1" }}
-            />
-            <Card
-                title="Développeur Full Stack"
-                desc="Lyon · CDI"
-                linkProps={{ href: "/offres/2" }}
-            />
-            <Card
-                title="Data Analyst"
-                desc="Marseille · CDD"
-                linkProps={{ href: "/offres/3" }}
-            />
-            <Card
-                title="Ingénieur logiciel"
-                desc="Toulouse · CDI"
-                linkProps={{ href: "/offres/4" }}
-            />
-            <Card
-                title="Développeur React"
-                desc="Bordeaux · CDI"
-                linkProps={{ href: "/offres/5" }}
-            />
-            </div>
-        </section>
-        <section
-            aria-labelledby="map-title"
-            className="geoemploi-map"
-        >
-            <h2
-            id="map-title"
-            className="fr-sr-only"
-            >
-            Carte des offres d'emploi
-            </h2>
-            <Map searchArea={searchArea} />
-        </section>
-        </div>
-    </main>
+        </main>
     );
 }
 

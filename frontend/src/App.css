@@ -300,6 +300,36 @@
   min-height: 0;
 }
 
+#map .geoemploi-map-pin,
+#map .geoemploi-map-cluster {
+  background: transparent;
+  border: 0;
+}
+
+#map .geoemploi-map-pin span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #000091;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 35%);
+  transform: rotate(-45deg);
+}
+
+#map .geoemploi-map-cluster span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  background: #000091;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 35%);
+}
+
 #spacer {
   height: 88px;
   border-top: 1px solid var(--border);

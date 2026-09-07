@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Admin from './pages/Admin/Admin';
 import About from './pages/About';
+import ProfilePage from './pages/ProfilePage';
 import HomePage from './HomePage';
 import { ROUTES } from './routes';
 import MyHeader from './Header';
@@ -31,6 +32,7 @@ function App() {
         <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={ROUTES.ADMIN} element={<Admin />} />
         <Route path={ROUTES.ABOUT} element={<About />} />
+        <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.EMPLOYER} element={<EmployerPage/>} />
       </Routes>
     </BrowserRouter>

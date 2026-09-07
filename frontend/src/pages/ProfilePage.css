@@ -1,0 +1,18 @@
+.profile-page { flex: 1; background: #fff; }
+.profile-container { width: min(1100px, calc(100% - 2rem)); margin: 0 auto; padding: 2.5rem 0 4rem; }
+.profile-container h1 { margin-top: .75rem; }
+.profile-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.profile-account { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--border); }
+.profile-account h2, .profile-section h2 { margin-bottom: 1.25rem; }
+.profile-form { display: grid; gap: 1rem; max-width: 760px; margin-bottom: 2rem; }
+.profile-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.profile-actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.profile-list, .profile-experiences { display: grid; gap: .75rem; padding: 0; margin: 0; list-style: none; }
+.profile-list-item { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border); background: #fff; }
+.profile-list-item div:first-child { display: grid; gap: .25rem; }
+.profile-list-item span { font-size: .9rem; color: #666; }
+.profile-experience { padding: 1.25rem; border: 1px solid var(--border); }
+.profile-experience h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
+.profile-experience p { margin: .35rem 0; }
+.profile-experience { display: flex; justify-content: space-between; gap: 1.5rem; }
+@media (max-width: 700px) { .profile-form-grid { grid-template-columns: 1fr; } .profile-list-item, .profile-experience { flex-direction: column; align-items: stretch; } .profile-container { width: min(100% - 1.5rem, 1100px); } }

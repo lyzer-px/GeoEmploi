@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr
 
 from app.schemas.output.offers import OfferOut
 
+
 class ApplicationStatus(str, Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
@@ -21,6 +22,7 @@ class ApplicationOut(BaseModel):
     created_at: date
     resume_original_filename: str
     resume_path: str
+
 
 class MyApplicationOut(BaseModel):
     application: ApplicationOut

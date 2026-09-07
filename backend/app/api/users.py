@@ -11,8 +11,8 @@ from app.api.dependencies.auth import (
     AccessTokenDep,
     CurrentUserDep,
 )
-from backend.app.core.permissions import Action, perm, perm
-from backend.app.core.permissions import Resource
+from app.core.permissions import Action, perm, perm
+from app.core.permissions import Resource
 
 users_router = APIRouter(tags=["users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -41,6 +41,7 @@ def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
     """Get user information"""
     return user_service.get_user_by_id(user.id)
 
+
 #
 #   OTHER ACCOUNT
 #
@@ -59,10 +60,11 @@ def update_user(
 ):
     return user_service.update_user(userId, user_update)
 
+
 @users_router.get(
     "/",
     response_model=list[UserOut],
     status_code=status.HTTP_200_OK,
 )
-def get_all_users(user_service: UserServiceDep, user: User = Depends(require_permission(perm(Action.READ, Resource.USER)))):
+def get_all_users(user_service: UserServiceDep, _: CurrentUserDep):
     return user_service.get_all_users()

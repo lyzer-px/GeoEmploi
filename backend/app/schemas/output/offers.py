@@ -34,6 +34,7 @@ class OfferOut(BaseModel):
     adress: str
     employer: EmployerOut
 
+
 class ApplicationOut(BaseModel):
     model_config = {"from_attributes": True}
 
@@ -44,6 +45,7 @@ class ApplicationOut(BaseModel):
     created_at: date
     resume_original_filename: str
     resume_path: str
+
 
 class CreatorOfferOut(BaseModel):
     offer: OfferOut

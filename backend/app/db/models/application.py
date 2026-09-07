@@ -40,9 +40,7 @@ class Application(Base):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(
-        back_populates="applications"
-    )
+    user: Mapped["User"] = relationship(back_populates="applications")
 
     offer_id: Mapped[int] = mapped_column(
         ForeignKey("offers.id", ondelete="CASCADE"),

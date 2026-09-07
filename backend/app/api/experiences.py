@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status
+import logging
 
 from app.schemas.input.experiences import ExperienceCreate, ExperienceUpdate
 from app.schemas.output.experiences import ExperienceOut
@@ -41,6 +42,7 @@ def create_experience(
     experience_service: ExperienceServiceDep,
 ):
     """Create a new experiences for the current user."""
+    logging.info(experience_data)
     return experience_service.create_experience(user, experience_data)
 
 

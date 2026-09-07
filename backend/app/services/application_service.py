@@ -132,5 +132,7 @@ class ApplicationService:
             )
 
 
-def get_application_service(session: Session = Depends(get_db_session),) -> ApplicationService:
+def get_application_service(
+    session: Session = Depends(get_db_session),
+) -> ApplicationService:
     return ApplicationService(session)

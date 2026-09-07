@@ -38,6 +38,9 @@ class UserService:
         statement = select(User).join(User.roles).where(Role.name == role_name)
         return list(self._db.scalars(statement).all())
 
+    def get_roles_of_user(self, user: User) -> list[Role]:
+        return user.roles
+    
     def get_stringify_roles_of_user(self, user: User) -> list[str]:
         return [role.name for role in user.roles]
 

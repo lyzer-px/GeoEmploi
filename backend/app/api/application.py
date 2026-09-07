@@ -1,13 +1,10 @@
-from pathlib import Path
 from fastapi import APIRouter, status, Depends
-from fastapi import File, UploadFile, HTTPException
+from fastapi import File, UploadFile
 from fastapi.responses import FileResponse
 
-from app.schemas.output.applications import ApplicationOut
+from app.schemas.output.applications import MyApplicationOut
 from app.api.dependencies.auth import CurrentUserDep
-from app.api.dependencies.offers import OfferServiceDep
 from app.api.dependencies.application import ApplicationServiceDep, ApplicationDeleteDep
-from app.schemas.output.offers import OfferOut
 from app.db.models import User
 from app.api.dependencies.auth import require_permission, perm, Action, Resource
 
@@ -16,21 +13,28 @@ applications_router = APIRouter(tags=["applications"])
 
 
 @applications_router.get(
-    "/me", response_model=list[ApplicationOut], status_code=status.HTTP_200_OK
+    "/me", response_model=list[MyApplicationOut], status_code=status.HTTP_200_OK
 )
-def get_my_applications(application_service: ApplicationServiceDep, user: CurrentUserDep):
+def get_my_applications(
+    application_service: ApplicationServiceDep, user: CurrentUserDep
+):
     return application_service.get_application_by_user(user)
 
 
-@applications_router.get("/{application_id}/resume", status_code=status.HTTP_200_OK,response_class=FileResponse)
+@applications_router.get(
+    "/{application_id}/resume",
+    status_code=status.HTTP_200_OK,
+    response_class=FileResponse,
+)
 def get_full_application(
     application_id: int,
     application_service: ApplicationServiceDep,
 ):
     return application_service.get_resume_file(application_id)
 
+
 @applications_router.post(
-    "/{offer_id}", status_code=status.HTTP_201_CREATED, response_model=ApplicationOut
+    "/{offer_id}", status_code=status.HTTP_201_CREATED, response_model=MyApplicationOut
 )
 async def apply_to_offer(
     offer_id: int,

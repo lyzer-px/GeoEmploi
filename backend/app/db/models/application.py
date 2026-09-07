@@ -1,7 +1,8 @@
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 from enum import Enum
 
-from sqlalchemy import ForeignKey, String, Enum as SQLEnum
+from sqlalchemy import ForeignKey, String, Enum as SQLEnum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -34,3 +35,9 @@ class Application(Base):
         ForeignKey("offers.id", ondelete="CASCADE"), nullable=False
     )
     offer: Mapped["Offer"] = relationship(back_populates="applications")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )

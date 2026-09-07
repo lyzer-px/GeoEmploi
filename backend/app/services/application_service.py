@@ -16,13 +16,12 @@ CV_TECH: Path = Path("storage/cv_tech")
 MAX_CV_SIZE_BYTES = 5 * 1024 * 1024
 
 offer_not_found: HTTPException = HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Offer not found."
-        )
+    status_code=status.HTTP_409_CONFLICT, detail="Offer not found."
+)
 
 multiple_apply: HTTPException = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
-    detail="You can't apply multiple times to the same offer."
+    detail="You can't apply multiple times to the same offer.",
 )
 
 
@@ -87,10 +86,12 @@ class ApplicationService:
         statement = select(Application).where(Application.offer_id == offer_id)
         return self._db.scalars(statement).all()
 
-    def save_application(self, offer_id: int, user: User, file: UploadFile) -> Application:
+    def save_application(
+        self, offer_id: int, user: User, file: UploadFile
+    ) -> Application:
         offer = self._db.get(Offer, offer_id)
         if not offer:
-            raise offer_not_found    
+            raise offer_not_found
         if self.get_application_by_user_and_offer(user.id, offer_id):
             raise multiple_apply
 
@@ -101,7 +102,7 @@ class ApplicationService:
             resume_original_filename=file.filename,
             user_id=user.id,
             offer_id=offer_id,
-            offer=offer
+            offer=offer,
         )
 
         write_upload_file(file, file_destination)

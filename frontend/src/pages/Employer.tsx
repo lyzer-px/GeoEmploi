@@ -61,14 +61,14 @@ export default function EmployerPage() {
     let cancelled = false;
     setIsLoadingOffers(true);
 
-    fetch(`${OFFERS_BASE}/`, { headers: authHeaders() })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Impossible de récupérer vos offres");
-        return (await response.json()) as OffersPage;
-      })
-      .then((data) => {
-        if (!cancelled) setOffers(data.items);
-      })
+fetch(`${OFFERS_BASE}/me`, { headers: authHeaders() })
+  .then(async (response) => {
+    if (!response.ok) throw new Error("Impossible de récupérer vos offres");
+    return (await response.json()) as Offer[];
+  })
+  .then((data) => {
+    if (!cancelled) setOffers(data);
+  })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);
       })

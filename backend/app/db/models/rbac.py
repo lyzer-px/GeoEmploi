@@ -27,9 +27,9 @@ class User(Base):
     skills: Mapped[list["Skill"]] = relationship(
         secondary="users_skills", back_populates="users"
     )
-    applications: Mapped[list["Application"]] = relationship(back_populates="user")
-    offers_created: Mapped[list["Offer"]] = relationship(back_populates="employer")
-    experiences: Mapped[list["Experience"]] = relationship(back_populates="user")
+    applications: Mapped[list["Application"]] = relationship(back_populates="user", passive_deletes=True)
+    offers_created: Mapped[list["Offer"]] = relationship(back_populates="employer", passive_deletes=True)
+    experiences: Mapped[list["Experience"]] = relationship(back_populates="user", passive_deletes=True)
 
     def set_password(self, password: str):
         self.password = generate_password_hash(password)

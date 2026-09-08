@@ -10,5 +10,6 @@ export const ROUTES = {
   ADMIN: '/admin',
   ABOUT: '/a-propos',
   PROFILE: '/profil',
-  TRANSPARENCY: '/transparence'
+  TRANSPARENCY: '/transparence',
+  CGU: '/cgu'
 } as const;

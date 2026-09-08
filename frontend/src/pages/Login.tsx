@@ -38,7 +38,7 @@ export function Login() {
     const isRegisterDisabled =
         firstName === "" || lastName === "" || registerEmail === "" || registerPassword === "";
 
-    function sendLoginRequest() {
+   function sendLoginRequest() {
         setFeedback(null);
         fetch(API_BACKEND_URL + LOGIN_PATH, {
             method: "POST",
@@ -58,19 +58,23 @@ export function Login() {
                 localStorage.setItem("access_token", data.tokens.access_token);
                 localStorage.setItem("refresh_token", data.tokens.refresh_token);
                 localStorage.setItem("current_user", JSON.stringify(data.user));
+                
                 setFeedback({ severity: "success", message: "Connexion réussie, redirection..." });
-                if (data.user.roles.includes("employer")) {
-                    navigate(ROUTES.EMPLOYER);
+                
+                // --- REDIRECTION BASÉE SUR LES RÔLES ---
+                const userRoles = data.user.roles || [];
+                
+                if (userRoles.includes("admin")) {
+                    navigate(ROUTES.ADMIN); // Redirige vers la page Admin
+                } else if (userRoles.includes("employer")) {
+                    navigate(ROUTES.EMPLOYER); // Redirige vers la page Employeur
                 } else {
-                    navigate(ROUTES.HOME);
+                    navigate(ROUTES.HOME); // Par défaut (job_seeker)
                 }
             })
             .catch((error: Error) => {
                 setFeedback({ severity: "error", message: error.message });
-                console.error(
-                    "Erreur lors de la requête de connexion :",
-                    error
-                );
+                console.error("Erreur lors de la requête de connexion :", error);
             });
     }
 

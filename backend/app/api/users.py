@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, Depends
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import JSONResponse
 
 from app.schemas.input.user import UserUpdate
 from app.schemas.output.user import UserOut
@@ -40,6 +41,42 @@ def delete_my_account(token: AccessTokenDep, user_service: UserServiceDep):
 def get_my_account(user: CurrentUserDep, user_service: UserServiceDep):
     """Get user information"""
     return user_service.get_user_by_id(user.id)
+
+@users_router.get("/me/export", status_code=status.HTTP_200_OK)
+def export_my_data(user: CurrentUserDep):
+    return JSONResponse(
+        content={
+            "account": {
+                "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email,
+                "roles": [role.name for role in user.roles],
+            },
+            "skills": [
+                {
+                    "id": skill.skill.id,
+                    "name": skill.skill.name,
+                    "level": skill.level,
+                }
+                for skill in user.skills
+            ],
+            "experiences": [
+                {
+                    "id": experience.id,
+                    "name": experience.name,
+                    "description": experience.description,
+                    "start_date": experience.start_date.isoformat(),
+                    "end_date": (
+                        experience.end_date.isoformat()
+                        if experience.end_date
+                        else None
+                    ),
+                }
+                for experience in user.experiences
+            ],
+        }
+    )
 
 
 #

@@ -1,10 +1,8 @@
 from typing import Optional, Any
 
-
+from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlmodel import select
-from fastapi import Depends, HTTPException
-
 from app.db.models import User, Role
 from app.schemas.input.user import UserUpdate, UserCreate
 from app.db.database import get_db_session

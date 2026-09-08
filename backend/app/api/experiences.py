@@ -42,7 +42,6 @@ def create_experience(
     experience_service: ExperienceServiceDep,
 ):
     """Create a new experiences for the current user."""
-    logging.info(experience_data)
     return experience_service.create_experience(user, experience_data)
 
 

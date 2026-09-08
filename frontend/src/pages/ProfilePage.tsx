@@ -8,9 +8,43 @@ import Footer from "../Footer";
 import { ROUTES } from "../routes";
 import "./ProfilePage.css";
 
+// Types
 type User = { id: number; first_name: string; last_name: string; email: string };
 type Skill = { skill: { id: number; name: string; description?: string | null }; level: number };
 type Experience = { id: number; name: string; description?: string | null; start_date: string; end_date?: string | null };
+
+type EmployerOut = {
+  first_name: string;
+  last_name: string;
+};
+
+type OfferOut = {
+  id: number;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date?: string | null;
+  contract_type: string;
+  latitude: number;
+  longitude: number;
+  adress: string;
+  employer: EmployerOut;
+};
+
+type ApplicationOut = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  status: string;
+  created_at: string;
+  resume_original_filename: string;
+};
+
+type MyApplicationOut = {
+  application: ApplicationOut;
+  offer: OfferOut;
+};
 
 const API = import.meta.env.VITE_API_BACKEND_URL;
 
@@ -25,6 +59,7 @@ function ProfilePage() {
   const [roles, setRoles] = useState<string[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [applications, setApplications] = useState<MyApplicationOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -46,24 +81,28 @@ function ProfilePage() {
     setLoading(true);
     setError(null);
     try {
-      const [userResponse, skillsResponse, experiencesResponse] = await Promise.all([
+      const [userResponse, skillsResponse, experiencesResponse, applicationsResponse] = await Promise.all([
         fetch(`${API}/users/me`, { headers: authHeaders() }),
         fetch(`${API}/skills/me`, { headers: authHeaders() }),
         fetch(`${API}/experiences/me`, { headers: authHeaders() }),
+        fetch(`${API}/applications/me`, { headers: authHeaders() }),
       ]);
-      if ([userResponse, skillsResponse, experiencesResponse].some((response) => response.status === 401)) {
+
+      if ([userResponse, skillsResponse, experiencesResponse, applicationsResponse].some((response) => response.status === 401)) {
         localStorage.removeItem("access_token");
         navigate(ROUTES.LOGIN);
         return;
       }
-      if (![userResponse, skillsResponse, experiencesResponse].every((response) => response.ok)) {
+      if (![userResponse, skillsResponse, experiencesResponse, applicationsResponse].every((response) => response.ok)) {
         throw new Error("Impossible de charger votre profil.");
       }
+
       const userData = await userResponse.json();
       setUser(userData);
       setRoles(Array.isArray(userData.roles) ? userData.roles : []);
       setSkills(await skillsResponse.json());
       setExperiences(await experiencesResponse.json());
+      setApplications(await applicationsResponse.json());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {
@@ -78,6 +117,38 @@ function ProfilePage() {
     window.setTimeout(() => setSuccess(null), 3000);
   }
 
+  async function downloadDocument(applicationId: number, documentType: "resume" | "cover_letter") {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(`${API}/applications/${applicationId}/${documentType}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!response.ok) {
+        throw new Error("Impossible de récupérer le document.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      const disposition = response.headers.get("content-disposition");
+      let filename = `${documentType}_${applicationId}.pdf`;
+      if (disposition && disposition.includes("filename=")) {
+        filename = disposition.split("filename=")[1].replace(/["']/g, "");
+      }
+
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors du téléchargement.");
+    }
+  }
+
   async function submitSkill(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!skillName.trim()) return;
@@ -85,7 +156,7 @@ function ProfilePage() {
     try {
       const response = editingSkillId === null
         ? await fetch(`${API}/skills/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ name: skillName.trim(), level: Number(skillLevel) }) })
-        : await fetch(`${API}/users/me/skills/${editingSkillId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
+        : await fetch(`${API}/skills/${editingSkillId}/me`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ level: Number(skillLevel) }) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer la compétence.");
       setSkillName(""); setSkillLevel("3"); setEditingSkillId(null);
       await loadProfile();
@@ -102,7 +173,7 @@ function ProfilePage() {
   async function deleteSkill(id: number) {
     if (!window.confirm("Supprimer cette compétence de votre profil ?")) return;
     setError(null);
-    const response = await fetch(`${API}/users/me/skills/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/skills/${id}/me`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer la compétence."); return; }
     setSkills((current) => current.filter((item) => item.skill.id !== id));
     if (editingSkillId === id) { setEditingSkillId(null); setSkillName(""); }
@@ -117,7 +188,7 @@ function ProfilePage() {
     try {
       const response = editingExperienceId === null
         ? await fetch(`${API}/experiences/me`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) })
-        : await fetch(`${API}/users/me/experiences/${editingExperienceId}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
+        : await fetch(`${API}/experiences/${editingExperienceId}/me`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify(payload) });
       if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Impossible d'enregistrer l'expérience.");
       setExperience({ name: "", description: "", start_date: "", end_date: "" }); setEditingExperienceId(null);
       await loadProfile();
@@ -135,7 +206,7 @@ function ProfilePage() {
   async function deleteExperience(id: number) {
     if (!window.confirm("Supprimer cette expérience ?")) return;
     setError(null);
-    const response = await fetch(`${API}/users/me/experiences/${id}`, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(`${API}/experiences/${id}/me`, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) { setError("Impossible de supprimer l'expérience."); return; }
     setExperiences((current) => current.filter((item) => item.id !== id));
     if (editingExperienceId === id) { setEditingExperienceId(null); setExperience({ name: "", description: "", start_date: "", end_date: "" }); }
@@ -162,6 +233,59 @@ function ProfilePage() {
               <p>{user.email}</p>
             </section>
 
+            <section className="profile-section" aria-labelledby="applications-title">
+              <h2 id="applications-title">Mes candidatures</h2>
+              {applications.length === 0 ? (
+                <p>Vous n'avez envoyé aucune candidature pour le moment.</p>
+              ) : (
+                <div className="profile-experiences">
+                  {applications.map(({ application, offer }) => (
+                    <article key={application.id} className="profile-experience fr-card">
+                      <div>
+                        <h3>{offer.name}</h3>
+                        <p><strong>Lieu :</strong> {offer.adress}</p>
+                        <p><strong>Type de contrat :</strong> {offer.contract_type}</p>
+                        <p>
+                          <strong>Statut :</strong>{" "}
+                          <span className="fr-badge fr-badge--info fr-badge--sm">
+                            {application.status}
+                          </span>
+                        </p>
+                        <p>
+                          <small>
+                            Candidature envoyée le :{" "}
+                            {new Date(application.created_at).toLocaleDateString("fr-FR")}
+                          </small>
+                        </p>
+                      </div>
+                      <div className="profile-actions">
+                        <Button
+                          priority="secondary"
+                          size="small"
+                          nativeButtonProps={{
+                            type: "button",
+                            onClick: () => void downloadDocument(application.id, "resume"),
+                          }}
+                        >
+                          Télécharger CV
+                        </Button>
+                        <Button
+                          priority="secondary"
+                          size="small"
+                          nativeButtonProps={{
+                            type: "button",
+                            onClick: () => void downloadDocument(application.id, "cover_letter"),
+                          }}
+                        >
+                          Télécharger LM
+                        </Button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
             <section className="profile-section" aria-labelledby="skills-title">
               <div className="profile-section-heading"><h2 id="skills-title">Compétences</h2></div>
               <form onSubmit={submitSkill} className="profile-form">
@@ -183,7 +307,6 @@ function ProfilePage() {
                       <label className="fr-label" htmlFor="experience-description">
                           Description
                       </label>
-
                       <textarea
                           id="experience-description"
                           className="fr-input"

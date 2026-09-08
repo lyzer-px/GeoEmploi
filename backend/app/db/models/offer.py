@@ -54,4 +54,7 @@ class Offer(Base):
     geocoding_score: Mapped[float] = mapped_column(nullable=True)
     latitude: Mapped[float] = mapped_column(nullable=False)
     longitude: Mapped[float] = mapped_column(nullable=False)
-    applications: Mapped[list["Application"]] = relationship(back_populates="offer")
+    applications: Mapped[list["Application"]] = relationship(
+        back_populates="offer",
+        cascade="all, delete-orphan",
+    )

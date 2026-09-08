@@ -133,14 +133,12 @@ function EditLayout({
           Annuler
         </button>
 
-        <button
+       <button
           type="button"
           onClick={onSave}
           disabled={saving}
-        >
-          {saving
-            ? "Enregistrement..."
-            : "Enregistrer"}loaddata
+    >
+        {saving ? "Enregistrement..." : "Enregistrer"}
         </button>
       </div>
     </div>
@@ -238,33 +236,25 @@ function Admin() {
         };
 
         const [
-          usersResponse,
-          offersResponse,
-          permissionsResponse,
-          rolesResponse,
-        ] = await Promise.all([
-          fetch(`${apiUrl}/users/`, {
-            headers: authHeaders,
-          }),
-
-          fetch(`${apiUrl}/offers/`, {
-            headers: authHeaders,
-          }),
-
-          fetch(
-            `${apiUrl}/permissions/`,
-            {
+            usersResponse,
+            offersResponse,
+            permissionsResponse,
+            rolesResponse,
+          ] = await Promise.all([
+            fetch(`${apiUrl}/users/`, {
               headers: authHeaders,
-            }
-          ),
-
-          fetch(
-            `${apiUrl}/roles/`,
-            {
+            }),
+          
+            fetch(`${apiUrl}/offers/`),
+          
+            fetch(`${apiUrl}/permissions/`, {
               headers: authHeaders,
-            }
-          ),
-        ]);
+            }),
+          
+            fetch(`${apiUrl}/roles/`, {
+              headers: authHeaders,
+            }),
+          ]);
 
         if (!usersResponse.ok) {
           throw new Error(
@@ -342,7 +332,7 @@ function Admin() {
       return (
         normalize(offer.name).includes(query) ||
         normalize(offer.description).includes(query) ||
-        normalize(offer.address).includes(query)
+        normalize(offer.adress).includes(query)
       );
     }
   );
@@ -606,7 +596,7 @@ function Admin() {
             contract_type:
               editJobOffer.contract_type,
             adress:
-              editJoboffer.address,
+              editJobOffer.adress,
             geocoding_source:
               editJobOffer.geocoding_source,
             geocoding_score:
@@ -656,25 +646,22 @@ function Admin() {
       const token = getToken();
 
       const response = await fetch(
-        `${apiUrl}/users/`
-        + `${selectedUser.id}/roles`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type":
-              "application/json",
-            ...(token
-              ? {
-                Authorization:
-                  `Bearer ${token}`,
-              }
-              : {}),
-          },
-          body: JSON.stringify({
-            roles: [selectedRole],
-          }),
-        }
-      );
+          `${apiUrl}/roles/users/${selectedUser.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token
+                ? {
+                    Authorization: `Bearer ${token}`,
+                  }
+                : {}),
+            },
+            body: JSON.stringify({
+              roles: [selectedRole],
+            }),
+          }
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -1126,7 +1113,7 @@ function Admin() {
                       <input
                         type="text"
                         value={
-                          editJoboffer.address
+                          editJobOffer.adress
                         }
                         onChange={(event) =>
                           setEditJobOffer({
@@ -1609,7 +1596,7 @@ function Admin() {
                                 offer.name
                               }
                               subtitle={
-                                offer.address
+                                offer.adress
                               }
                               avatar={
                                 offer.name.charAt(

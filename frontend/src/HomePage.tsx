@@ -135,6 +135,7 @@ function HomePage() {
         setLocationError(null);
     }
 
+
     async function handleSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -215,6 +216,45 @@ function HomePage() {
         setCvFile(null);
         setCoverLetterFile(null);
     }
+
+    async function handleApply() {
+    if (!selectedOffer || !cvFile || !coverLetterFile) return;
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Vous devez être connecté pour postuler.");
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append("resume", cvFile);
+        formData.append("cover_letter", coverLetterFile);
+
+        const response = await fetch(
+            `${import.meta.env.VITE_API_BACKEND_URL}/applications/${selectedOffer.id}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de l'envoi de la candidature.");
+        }
+
+        const data = await response.json();
+        alert("Votre candidature a bien été envoyée !");
+        closeOffer();
+    } catch (error) {
+        console.error("Erreur postuler :", error);
+        alert("Impossible d'envoyer la candidature.");
+    }
+}
 
     function handleCvChange(
         event: React.ChangeEvent<HTMLInputElement>,
@@ -545,6 +585,7 @@ function HomePage() {
                                 disabled:
                                     !cvFile ||
                                     !coverLetterFile,
+                                onClick: handleApply,
                             }}
                         >
                             Postuler

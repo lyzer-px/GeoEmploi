@@ -12,7 +12,7 @@ from .api.permissions import permissions_router
 from .api.offers import offers_router
 from .api.skills import skills_router
 from .api.experiences import experiences_router
-from .api.application import applications_router
+from .api.applications import applications_router
 from .core.loggings import setup_logging
 from .core.settings import Settings
 from .db.database import init_db

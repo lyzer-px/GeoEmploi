@@ -52,13 +52,10 @@ function MyHeader() {
       });
   }, []);
 
-    let roleLabel = "Chercheur d'emploi";
-    if (currentUser?.roles.includes("admin")) {
-      roleLabel = "Administrateur";
-    } else if (currentUser?.roles.includes("employer")) {
-      roleLabel = "Employeur";
-    }
-  
+  const roleLabel = currentUser?.roles.includes("employer")
+    ? "Employeur"
+    : "Chercheur d'emploi";
+
   return (
     <Header
       brandTop={
@@ -131,6 +128,12 @@ function MyHeader() {
           text: "À propos",
           linkProps: {
             href: "/a-propos",
+          },
+        },
+        {
+          text: "Transparence",
+          linkProps: {
+            href: "/transparence",
           },
         },
       ]}

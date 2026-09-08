@@ -243,9 +243,13 @@ function Admin() {
           permissionsResponse,
           rolesResponse,
         ] = await Promise.all([
-          fetch(`${apiUrl}/users/`),
+          fetch(`${apiUrl}/users/`, {
+            headers: authHeaders,
+          }),
 
-          fetch(`${apiUrl}/offers/`),
+          fetch(`${apiUrl}/offers/`, {
+            headers: authHeaders,
+          }),
 
           fetch(
             `${apiUrl}/permissions/`,

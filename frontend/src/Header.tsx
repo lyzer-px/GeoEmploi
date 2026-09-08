@@ -52,10 +52,13 @@ function MyHeader() {
       });
   }, []);
 
-  const roleLabel = currentUser?.roles.includes("employer")
-    ? "Employeur"
-    : "Chercheur d'emploi";
-
+    let roleLabel = "Chercheur d'emploi";
+    if (currentUser?.roles.includes("admin")) {
+      roleLabel = "Administrateur";
+    } else if (currentUser?.roles.includes("employer")) {
+      roleLabel = "Employeur";
+    }
+  
   return (
     <Header
       brandTop={

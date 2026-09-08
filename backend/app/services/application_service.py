@@ -62,10 +62,6 @@ class ApplicationService:
         CV_TECH.mkdir(parents=True, exist_ok=True)
         COVER_LETTER.mkdir(parents=True, exist_ok=True)
 
-    # ------------------------------------------------------------------
-    # Serialization helpers
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _to_application_out(application: Application) -> ApplicationOut:
         """Build the ApplicationOut schema from an Application ORM object."""
@@ -85,10 +81,6 @@ class ApplicationService:
             application=self._to_application_out(application),
             offer=OfferOut.model_validate(application.offer),
         )
-
-    # ------------------------------------------------------------------
-    # Read
-    # ------------------------------------------------------------------
 
     def get_application_by_id(self, application_id: int) -> Application:
         statement = select(Application).where(Application.id == application_id)
@@ -140,10 +132,6 @@ class ApplicationService:
     def get_applications_by_offer(self, offer_id: int) -> list[Application]:
         statement = select(Application).where(Application.offer_id == offer_id)
         return self._db.scalars(statement).all()
-
-    # ------------------------------------------------------------------
-    # Write
-    # ------------------------------------------------------------------
 
     def save_application(
         self, offer_id: int, user: User, resume: UploadFile, cover_letter: UploadFile

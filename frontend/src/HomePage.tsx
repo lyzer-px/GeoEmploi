@@ -228,26 +228,8 @@ function HomePage() {
         setLocationError(null);
     }
 
-    /**
-     * Search button.
-     *
-     * Supports:
-     *
-     * 1. Nothing:
-     *    → all offers
-     *
-     * 2. Job name only:
-     *    → offers filtered by name
-     *
-     * 3. Location only:
-     *    → offers filtered geographically
-     *
-     * 4. Job name + location:
-     *    → offers filtered by both
-     */
-    async function handleSearch(
-        event: FormEvent<HTMLFormElement>,
-    ) {
+
+    async function handleSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         const job = jobName.trim();
@@ -353,6 +335,85 @@ function HomePage() {
         } finally {
             setIsSearching(false);
         }
+    }
+
+    function openOffer(offer: JobOffer) {
+        setSelectedOffer(offer);
+        setCvFile(null);
+        setCoverLetterFile(null);
+    }
+
+    function closeOffer() {
+        setSelectedOffer(null);
+        setCvFile(null);
+        setCoverLetterFile(null);
+    }
+
+    async function handleApply() {
+    if (!selectedOffer || !cvFile || !coverLetterFile) return;
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Vous devez être connecté pour postuler.");
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append("resume", cvFile);
+        formData.append("cover_letter", coverLetterFile);
+
+        const response = await fetch(
+            `${import.meta.env.VITE_API_BACKEND_URL}/applications/${selectedOffer.id}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de l'envoi de la candidature.");
+        }
+
+        const data = await response.json();
+        alert("Votre candidature a bien été envoyée !");
+        closeOffer();
+    } catch (error) {
+        console.error("Erreur postuler :", error);
+        alert("Impossible d'envoyer la candidature.");
+    }
+}
+
+    function handleCvChange(
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) {
+        const file = event.target.files?.[0] ?? null;
+
+        if (file && file.type !== "application/pdf") {
+            event.target.value = "";
+            setCvFile(null);
+            return;
+        }
+
+        setCvFile(file);
+    }
+
+    function handleCoverLetterChange(
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) {
+        const file = event.target.files?.[0] ?? null;
+
+        if (file && file.type !== "application/pdf") {
+            event.target.value = "";
+            setCoverLetterFile(null);
+            return;
+        }
+
+        setCoverLetterFile(file);
     }
 
     return (
@@ -571,6 +632,126 @@ function HomePage() {
                     />
                 </section>
             </div>
+
+            {selectedOffer !== null && (
+                <div
+                    className="geoemploi-modal-overlay"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) {
+                            closeOffer();
+                        }
+                    }}
+                >
+                    <div
+                        className="geoemploi-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="offer-modal-title"
+                    >
+                        <button
+                            type="button"
+                            className="geoemploi-modal-close"
+                            onClick={closeOffer}
+                            aria-label="Fermer"
+                        >
+                            ×
+                        </button>
+
+                        <h2 id="offer-modal-title">
+                            {selectedOffer.name}
+                        </h2>
+
+                        <p>
+                            <strong>Employeur :</strong>{" "}
+                            {selectedOffer.employer.first_name}{" "}
+                            {selectedOffer.employer.last_name}
+                        </p>
+
+                        <p>
+                            <strong>Lieu :</strong>{" "}
+                            {selectedOffer.adress}
+                        </p>
+
+                        <p>
+                            <strong>Contrat :</strong>{" "}
+                            {selectedOffer.contract_type}
+                        </p>
+
+                        <p>
+                            <strong>Date de début :</strong>{" "}
+                            {selectedOffer.start_date}
+                        </p>
+
+                        {selectedOffer.end_date && (
+                            <p>
+                                <strong>Date de fin :</strong>{" "}
+                                {selectedOffer.end_date}
+                            </p>
+                        )}
+
+                        <div>
+                            <h3>Description</h3>
+                            <p>
+                                {selectedOffer.description}
+                            </p>
+                        </div>
+
+                        <div className="geoemploi-file-upload">
+                            <label htmlFor="cv-file">
+                                CV
+                            </label>
+
+                            <input
+                                id="cv-file"
+                                type="file"
+                                accept=".pdf,application/pdf"
+                                onChange={handleCvChange}
+                            />
+
+                            {cvFile && (
+                                <p>
+                                    Fichier sélectionné :{" "}
+                                    {cvFile.name}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="geoemploi-file-upload">
+                            <label htmlFor="cover-letter-file">
+                                Lettre de motivation
+                            </label>
+
+                            <input
+                                id="cover-letter-file"
+                                type="file"
+                                accept=".pdf,application/pdf"
+                                onChange={
+                                    handleCoverLetterChange
+                                }
+                            />
+
+                            {coverLetterFile && (
+                                <p>
+                                    Fichier sélectionné :{" "}
+                                    {coverLetterFile.name}
+                                </p>
+                            )}
+                        </div>
+
+                        <Button
+                            nativeButtonProps={{
+                                type: "button",
+                                disabled:
+                                    !cvFile ||
+                                    !coverLetterFile,
+                                onClick: handleApply,
+                            }}
+                        >
+                            Postuler
+                        </Button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

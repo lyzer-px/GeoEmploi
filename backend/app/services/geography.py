@@ -13,7 +13,7 @@ class BoundingBox:
 
 
 def perimeter_to_radius(perimeter_km: float) -> float:
-    return perimeter_km
+    return perimeter_km / (2 * math.pi)
 
 
 def get_bounding_box(

@@ -241,6 +241,45 @@ function ProfilePage() {
     }
   }
 
+  async function deleteAccount() {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(`${API}/users/me`, {
+        method: "DELETE",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Impossible de supprimer votre compte.");
+      }
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      navigate(ROUTES.HOME);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de la suppression du compte."
+      );
+    }
+  }
+
   async function downloadDocument(
     applicationId: number,
     documentType: "resume" | "cover_letter"
@@ -597,7 +636,7 @@ function ProfilePage() {
                     nativeButtonProps={{
                       type: "button",
                       onClick: () => {
-                        // TODO: suppression du compte
+                        void deleteAccount();
                       },
                     }}
                   >

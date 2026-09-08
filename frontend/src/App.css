@@ -550,3 +550,8 @@
 .geoemploi-modal > button:last-child {
   margin-top: 2rem;
 }
+
+.fr-logo,
+.fr-header__brand .fr-header__logo {
+  display: none;
+}

@@ -37,10 +37,6 @@ function MyHeader() {
         }
 
         const user = await response.json();
-
-        // Le backend renvoie roles comme un tableau d'objets, ex :
-        // roles: [{ name: "employer" }]
-        // On extrait le champ `name` de chaque rôle.
         const roles: string[] = Array.isArray(user.roles)
           ? user.roles.map((r: any) => r?.name).filter(Boolean)
           : [];
@@ -73,9 +69,8 @@ function MyHeader() {
     <Header
       brandTop={
         <>
-          Ministère <br />
-          du Job et <br />
-          Bonheur
+           <br />
+           <br />
         </>
       }
       homeLinkProps={{

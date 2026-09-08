@@ -15,9 +15,9 @@ class Skill(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), unique=True)
-    
+
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     users: Mapped[list["User"]] = relationship(
         secondary="users_skills", back_populates="skills"
     )
@@ -46,8 +46,8 @@ class Experience(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     user: Mapped["User"] = relationship(back_populates="experiences")
-    
+
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)

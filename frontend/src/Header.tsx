@@ -38,10 +38,17 @@ function MyHeader() {
 
         const user = await response.json();
 
+        // Le backend renvoie roles comme un tableau d'objets, ex :
+        // roles: [{ name: "employer" }]
+        // On extrait le champ `name` de chaque rôle.
+        const roles: string[] = Array.isArray(user.roles)
+          ? user.roles.map((r: any) => r?.name).filter(Boolean)
+          : [];
+
         setCurrentUser({
           first_name: user.first_name,
           last_name: user.last_name,
-          roles: Array.isArray(user.roles) ? user.roles : [],
+          roles,
         });
       })
       .catch((error) => {
@@ -52,9 +59,15 @@ function MyHeader() {
       });
   }, []);
 
-  const roleLabel = currentUser?.roles.includes("employer")
-    ? "Employeur"
-    : "Chercheur d'emploi";
+  const isAdmin = currentUser?.roles.includes("admin") ?? false;
+  const isEmployer = currentUser?.roles.includes("employer") ?? false;
+
+  let roleLabel = "Chercheur d'emploi";
+  if (isAdmin) {
+    roleLabel = "Administrateur";
+  } else if (isEmployer) {
+    roleLabel = "Employeur";
+  }
 
   return (
     <Header
@@ -85,13 +98,14 @@ function MyHeader() {
           : [
               {
                 buttonProps: {
-                  onClick: () => navigate(ROUTES.PROFILE),
+                  onClick: () =>
+                    navigate(isEmployer ? ROUTES.EMPLOYER : ROUTES.PROFILE),
                 },
                 iconId: "ri-user-line" as const,
                 text: `${currentUser.first_name} ${currentUser.last_name} · ${roleLabel}`,
               },
 
-              ...(currentUser.roles.includes("admin")
+              ...(isAdmin
                 ? [
                     {
                       buttonProps: {

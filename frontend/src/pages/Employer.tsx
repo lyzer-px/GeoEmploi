@@ -16,6 +16,32 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/**
+ * Normalise une réponse d'offres, qu'elle soit renvoyée comme un
+ * tableau brut ([{...}, {...}]) ou paginée ({ items: [...], total }).
+ *
+ * /offers/ renvoie apparemment { items: [...] } (OffersPage), mais
+ * /offers/me semble renvoyer un tableau brut — d'où le TypeError sur
+ * offers.map quand on assignait directement data.items (undefined).
+ */
+function normalizeOffers(data: unknown): Offer[] {
+  if (Array.isArray(data)) return data as Offer[];
+  if (data && typeof data === "object" && Array.isArray((data as any).items)) {
+    return (data as any).items as Offer[];
+  }
+  console.warn("Réponse offres inattendue, forme reçue :", data);
+  return [];
+}
+
+function normalizeApplicants(data: unknown): Applicant[] {
+  if (Array.isArray(data)) return data as Applicant[];
+  if (data && typeof data === "object" && Array.isArray((data as any).items)) {
+    return (data as any).items as Applicant[];
+  }
+  console.warn("Réponse candidatures inattendue, forme reçue :", data);
+  return [];
+}
+
 async function geocodeAddress(address: string) {
   const response = await fetch(
     `https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(address)}`
@@ -30,7 +56,7 @@ async function geocodeAddress(address: string) {
   };
 
   if (data.features.length === 0) {
-    throw new Error("Adresse introuvable, essayez d'être plus précis");
+    throw new Error("Adresse introuvable");
   }
 
   const [best] = data.features;
@@ -61,13 +87,13 @@ export default function EmployerPage() {
     let cancelled = false;
     setIsLoadingOffers(true);
 
-    fetch(`${OFFERS_BASE}/`, { headers: authHeaders() })
+    fetch(`${OFFERS_BASE}/me`, { headers: authHeaders() })
       .then(async (response) => {
         if (!response.ok) throw new Error("Impossible de récupérer vos offres");
-        return (await response.json()) as OffersPage;
+        return await response.json();
       })
       .then((data) => {
-        if (!cancelled) setOffers(data.items);
+        if (!cancelled) setOffers(normalizeOffers(data));
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);
@@ -85,12 +111,14 @@ export default function EmployerPage() {
     async (offerId: number) => {
       if (applicantsByOffer[offerId]) return;
       setIsLoadingApplicants(true);
+
       try {
-        const response = await fetch(`${OFFERS_BASE}/${offerId}/applications`, {
+        const response = await fetch(`${OFFERS_BASE}/me/${offerId}`, {
           headers: authHeaders(),
         });
         if (!response.ok) throw new Error("Impossible de récupérer les candidatures");
-        const applicants = (await response.json()) as Applicant[];
+        const data = await response.json();
+        const applicants = normalizeApplicants(data);
         setApplicantsByOffer((prev) => ({ ...prev, [offerId]: applicants }));
       } catch (err) {
         setError((err as Error).message);

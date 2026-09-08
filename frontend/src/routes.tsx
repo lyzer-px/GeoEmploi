@@ -9,5 +9,6 @@ export const ROUTES = {
   EMPLOYER: '/employeur',
   ADMIN: '/admin',
   ABOUT: '/a-propos',
-  PROFILE: '/profil'
+  PROFILE: '/profil',
+  TRANSPARENCY: '/transparence'
 } as const;

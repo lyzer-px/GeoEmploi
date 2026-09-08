@@ -65,9 +65,9 @@ export function Login() {
                 const userRoles = data.user.roles || [];
                 
                 if (userRoles.includes("admin")) {
-                    navigate(ROUTES.ADMIN); // Redirige vers la page Admin
+                    navigate(ROUTES.ADMIN);
                 } else if (userRoles.includes("employer")) {
-                    navigate(ROUTES.EMPLOYER); // Redirige vers la page Employeur
+                    navigate(ROUTES.EMPLOYER);
                 } else {
                     navigate(ROUTES.HOME); // Par défaut (job_seeker)
                 }

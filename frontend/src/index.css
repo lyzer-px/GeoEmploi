@@ -31,8 +31,6 @@
   }
 }
 
-/* dsfr.min.css sets Marianne on html/body with higher specificity than
-   :root — restate the font explicitly here so it actually wins. */
 html,
 body {
   font-family: var(--sans);

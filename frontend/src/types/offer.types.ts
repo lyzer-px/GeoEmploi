@@ -1,10 +1,14 @@
-export type ContractType = "part-time" | "full-time" | "internship" | "volunteer";
+export type ContractType =
+  | "part-time"
+  | "full-time"
+  | "internship"
+  | "volunteer";
 
 export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
   "part-time": "Temps partiel",
   "full-time": "Temps plein",
-  "internship": "Stage",
-  "volunteer": "Bénévolat",
+  internship: "Stage",
+  volunteer: "Bénévolat",
 };
 
 export interface OfferEmployer {
@@ -38,17 +42,25 @@ export interface OfferFormValues {
   name: string;
   description: string;
   start_date: string;
-  end_date: string | null;
+  end_date: string;
   contract_type: ContractType;
   adress: string;
 }
 
+export type ApplicationStatus =
+  | "pending"
+  | "accepted"
+  | "rejected";
+
 export interface Applicant {
   id: number;
-  user_id: number;
   first_name: string;
   last_name: string;
   email: string;
+  status: ApplicationStatus;
+  created_at: string;
+  resume_original_filename: string;
+  cover_letter_original_filename: string;
 }
 
 export interface CreatorOfferOut {

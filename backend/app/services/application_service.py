@@ -209,7 +209,7 @@ class ApplicationService:
         self._db.commit()
         self._db.refresh(application)
 
-        return self._to_my_application_out(application)
+        return self._to_application_out(application)
 
 
 def get_application_service(

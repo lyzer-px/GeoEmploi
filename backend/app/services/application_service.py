@@ -73,6 +73,7 @@ class ApplicationService:
             status=application.status,
             created_at=application.created_at,
             resume_original_filename=application.resume_original_filename,
+            cover_letter_original_filename=application.cover_letter_original_filename
         )
 
     def _to_my_application_out(self, application: Application) -> MyApplicationOut:
@@ -113,7 +114,6 @@ class ApplicationService:
             filename=application.cover_letter_original_filename,
             media_type="application/octet-stream",
         )
-
 
     def get_application_by_user(self, user: User) -> list[MyApplicationOut]:
         statement = select(Application).where(Application.user_id == user.id)
@@ -181,12 +181,6 @@ class ApplicationService:
                     file_path.unlink(missing_ok=True)
             if isinstance(exc, HTTPException):
                 raise exc
-
-            import traceback
-            print("="*80)
-            traceback.print_exc()
-            print("="*80)
-
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error during the creation of the application",

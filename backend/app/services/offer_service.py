@@ -147,7 +147,6 @@ class OfferService:
             "y": round(y_lambert, 2),
         }
 
-
     def get_offer_applications(self, offer_id: int) -> CreatorOfferOut:
         """Retrieve one offer with the employer's info and all its applications."""
         offer = self.get_offer_by_id(offer_id)
@@ -173,6 +172,7 @@ class OfferService:
                     status=app.status,
                     created_at=app.created_at,
                     resume_original_filename=app.resume_original_filename,
+                    cover_letter_original_filename=app.cover_letter_original_filename
                 )
                 for app in offer.applications
             ],

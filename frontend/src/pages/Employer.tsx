@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { OfferPanel } from "../components/OfferPanel";
 import { ApplicantsPanel } from "../components/ApplicantsPanel";
 import { OfferFormModal, offerFormModal } from "../components/OfferFormModal";
-import type { Applicant, Offer, OfferFormValues, OffersPage } from "../types/offer.types";
+import type { Applicant, Offer, OfferFormValues, CreatorOfferOut } from "../types/offer.types";
 import MyHeader from "../Header";
 import Footer from "../Footer";
 import "../Employer.css";
@@ -35,10 +35,16 @@ function normalizeOffers(data: unknown): Offer[] {
 
 function normalizeApplicants(data: unknown): Applicant[] {
   if (Array.isArray(data)) return data as Applicant[];
-  if (data && typeof data === "object" && Array.isArray((data as any).items)) {
-    return (data as any).items as Applicant[];
+
+  if (
+    data &&
+    typeof data === "object" &&
+    Array.isArray((data as any).applications)
+  ) {
+    return (data as any).applications as Applicant[];
   }
-  console.warn("Réponse candidatures inattendue, forme reçue :", data);
+
+  console.warn("Réponse candidatures inattendue :", data);
   return [];
 }
 
@@ -160,8 +166,7 @@ export default function EmployerPage() {
 
     try {
       const geocoding = await geocodeAddress(values.adress);
-      const body = { ...values, ...geocoding };
-
+      const body = {...values, end_date: values.end_date || null, ...geocoding };
       const response = await fetch(url, {
         method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },

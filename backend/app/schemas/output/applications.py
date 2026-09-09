@@ -16,6 +16,7 @@ class ApplicationOut(BaseModel):
     status: ApplicationStatus
     created_at: datetime
     resume_original_filename: str
+    cover_letter_original_filename: str
 
 
 class MyApplicationOut(BaseModel):

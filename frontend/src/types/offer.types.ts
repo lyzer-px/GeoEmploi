@@ -38,7 +38,7 @@ export interface OfferFormValues {
   name: string;
   description: string;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   contract_type: ContractType;
   adress: string;
 }
@@ -49,4 +49,12 @@ export interface Applicant {
   first_name: string;
   last_name: string;
   email: string;
+}
+
+export interface CreatorOfferOut {
+  offer: Offer;
+  first_name: string;
+  last_name: string;
+  email: string;
+  applications: Applicant[];
 }

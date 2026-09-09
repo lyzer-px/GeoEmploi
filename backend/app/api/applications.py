@@ -66,7 +66,9 @@ def delete_application(
     application_service.delete_application(application)
 
 
-@applications_router.patch("/{application_id}", status_code=status.HTTP_200_OK, response_model= MyApplicationOut)
+@applications_router.patch(
+    "/{application_id}", status_code=status.HTTP_200_OK, response_model=MyApplicationOut
+)
 def update_status_application(
     application_status: ApplicationUpdate, application_service: ApplicationServiceDep
 ):

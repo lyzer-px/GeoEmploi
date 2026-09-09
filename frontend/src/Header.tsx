@@ -1,9 +1,13 @@
-import { Header } from "@codegouvfr/react-dsfr/Header";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ROUTES } from "./routes";
 
-type CurrentUser = { first_name: string; last_name: string; roles: string[] };
+type CurrentUser = {
+  first_name: string;
+  last_name: string;
+  roles: string[];
+};
+
 const API = import.meta.env.VITE_API_BACKEND_URL;
 
 function MyHeader() {
@@ -11,20 +15,22 @@ function MyHeader() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const loadCurrentUser = async () => {
+      const token = localStorage.getItem("access_token");
 
-    if (!token) {
-      setCurrentUser(null);
-      return;
-    }
+      if (!token) {
+        setCurrentUser(null);
+        return;
+      }
 
-    fetch(`${API}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    })
-      .then(async (response) => {
+      try {
+        const response = await fetch(`${API}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
         if (response.status === 401) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
@@ -33,12 +39,17 @@ function MyHeader() {
         }
 
         if (!response.ok) {
-          throw new Error(`GET /me HTTP ${response.status}`);
+          throw new Error(`GET /users/me HTTP ${response.status}`);
         }
 
         const user = await response.json();
+
         const roles: string[] = Array.isArray(user.roles)
-          ? user.roles.map((r: any) => r?.name).filter(Boolean)
+          ? user.roles
+              .map((role: any) =>
+                typeof role === "string" ? role : role?.name
+              )
+              .filter(Boolean)
           : [];
 
         setCurrentUser({
@@ -46,107 +57,123 @@ function MyHeader() {
           last_name: user.last_name,
           roles,
         });
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error(
           "Erreur lors du chargement de l'utilisateur :",
-          error,
+          error
         );
-      });
+      }
+    };
+
+    void loadCurrentUser();
+
+    const handleAuthChange = () => {
+      void loadCurrentUser();
+    };
+
+    window.addEventListener("geoemploi-auth-changed", handleAuthChange);
+
+    return () => {
+      window.removeEventListener(
+        "geoemploi-auth-changed",
+        handleAuthChange
+      );
+    };
   }, []);
 
   const isAdmin = currentUser?.roles.includes("admin") ?? false;
   const isEmployer = currentUser?.roles.includes("employer") ?? false;
 
-  let roleLabel = "Chercheur d'emploi";
-  if (isAdmin) {
-    roleLabel = "Administrateur";
-  } else if (isEmployer) {
-    roleLabel = "Employeur";
-  }
+  const roleLabel = isAdmin
+    ? "Administrateur"
+    : isEmployer
+      ? "Employeur"
+      : "Chercheur d'emploi";
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("current_user");
+    window.dispatchEvent(new Event("geoemploi-auth-changed"));
+    navigate(ROUTES.HOME);
+  };
 
   return (
-    <Header
-      brandTop={
-        <>
-           <br />
-           <br />
-        </>
-      }
-      homeLinkProps={{
-        href: "/",
-        title: "Accueil - GeoEmploi",
-      }}
-      serviceTitle="GeoEmploi"
-      id="fr-header-header-with-quick-access-items"
-      quickAccessItems={
-        !currentUser
-          ? [
-              {
-                buttonProps: {
-                  onClick: () => navigate(ROUTES.LOGIN),
-                },
-                iconId: "ri-account-box-line" as const,
-                text: "Se connecter",
-              },
-            ]
-          : [
-              {
-                buttonProps: {
-                  onClick: () =>
-                    navigate(isEmployer ? ROUTES.EMPLOYER : ROUTES.PROFILE),
-                },
-                iconId: "ri-user-line" as const,
-                text: `${currentUser.first_name} ${currentUser.last_name} · ${roleLabel}`,
-              },
+    <header className="geoemploi-header">
+      <div className="geoemploi-header-main">
+        <div className="geoemploi-header-container">
+          <a
+            className="geoemploi-header-home"
+            href="/"
+            aria-label="Accueil - GéoEmploi"
+          >
+            <img
+              className="geoemploi-header-logo"
+              src="/images/Geo_emploie_header.png"
+              alt="GéoEmploi — Les opportunités près de vous"
+            />
+          </a>
 
-              ...(isAdmin
-                ? [
-                    {
-                      buttonProps: {
-                        onClick: () => navigate(ROUTES.ADMIN),
-                      },
-                      iconId: "ri-dashboard-line" as const,
-                      text: "Panel admin",
-                    },
-                  ]
-                : []),
+          <div className="geoemploi-header-actions">
+            {!currentUser ? (
+              <button
+                type="button"
+                className="geoemploi-header-login"
+                onClick={() => navigate(ROUTES.LOGIN)}
+              >
+                <span aria-hidden="true">◉</span>
+                Se connecter
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="geoemploi-header-user"
+                  onClick={() =>
+                    navigate(
+                      isEmployer ? ROUTES.EMPLOYER : ROUTES.PROFILE
+                    )
+                  }
+                >
+                  {currentUser.first_name} {currentUser.last_name} ·{" "}
+                  {roleLabel}
+                </button>
 
-              {
-                buttonProps: {
-                  onClick: () => {
-                    localStorage.removeItem("access_token");
-                    localStorage.removeItem("refresh_token");
-                    window.location.href = "/";
-                  },
-                  className: "geoemploi-logout",
-                },
-                iconId: "ri-logout-box-line" as const,
-                text: "Se déconnecter",
-              },
-            ]
-      }
-      navigation={[
-        {
-          text: "Accueil",
-          linkProps: {
-            href: "/",
-          },
-        },
-        {
-          text: "À propos",
-          linkProps: {
-            href: "/a-propos",
-          },
-        },
-        {
-          text: "Transparence",
-          linkProps: {
-            href: "/transparence",
-          },
-        },
-      ]}
-    />
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="geoemploi-header-action"
+                    onClick={() => navigate(ROUTES.ADMIN)}
+                  >
+                    Panel admin
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="geoemploi-header-action"
+                  onClick={handleLogout}
+                >
+                  Se déconnecter
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <nav
+        className="geoemploi-header-nav"
+        aria-label="Navigation principale"
+      >
+        <div className="geoemploi-header-container">
+          <a href="/">Accueil</a>
+          <a href="/a-propos">À propos</a>
+          <a href="/transparence">Transparence</a>
+        </div>
+      </nav>
+    </header>
   );
 }
+
 export default MyHeader;

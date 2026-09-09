@@ -77,3 +77,18 @@
 .applicant-name {
   font-weight: 700;
 }
+
+.application-status--accepted select {
+  color: #18753c;
+  font-weight: 600;
+}
+
+.application-status--rejected select {
+  color: #ce0500;
+  font-weight: 600;
+}
+
+.application-status--pending select {
+  color: #666666;
+  font-weight: 600;
+}

@@ -117,14 +117,15 @@ export function ApplicantsPanel({
             </p>
 
             {/* Statut */}
-            <Select
+           <Select
               label="Statut de la candidature"
+              className={`application-status application-status--${applicant.status}`}
               nativeSelectProps={{
                 value: applicant.status,
                 onChange: (event) => {
                   const newStatus =
                     event.target.value as ApplicationStatus;
-
+                
                   void onUpdateStatus(
                     applicant.id,
                     newStatus
@@ -135,11 +136,11 @@ export function ApplicantsPanel({
               <option value="pending">
                 En attente
               </option>
-
+            
               <option value="accepted">
                 Acceptée
               </option>
-
+            
               <option value="rejected">
                 Refusée
               </option>

@@ -4,18 +4,8 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 
 import { OfferPanel } from "../components/OfferPanel";
 import { ApplicantsPanel } from "../components/ApplicantsPanel";
-import {
-  OfferFormModal,
-  offerFormModal,
-} from "../components/OfferFormModal";
-
-import type {
-  Applicant,
-  ApplicationStatus,
-  Offer,
-  OfferFormValues,
-} from "../types/offer.types";
-
+import { OfferFormModal, offerFormModal } from "../components/OfferFormModal";
+import type { Applicant, ApplicationStatus, Offer, OfferFormValues, OfferApplicantsResponse, OffersPage } from "../types/offer.types";
 import MyHeader from "../Header";
 import Footer from "../Footer";
 

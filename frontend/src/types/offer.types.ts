@@ -1,8 +1,6 @@
-export type ContractType =
-  | "part-time"
-  | "full-time"
-  | "internship"
-  | "volunteer";
+export type ContractType = "part-time" | "full-time" | "internship" | "volunteer";
+export type ApplicationStatus = "pending" | "accepted" | "rejected";
+
 
 export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
   "part-time": "Temps partiel",

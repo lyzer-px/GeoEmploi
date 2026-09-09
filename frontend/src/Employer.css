@@ -64,6 +64,10 @@
   color: var(--text-mention-grey);
 }
 
+.offer-card:hover {
+  border-color: var(--accent-border);
+}
+
 .applicants-placeholder {
   color: var(--text-mention-grey);
 }

@@ -9,6 +9,7 @@ export type MapSearchArea = {
     longitude: number;
     radiusKm: number;
     label: string;
+    zoom?: number;
 };
 
 export type JobOffer = {
@@ -92,10 +93,10 @@ function Map({ searchArea, offers, onOfferSelect }: MapProps) {
         searchMarkerRef.current = L.marker(center)
             .addTo(map)
             .bindPopup(searchArea.label);
-
         map.flyToBounds(circle.getBounds(), {
-            padding: [36, 36],
-            maxZoom: 13,
+            padding: [48, 48],
+            maxZoom: 11,
+            duration: 0.8,
         });
     }, [searchArea]);
 

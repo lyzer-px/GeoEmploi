@@ -1,14 +1,17 @@
 :root {
-  --text: #4b5359;
-  --text-h: #0a0e11;
-  --bg: #fff;
-  --border: #dde3e5;
-  --code-bg: #eef7f8;
+  &[data-fr-scheme="dark"],
+  &[data-fr-theme="dark"] {
+    --text: #c9d2d6;
+    --text-h: #f6f6f6;
+    --bg: #1a1a1a;
+    --border: #3a3f42;
+    --code-bg: #22292b;
+    --social-bg: rgba(34, 41, 43, 0.5);
+  }
 
   --accent: #0891b2;
   --accent-bg: rgba(8, 145, 178, 0.1);
   --accent-border: rgba(8, 145, 178, 0.5);
-  --social-bg: rgba(238, 247, 248, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
@@ -31,9 +34,21 @@
   }
 }
 
+:root[data-fr-theme="dark"] .geoemploi-modal,
+:root[data-fr-scheme="dark"] .geoemploi-modal {
+  background: #22292b;
+  color: var(--text);
+}
+
+:root[data-fr-theme="dark"] .geoemploi-modal-close,
+:root[data-fr-scheme="dark"] .geoemploi-modal-close {
+  color: var(--text);
+}
+
 html,
 body {
   font-family: var(--sans);
+  background: var(--bg);
 }
 
 #root {
@@ -42,39 +57,7 @@ body {
   margin: 0;
   min-height: 100svh;
   padding: 0;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+  background: var(--bg);
 }
 
 code,
@@ -90,4 +73,48 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  font-family: var(--heading);
+  font-weight: 500;
+  background: linear-gradient(135deg, var(--text-h) 40%, var(--accent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+  position: relative;
+  padding-bottom: 8px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 48px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
 }

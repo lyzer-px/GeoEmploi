@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { OfferPanel } from "../components/OfferPanel";
 import { ApplicantsPanel } from "../components/ApplicantsPanel";
 import { OfferFormModal, offerFormModal } from "../components/OfferFormModal";
-import type { Applicant, Offer, OfferFormValues, OffersPage } from "../types/offer.types";
+import type { Applicant, Offer, OfferApplicantsResponse, OfferFormValues, OffersPage } from "../types/offer.types";
 import MyHeader from "../Header";
 import Footer from "../Footer";
 import "../Employer.css";
@@ -16,14 +16,7 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-/**
- * Normalise une réponse d'offres, qu'elle soit renvoyée comme un
- * tableau brut ([{...}, {...}]) ou paginée ({ items: [...], total }).
- *
- * /offers/ renvoie apparemment { items: [...] } (OffersPage), mais
- * /offers/me semble renvoyer un tableau brut — d'où le TypeError sur
- * offers.map quand on assignait directement data.items (undefined).
- */
+
 function normalizeOffers(data: unknown): Offer[] {
   if (Array.isArray(data)) return data as Offer[];
   if (data && typeof data === "object" && Array.isArray((data as any).items)) {
@@ -34,9 +27,8 @@ function normalizeOffers(data: unknown): Offer[] {
 }
 
 function normalizeApplicants(data: unknown): Applicant[] {
-  if (Array.isArray(data)) return data as Applicant[];
-  if (data && typeof data === "object" && Array.isArray((data as any).items)) {
-    return (data as any).items as Applicant[];
+  if (data && typeof data === "object" && Array.isArray((data as any).applications)) {
+    return (data as any).applications as Applicant[];
   }
   console.warn("Réponse candidatures inattendue, forme reçue :", data);
   return [];

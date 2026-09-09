@@ -1,4 +1,6 @@
 export type ContractType = "part-time" | "full-time" | "internship" | "volunteer";
+export type ApplicationStatus = "pending" | "accepted" | "rejected";
+
 
 export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
   "part-time": "Temps partiel",
@@ -45,8 +47,18 @@ export interface OfferFormValues {
 
 export interface Applicant {
   id: number;
-  user_id: number;
   first_name: string;
   last_name: string;
   email: string;
+  status: ApplicationStatus;
+  created_at: string;
+  resume_original_filename: string;
+}
+
+export interface OfferApplicantsResponse {
+  offer: Offer;
+  first_name: string;
+  last_name: string;
+  email: string;
+  applications: Applicant[];
 }

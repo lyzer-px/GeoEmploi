@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         create_admin_user(user_service, role_service, app.state.settings)
 
     yield
-    logging.info("Shutting down...")
+    logging.info("Shutting down....")
     db_handler.engine.dispose()
 
 

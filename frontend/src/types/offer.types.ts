@@ -45,11 +45,6 @@ export interface OfferFormValues {
   adress: string;
 }
 
-export type ApplicationStatus =
-  | "pending"
-  | "accepted"
-  | "rejected";
-
 export interface Applicant {
   id: number;
   first_name: string;

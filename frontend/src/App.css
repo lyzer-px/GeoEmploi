@@ -76,15 +76,15 @@
   font: inherit;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-h);
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
   cursor: pointer;
 }
 
 .app-header-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
 .geoemploi-logout {

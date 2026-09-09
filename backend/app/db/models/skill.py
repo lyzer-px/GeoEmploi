@@ -1,7 +1,7 @@
 from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, SmallInteger, String
+from sqlalchemy import Date, ForeignKey, SmallInteger, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -15,7 +15,9 @@ class Skill(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), unique=True)
-    description: Mapped[str | None] = mapped_column(String(256), nullable=True)
+
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     users: Mapped[list["User"]] = relationship(
         secondary="users_skills", back_populates="skills"
     )
@@ -32,6 +34,8 @@ class UsersSkills(Base):
     )
     level: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
+    skill: Mapped["Skill"] = relationship(viewonly=True)
+
 
 class Experience(Base):
     __tablename__ = "experiences"
@@ -42,6 +46,8 @@ class Experience(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     user: Mapped["User"] = relationship(back_populates="experiences")
-    description: Mapped[str | None] = mapped_column(String(256), nullable=True)
+
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)

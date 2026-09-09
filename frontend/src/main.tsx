@@ -1,12 +1,10 @@
-import { StrictMode } from 'react'
+import { startReactDsfr } from '@codegouvfr/react-dsfr/spa'
+startReactDsfr({ defaultColorScheme: "system" })
 import { createRoot } from 'react-dom/client'
-import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import '@gouvfr/dsfr/dist/dsfr.min.css'
 import './index.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <App />
-  </StrictMode>,
 )

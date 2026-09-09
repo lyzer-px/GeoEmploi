@@ -6,7 +6,3 @@ class RoleCreate(BaseModel):
     description: str
     permissions: list[str]
     is_self_assignable: bool
-
-
-class PermissionCreate(BaseModel):
-    name: str

@@ -1,0 +1,98 @@
+.employer-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 2rem;
+  height: 70vh;
+}
+
+.employer-detail-actions {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.employer-delete-link {
+  color: var(--text-default-error);
+}
+
+.offer-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.offer-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.offer-panel-list {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.offer-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border-default-grey);
+  background: var(--background-default-grey);
+  cursor: pointer;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.offer-card--selected {
+  border-left: 4px solid var(--border-active-blue-france);
+  background: var(--background-alt-blue-france);
+}
+
+.offer-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.offer-card-title {
+  font-weight: 700;
+}
+
+.offer-card-address {
+  color: var(--text-mention-grey);
+}
+
+.offer-card:hover {
+  border-color: var(--accent-border);
+}
+
+.applicants-placeholder {
+  color: var(--text-mention-grey);
+}
+
+.applicant-item {
+  border: 1px solid var(--border-default-grey);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.applicant-name {
+  font-weight: 700;
+}
+
+.application-status--accepted select {
+  color: #18753c;
+  font-weight: 600;
+}
+
+.application-status--rejected select {
+  color: #ce0500;
+  font-weight: 600;
+}
+
+.application-status--pending select {
+  color: #666666;
+  font-weight: 600;
+}

@@ -4,14 +4,17 @@ from fastapi import APIRouter, HTTPException
 from app.db import User
 from app.schemas.input.user import UserCreate, UserIn
 from app.schemas.input.auth import AccessToken, RefreshTokenRequest
-from app.schemas.output.token import Token
-from app.api.dependencies import UserServiceDep, RefreshTokenDep
+from app.schemas.output.auth import Token
+from app.api.dependencies.auth import UserServiceDep, RefreshTokenDep, RoleServiceDep
 from app.services.auth_service import AuthenticationService
+from app.schemas.output.auth import RegisterResponse, UserOut
 
 auth_router = APIRouter(tags=["auth"])
 
 
-@auth_router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@auth_router.post(
+    "/login", response_model=RegisterResponse, status_code=status.HTTP_200_OK
+)
 def login_user(user_data: UserIn, user_service: UserServiceDep):
     user: User = AuthenticationService.authenticate_user(user_data, user_service)
     access_payload: AccessToken = AuthenticationService.create_access_token_payload(
@@ -19,18 +22,29 @@ def login_user(user_data: UserIn, user_service: UserServiceDep):
     )
     access_token: str = AuthenticationService.create_access_token(access_payload)
     refresh_token: str = AuthenticationService.create_refresh_token(user.id)
-    return Token(access_token=access_token, refresh_token=refresh_token)
+    return RegisterResponse(
+        user=UserOut.model_validate(user),
+        tokens=Token(access_token=access_token, refresh_token=refresh_token),
+    )
 
 
-@auth_router.post("/users", response_model=Token, status_code=status.HTTP_201_CREATED)
-def create_user(new_user: UserCreate, user_service: UserServiceDep):
-    user: User = user_service.create_user(new_user)
+@auth_router.post(
+    "/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED
+)
+def register_user(
+    new_user: UserCreate, user_service: UserServiceDep, role_service: RoleServiceDep
+):
+    role = role_service.get_self_assignable_role(new_user.role)
+    user = user_service.create_user(new_user, role)
     access_payload: AccessToken = AuthenticationService.create_access_token_payload(
         user.email, user_service
     )
     access_token: str = AuthenticationService.create_access_token(access_payload)
     refresh_token: str = AuthenticationService.create_refresh_token(user.id)
-    return Token(access_token=access_token, refresh_token=refresh_token)
+    return RegisterResponse(
+        user=UserOut.model_validate(user),
+        tokens=Token(access_token=access_token, refresh_token=refresh_token),
+    )
 
 
 @auth_router.post("/refresh", response_model=Token)

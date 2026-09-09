@@ -1,13 +1,17 @@
 from datetime import datetime, timezone
-from typing import Any, Optional, Sequence
+from typing import Any, Optional
 from fastapi import Depends, HTTPException, status
 from pyproj import Transformer
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import Select
 from sqlmodel import select
 
+from app.services.geography import BoundingBox
 from app.db.database import get_db_session
 from app.db.models import Application, Offer, User
 from app.schemas.input.offers import OfferCreate, OfferUpdate
+from app.schemas.output.offers import OfferOut
+from app.schemas.output.applications import ApplicationOut, CreatorOfferOut
 
 
 class OfferNotFoundError(Exception):
@@ -26,15 +30,42 @@ class OfferService:
         statement = select(Offer).where(Offer.id == offer_id)
         return self._db.scalars(statement).first()
 
-    def get_all_offers(self, skip: int = 0, limit: int = 100) -> Sequence[Offer]:
+    @staticmethod
+    def get_offer_statement() -> Select:
+        return select(Offer).order_by(Offer.id)
+
+    def get_all_offers(self, skip: int = 0, limit: int = 100) -> list[Offer]:
         """Retrieves all offers with pagination."""
         statement = select(Offer).offset(skip).limit(limit)
         return self._db.scalars(statement).all()
 
-    def get_offers_by_employer(self, employer_id: int) -> Sequence[Offer]:
+    def get_offers_by_employer(self, employer_id: int) -> list[Offer]:
         """Retrieves all offers created by a specific employer."""
         statement = select(Offer).where(Offer.employer_id == employer_id)
         return self._db.scalars(statement).all()
+
+    @staticmethod
+    def filter_by_location(
+        statement: Select,
+        bounding_box: BoundingBox,
+    ) -> Select:
+        return statement.where(
+            Offer.latitude.between(
+                bounding_box.lat_min,
+                bounding_box.lat_max,
+            ),
+            Offer.longitude.between(
+                bounding_box.lon_min,
+                bounding_box.lon_max,
+            ),
+        )
+
+    @staticmethod
+    def filter_by_name(
+        statement: Select,
+        name: str,
+    ) -> Select:
+        return statement.where(Offer.name.ilike(f"%{name}%"))
 
     def create_offer(self, offer_data: OfferCreate, employer: User) -> Offer:
         """Create a new offer by associating the geocoding metadata and the employer."""
@@ -66,15 +97,7 @@ class OfferService:
                 detail="Error during the creation of the offer.",
             )
 
-    def update_offer(self, offer_id: int, offer_data: OfferUpdate) -> Offer:
-        """Updates an existing offer."""
-        offer = self.get_offer_by_id(offer_id)
-
-        if not offer:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Offer {offer_id} not found.",
-            )
+    def update_offer(self, offer: Offer, offer_data: OfferUpdate) -> Offer:
         update_dict: dict[str, Any] = offer_data.model_dump(exclude_unset=True)
         if "address" in update_dict:
             update_dict["adress"] = update_dict.pop("address")
@@ -92,12 +115,7 @@ class OfferService:
                 detail="Error updating the offer.",
             )
 
-    def delete_offer(self, offer_id: int) -> None:
-        """Delete an offer"""
-        offer = self.get_offer_by_id(offer_id)
-        if not offer:
-            raise OfferNotFoundError(f"Offer {offer_id} not found.")
-
+    def delete_offer(self, offer: Offer) -> None:
         self._db.delete(offer)
         try:
             self._db.commit()
@@ -129,15 +147,44 @@ class OfferService:
             "y": round(y_lambert, 2),
         }
 
-    def get_offer_applications(self, offer_id: int) -> list[Application]:
-        """Retrieve all applications associated with a job posting."""
+    def get_offer_applications(self, offer_id: int) -> CreatorOfferOut:
+        """Retrieve one offer with the employer's info and all its applications."""
         offer = self.get_offer_by_id(offer_id)
         if not offer:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Offer {offer_id} not found.",
             )
-        return offer.applications
+
+        employer = offer.employer
+
+        return CreatorOfferOut(
+            offer=OfferOut.model_validate(offer),
+            first_name=employer.first_name,
+            last_name=employer.last_name,
+            email=employer.email,
+            applications=[
+                ApplicationOut(
+                    id=app.id,
+                    first_name=app.user.first_name,
+                    last_name=app.user.last_name,
+                    email=app.user.email,
+                    status=app.status,
+                    created_at=app.created_at,
+                    resume_original_filename=app.resume_original_filename,
+                    cover_letter_original_filename=app.cover_letter_original_filename
+                )
+                for app in offer.applications
+            ],
+        )
+
+    def get_offers_applied_to(self, user_id: int) -> list[Offer]:
+        statement = (
+            select(Offer)
+            .join(Application, Application.offer_id == Offer.id)
+            .where(Application.user_id == user_id)
+        )
+        return self._db.scalars(statement).all()
 
 
 def get_offer_service(session: Session = Depends(get_db_session)) -> OfferService:

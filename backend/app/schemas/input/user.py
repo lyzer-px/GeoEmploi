@@ -7,6 +7,7 @@ class UserCreate(BaseModel):
     last_name: str
     email: EmailStr
     password: str
+    role: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
@@ -23,3 +24,10 @@ class UserIn(BaseModel):
 
 class UserRolesUpdate(BaseModel):
     roles: list[str]
+
+
+class UserAdminResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str

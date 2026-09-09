@@ -11,10 +11,54 @@ type GeoPfFeature = {
         coordinates?: [number, number];
     };
     properties?: {
-        label?: string;
-        name?: string;
+        label?: unknown;
+        name?: unknown;
+        city?: unknown;
+        municipality?: unknown;
+        citycode?: unknown;
     };
 };
+
+// The IGN geocoding API can return some property values in different shapes
+// depending on the index used. Keep everything entering the React input as a
+// real string so a geocoding response can never crash the page with
+// `location.trim is not a function`.
+function asText(value: unknown): string | undefined {
+    if (typeof value === "string") {
+        const text = value.trim();
+        return text || undefined;
+    }
+
+    if (typeof value === "number") {
+        return String(value);
+    }
+
+    if (Array.isArray(value)) {
+        const text = value.find((item) => typeof item === "string");
+        return typeof text === "string" ? text.trim() || undefined : undefined;
+    }
+
+    return undefined;
+}
+
+function getFeatureLabel(feature: GeoPfFeature): string | undefined {
+    const properties = feature.properties;
+    return (
+        asText(properties?.label) ??
+        asText(properties?.name) ??
+        asText(properties?.city) ??
+        asText(properties?.municipality)
+    );
+}
+
+function getFeatureCity(feature: GeoPfFeature): string | undefined {
+    const properties = feature.properties;
+    return (
+        asText(properties?.city) ??
+        asText(properties?.municipality) ??
+        asText(properties?.name)
+    );
+}
 
 type GeoPfResponse = {
     features?: GeoPfFeature[];
@@ -26,6 +70,8 @@ function HomePage() {
     const [searchArea, setSearchArea] = useState<MapSearchArea | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isSearching, setIsSearching] = useState(false);
+    const [isLocating, setIsLocating] = useState(false);
+    const [useGeolocation, setUseGeolocation] = useState(false);
     const [suggestions, setSuggestions] = useState<GeoPfFeature[]>([]);
     const [selectedLocation, setSelectedLocation] =
         useState<GeoPfFeature | null>(null);
@@ -37,7 +83,7 @@ function HomePage() {
     const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
 
     useEffect(() => {
-        const query = location.trim();
+        const query = typeof location === "string" ? location.trim() : "";
 
         if (query.length < 2 || selectedLocation) {
             setSuggestions([]);
@@ -94,36 +140,236 @@ function HomePage() {
         };
     }, [location, selectedLocation]);
 
-    useEffect(() => {
-        async function loadOffers() {
-            try {
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_BACKEND_URL}/offers/`,
-                );
+    async function loadOffers(
+        search?: {
+            latitude: number;
+            longitude: number;
+            radiusKm: number;
+            name?: string;
+        },
+    ) {
+        const url = new URL(
+            `${import.meta.env.VITE_API_BACKEND_URL}/offers/`,
+        );
 
-                if (!response.ok) {
-                    throw new Error(
-                        "Impossible de récupérer les offres.",
-                    );
-                }
+        if (search) {
+            url.searchParams.set("latitude", String(search.latitude));
+            url.searchParams.set("longitude", String(search.longitude));
+            // The existing backend calls this value "perimeter" and converts
+            // it to a radius with perimeter / (2π). We expose a radius to the
+            // user, so send the equivalent circumference here.
+            url.searchParams.set(
+                "perimeter",
+                String(search.radiusKm * 2 * Math.PI),
+            );
 
-                const data = await response.json();
-
-                setOffers(data.items ?? []);
-            } catch (error) {
-                console.error(
-                    "Erreur lors du chargement des offres :",
-                    error,
-                );
+            if (search.name?.trim()) {
+                url.searchParams.set("name", search.name.trim());
             }
         }
 
-        loadOffers();
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Impossible de récupérer les offres.");
+        }
+
+        const data = await response.json();
+        setOffers(data.items ?? []);
+    }
+
+    useEffect(() => {
+        loadOffers().catch((error) => {
+            console.error("Erreur lors du chargement des offres :", error);
+        });
     }, []);
 
+    async function reverseGeocodeCity(
+        latitude: number,
+        longitude: number,
+    ): Promise<{ city: string }> {
+        // Ask the French administrative API for the commune containing the
+        // exact GPS point. This is preferable to using the nearest address,
+        // especially around boundaries such as Paris / Vincennes /
+        // Saint-Mandé / Montreuil.
+        const communeUrl = new URL(
+            "https://geo.api.gouv.fr/communes",
+        );
+        communeUrl.searchParams.set("lat", String(latitude));
+        communeUrl.searchParams.set("lon", String(longitude));
+        communeUrl.searchParams.set("fields", "nom,code");
+        communeUrl.searchParams.set("limit", "1");
+
+        try {
+            const communeResponse = await fetch(communeUrl);
+
+            if (communeResponse.ok) {
+                const communes = (await communeResponse.json()) as Array<{
+                    nom?: unknown;
+                }>;
+                const city = asText(communes[0]?.nom);
+
+                if (city) {
+                    return { city };
+                }
+            }
+        } catch {
+            // Fall through to the IGN reverse geocoder.
+        }
+
+        // IGN fallback: explicitly request a municipality rather than a
+        // nearby street/address. The municipality type is designed for city
+        // lookup from coordinates.
+        const municipalityUrl = new URL(
+            "https://data.geopf.fr/geocodage/reverse",
+        );
+        municipalityUrl.searchParams.set("lat", String(latitude));
+        municipalityUrl.searchParams.set("lon", String(longitude));
+        municipalityUrl.searchParams.set("index", "address");
+        municipalityUrl.searchParams.set("type", "municipality");
+        municipalityUrl.searchParams.set("limit", "1");
+
+        const municipalityResponse = await fetch(municipalityUrl);
+
+        if (municipalityResponse.ok) {
+            const municipalityData =
+                (await municipalityResponse.json()) as GeoPfResponse;
+            const municipalityFeature = municipalityData.features?.[0];
+            const city = municipalityFeature
+                ? getFeatureCity(municipalityFeature) ??
+                  getFeatureLabel(municipalityFeature)
+                : undefined;
+
+            if (city) {
+                return { city };
+            }
+        }
+
+        // Last fallback: a very small POI search for the commune itself.
+        // Keeping the search radius at 1 m avoids accidentally returning a
+        // neighbouring commune at a municipal boundary.
+        const searchGeometry = JSON.stringify({
+            type: "Circle",
+            coordinates: [longitude, latitude],
+            radius: 1,
+        });
+        const poiUrl = new URL(
+            "https://data.geopf.fr/geocodage/reverse",
+        );
+        poiUrl.searchParams.set("lat", String(latitude));
+        poiUrl.searchParams.set("lon", String(longitude));
+        poiUrl.searchParams.set("index", "poi");
+        poiUrl.searchParams.set("category", "commune");
+        poiUrl.searchParams.set("searchgeom", searchGeometry);
+        poiUrl.searchParams.set("limit", "1");
+
+        const poiResponse = await fetch(poiUrl);
+        if (poiResponse.ok) {
+            const poiData = (await poiResponse.json()) as GeoPfResponse;
+            const poiFeature = poiData.features?.[0];
+            const city = poiFeature
+                ? getFeatureCity(poiFeature) ?? getFeatureLabel(poiFeature)
+                : undefined;
+
+            if (city) {
+                return { city };
+            }
+        }
+
+        throw new Error(
+            "Votre ville n'a pas pu être déterminée. Vous pouvez saisir votre ville manuellement.",
+        );
+    }
+
+    function handleGeolocationChange(checked: boolean) {
+        setUseGeolocation(checked);
+        setLocationError(null);
+
+        if (!checked) {
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            setUseGeolocation(false);
+            setLocationError(
+                "La géolocalisation n'est pas disponible sur votre navigateur.",
+            );
+            return;
+        }
+
+        setIsLocating(true);
+        setSuggestions([]);
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const result = await reverseGeocodeCity(
+                        latitude,
+                        longitude,
+                    );
+
+                    // Keep the real GPS coordinates for the map, but expose
+                    // only the commune/city name in the search field.
+                    setLocation(result.city);
+                    setSelectedLocation({
+                        geometry: {
+                            coordinates: [longitude, latitude],
+                        },
+                        properties: {
+                            name: result.city,
+                            label: result.city,
+                            city: result.city,
+                        },
+                    });
+                    setSearchArea({
+                        latitude,
+                        longitude,
+                        radiusKm,
+                        label: result.city,
+                    });
+                } catch (error) {
+                    setUseGeolocation(false);
+                    setLocationError(
+                        error instanceof Error
+                            ? error.message
+                            : "Impossible de récupérer votre localisation.",
+                    );
+                } finally {
+                    setIsLocating(false);
+                }
+            },
+            (error) => {
+                setUseGeolocation(false);
+                setIsLocating(false);
+
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        setLocationError(
+                            "L'accès à votre position a été refusé. Autorisez la géolocalisation dans votre navigateur puis réessayez.",
+                        );
+                        break;
+                    case error.TIMEOUT:
+                        setLocationError(
+                            "La récupération de votre position a pris trop de temps. Réessayez.",
+                        );
+                        break;
+                    default:
+                        setLocationError(
+                            "Votre position n'a pas pu être récupérée.",
+                        );
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 20000,
+                maximumAge: 60000,
+            },
+        );
+    }
+
     function selectLocation(feature: GeoPfFeature) {
-        const label =
-            feature.properties?.label ?? feature.properties?.name;
+        const label = getFeatureLabel(feature);
 
         if (!label) {
             return;
@@ -139,7 +385,7 @@ function HomePage() {
     async function handleSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const query = location.trim();
+        const query = typeof location === "string" ? location.trim() : "";
 
         if (!query) {
             setLocationError("Saisissez une ville ou une adresse.");
@@ -189,10 +435,14 @@ function HomePage() {
                 latitude,
                 longitude,
                 radiusKm,
-                label:
-                    feature?.properties?.label ??
-                    feature?.properties?.name ??
-                    query,
+                label: getFeatureLabel(feature) ?? query,
+            });
+
+            await loadOffers({
+                latitude,
+                longitude,
+                radiusKm,
+                name: undefined,
             });
         } catch (error) {
             setLocationError(
@@ -341,10 +591,7 @@ function HomePage() {
                             {suggestions.map(
                                 (feature, index) => {
                                     const label =
-                                        feature.properties
-                                            ?.label ??
-                                        feature.properties
-                                            ?.name;
+                                        getFeatureLabel(feature);
 
                                     if (!label) {
                                         return null;
@@ -374,15 +621,24 @@ function HomePage() {
                     )}
 
                     <Select
-                        label="Périmètre"
+                        label="Rayon"
                         nativeSelectProps={{
                             value: String(radiusKm),
-                            onChange: (event) =>
-                                setRadiusKm(
-                                    Number(
-                                        event.target.value,
-                                    ),
-                                ),
+                            onChange: (event) => {
+                                const nextRadius = Number(
+                                    event.target.value,
+                                );
+
+                                setRadiusKm(nextRadius);
+                                setSearchArea((previous) =>
+                                    previous
+                                        ? {
+                                              ...previous,
+                                              radiusKm: nextRadius,
+                                          }
+                                        : previous,
+                                );
+                            },
                         }}
                     >
                         <option value="10">10 km</option>
@@ -397,9 +653,17 @@ function HomePage() {
                         options={[
                             {
                                 label:
-                                    "Utiliser ma position actuelle",
+                                    isLocating
+                                        ? "Localisation en cours..."
+                                        : "Utiliser ma position actuelle",
                                 nativeInputProps: {
                                     name: "use-geolocation",
+                                    checked: useGeolocation,
+                                    disabled: isLocating,
+                                    onChange: (event) =>
+                                        handleGeolocationChange(
+                                            event.target.checked,
+                                        ),
                                 },
                             },
                         ]}

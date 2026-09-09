@@ -9,6 +9,7 @@ export type MapSearchArea = {
     longitude: number;
     radiusKm: number;
     label: string;
+    zoom?: number;
 };
 
 export type JobOffer = {
@@ -93,9 +94,13 @@ function Map({ searchArea, offers, onOfferSelect }: MapProps) {
             .addTo(map)
             .bindPopup(searchArea.label);
 
+        // Always fit the complete search radius in the viewport.
+        // A fixed zoom (for example 13) is too close to the user's point
+        // and hides most/all of a 25 km search area.
         map.flyToBounds(circle.getBounds(), {
-            padding: [36, 36],
-            maxZoom: 13,
+            padding: [48, 48],
+            maxZoom: 11,
+            duration: 0.8,
         });
     }, [searchArea]);
 

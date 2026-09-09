@@ -37,11 +37,14 @@ function MyHeader() {
         }
 
         const user = await response.json();
+        const roles: string[] = Array.isArray(user.roles)
+          ? user.roles.map((r: any) => r?.name).filter(Boolean)
+          : [];
 
         setCurrentUser({
           first_name: user.first_name,
           last_name: user.last_name,
-          roles: Array.isArray(user.roles) ? user.roles : [],
+          roles,
         });
       })
       .catch((error) => {
@@ -52,20 +55,22 @@ function MyHeader() {
       });
   }, []);
 
-    let roleLabel = "Chercheur d'emploi";
-    if (currentUser?.roles.includes("admin")) {
-      roleLabel = "Administrateur";
-    } else if (currentUser?.roles.includes("employer")) {
-      roleLabel = "Employeur";
-    }
-  
+  const isAdmin = currentUser?.roles.includes("admin") ?? false;
+  const isEmployer = currentUser?.roles.includes("employer") ?? false;
+
+  let roleLabel = "Chercheur d'emploi";
+  if (isAdmin) {
+    roleLabel = "Administrateur";
+  } else if (isEmployer) {
+    roleLabel = "Employeur";
+  }
+
   return (
     <Header
       brandTop={
         <>
-          Ministère <br />
-          du Job et <br />
-          Bonheur
+           <br />
+           <br />
         </>
       }
       homeLinkProps={{
@@ -88,13 +93,14 @@ function MyHeader() {
           : [
               {
                 buttonProps: {
-                  onClick: () => navigate(ROUTES.PROFILE),
+                  onClick: () =>
+                    navigate(isEmployer ? ROUTES.EMPLOYER : ROUTES.PROFILE),
                 },
                 iconId: "ri-user-line" as const,
                 text: `${currentUser.first_name} ${currentUser.last_name} · ${roleLabel}`,
               },
 
-              ...(currentUser.roles.includes("admin")
+              ...(isAdmin
                 ? [
                     {
                       buttonProps: {
@@ -131,6 +137,12 @@ function MyHeader() {
           text: "À propos",
           linkProps: {
             href: "/a-propos",
+          },
+        },
+        {
+          text: "Transparence",
+          linkProps: {
+            href: "/transparence",
           },
         },
       ]}

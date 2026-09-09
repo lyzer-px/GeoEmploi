@@ -16,7 +16,6 @@ type Mode = "login" | "register";
 type Role = "job_seeker" | "employer";
 
 export function Login() {
-    // URL absolue du back + préfixe /api/v1 vu dans les routes FastAPI
     const API_BACKEND_URL = import.meta.env.VITE_API_BACKEND_URL;
     const LOGIN_PATH = `/auth/login`;
     const REGISTER_PATH = `/auth/register`;
@@ -61,7 +60,6 @@ export function Login() {
                 
                 setFeedback({ severity: "success", message: "Connexion réussie, redirection..." });
                 
-                // --- REDIRECTION BASÉE SUR LES RÔLES ---
                 const userRoles = data.user.roles || [];
                 
                 if (userRoles.includes("admin")) {

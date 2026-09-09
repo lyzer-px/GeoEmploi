@@ -14,15 +14,18 @@ export function ApplicantsPanel({ offer, applicants }: ApplicantsPanelProps) {
     );
   }
 
+
+  const list = Array.isArray(applicants) ? applicants : [];
+
   return (
     <div>
       <h2 className="fr-h5">{offer.name}</h2>
       <p className="fr-text--sm">{offer.description}</p>
 
-      <h3 className="fr-h6 fr-mt-3w">Candidatures ({applicants.length})</h3>
-      {applicants.length === 0 && <p className="fr-text--sm">Aucune candidature pour le moment.</p>}
+      <h3 className="fr-h6 fr-mt-3w">Candidatures ({list.length})</h3>
+      {list.length === 0 && <p className="fr-text--sm">Aucune candidature pour le moment.</p>}
       <ul className="fr-raw-list">
-        {applicants.map((applicant) => (
+        {list.map((applicant) => (
           <li key={applicant.id} className="applicant-item">
             <p className="fr-mb-0 applicant-name">
               {applicant.first_name} {applicant.last_name}

@@ -93,10 +93,6 @@ function Map({ searchArea, offers, onOfferSelect }: MapProps) {
         searchMarkerRef.current = L.marker(center)
             .addTo(map)
             .bindPopup(searchArea.label);
-
-        // Always fit the complete search radius in the viewport.
-        // A fixed zoom (for example 13) is too close to the user's point
-        // and hides most/all of a 25 km search area.
         map.flyToBounds(circle.getBounds(), {
             padding: [48, 48],
             maxZoom: 11,

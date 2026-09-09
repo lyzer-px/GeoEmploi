@@ -19,10 +19,6 @@ type GeoPfFeature = {
     };
 };
 
-// The IGN geocoding API can return some property values in different shapes
-// depending on the index used. Keep everything entering the React input as a
-// real string so a geocoding response can never crash the page with
-// `location.trim is not a function`.
 function asText(value: unknown): string | undefined {
     if (typeof value === "string") {
         const text = value.trim();
@@ -155,9 +151,6 @@ function HomePage() {
         if (search) {
             url.searchParams.set("latitude", String(search.latitude));
             url.searchParams.set("longitude", String(search.longitude));
-            // The existing backend calls this value "perimeter" and converts
-            // it to a radius with perimeter / (2π). We expose a radius to the
-            // user, so send the equivalent circumference here.
             url.searchParams.set(
                 "perimeter",
                 String(search.radiusKm * 2 * Math.PI),
@@ -188,10 +181,6 @@ function HomePage() {
         latitude: number,
         longitude: number,
     ): Promise<{ city: string }> {
-        // Ask the French administrative API for the commune containing the
-        // exact GPS point. This is preferable to using the nearest address,
-        // especially around boundaries such as Paris / Vincennes /
-        // Saint-Mandé / Montreuil.
         const communeUrl = new URL(
             "https://geo.api.gouv.fr/communes",
         );
@@ -214,12 +203,7 @@ function HomePage() {
                 }
             }
         } catch {
-            // Fall through to the IGN reverse geocoder.
         }
-
-        // IGN fallback: explicitly request a municipality rather than a
-        // nearby street/address. The municipality type is designed for city
-        // lookup from coordinates.
         const municipalityUrl = new URL(
             "https://data.geopf.fr/geocodage/reverse",
         );
@@ -244,10 +228,6 @@ function HomePage() {
                 return { city };
             }
         }
-
-        // Last fallback: a very small POI search for the commune itself.
-        // Keeping the search radius at 1 m avoids accidentally returning a
-        // neighbouring commune at a municipal boundary.
         const searchGeometry = JSON.stringify({
             type: "Circle",
             coordinates: [longitude, latitude],
@@ -309,8 +289,6 @@ function HomePage() {
                         longitude,
                     );
 
-                    // Keep the real GPS coordinates for the map, but expose
-                    // only the commune/city name in the search field.
                     setLocation(result.city);
                     setSelectedLocation({
                         geometry: {

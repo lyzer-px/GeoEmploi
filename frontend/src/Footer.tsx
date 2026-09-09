@@ -2,6 +2,12 @@ function Footer() {
   return (
     <footer className="app-footer">
       <div className="app-footer-content">
+        <img
+          className="geoemploi-footer-logo"
+          src="/images/Geo_emploie_footer.png"
+          alt="GéoEmploi - Les opportunités près de vous"
+        />
+
         <p className="app-footer-disclaimer">
           Démonstrateur technique, ne constitue pas un service public en
           exploitation.

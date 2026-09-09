@@ -29,6 +29,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    volumes:
+      - ./backend/storage:/code/backend/storage
     ports:
       - "8084:8084"
 

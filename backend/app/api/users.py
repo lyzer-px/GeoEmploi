@@ -56,15 +56,11 @@ def export_my_data(
     user: CurrentUserDep,
     skill_service: SkillServiceDep,
     experience_service: ExperienceServiceDep,
-    application_service: ApplicationServiceDep,
-    offer_service: OfferServiceDep,
 ):
     return ExportOut(
         user=user,
         skills=skill_service.get_user_skills(user.id),
         experience=experience_service.get_experiences_by_user(user.id),
-        application=application_service.get_application_by_user(user),
-        offers=offer_service.get_offers_by_employer(user.id),
     )
 
 #

@@ -12,5 +12,3 @@ class ExportOut(BaseModel):
     user: UserOut
     skills: list[SkillUserOut]
     experience: list[ExperienceOut]
-    offers: list[OfferOut]
-    application: list[ApplicationOut]

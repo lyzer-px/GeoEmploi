@@ -56,6 +56,7 @@ def delete_offer(
 def get_created_offers(offer_service: OfferServiceDep, user: CurrentUserDep):
     return offer_service.get_offers_by_employer(user.id)
 
+
 @offers_router.get(
     "/me/{offer_id}",
     status_code=status.HTTP_200_OK,
@@ -63,6 +64,7 @@ def get_created_offers(offer_service: OfferServiceDep, user: CurrentUserDep):
 )
 def get_application_by_offers(offer_id: int, offer_service: OfferServiceDep):
     return offer_service.get_offer_applications(offer_id)
+
 
 @offers_router.get(
     "/{offer_id}", status_code=status.HTTP_200_OK, response_model=OfferOut

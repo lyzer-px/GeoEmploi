@@ -2,16 +2,15 @@
 FROM python:3.14
 
 
-WORKDIR /code
+WORKDIR /code/backend
 
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt /code/backend/requirements.txt
 
+RUN pip install --no-cache-dir --upgrade -r /code/backend/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY ./app /code/backend/app
 
-
-COPY ./app /code/app
-
+EXPOSE 8084
 
 CMD ["fastapi", "run", "app/main.py", "--host", "0.0.0.0", "--port", "8084"]

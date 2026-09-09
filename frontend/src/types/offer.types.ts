@@ -5,8 +5,8 @@ export type ApplicationStatus = "pending" | "accepted" | "rejected";
 export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
   "part-time": "Temps partiel",
   "full-time": "Temps plein",
-  "internship": "Stage",
-  "volunteer": "Bénévolat",
+  internship: "Stage",
+  volunteer: "Bénévolat",
 };
 
 export interface OfferEmployer {
@@ -45,6 +45,11 @@ export interface OfferFormValues {
   adress: string;
 }
 
+export type ApplicationStatus =
+  | "pending"
+  | "accepted"
+  | "rejected";
+
 export interface Applicant {
   id: number;
   first_name: string;
@@ -53,9 +58,10 @@ export interface Applicant {
   status: ApplicationStatus;
   created_at: string;
   resume_original_filename: string;
+  cover_letter_original_filename: string;
 }
 
-export interface OfferApplicantsResponse {
+export interface CreatorOfferOut {
   offer: Offer;
   first_name: string;
   last_name: string;

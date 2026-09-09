@@ -475,7 +475,6 @@ function HomePage() {
             throw new Error("Erreur lors de l'envoi de la candidature.");
         }
 
-        const data = await response.json();
         alert("Votre candidature a bien été envoyée !");
         closeOffer();
     } catch (error) {

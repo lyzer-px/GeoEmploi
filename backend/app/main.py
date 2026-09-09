@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         create_admin_user(user_service, role_service, app.state.settings)
 
     yield
-    logging.info("Shutting down...")
+    logging.info("Shutting down....")
     db_handler.engine.dispose()
 
 
@@ -49,10 +49,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origin_regex=r"http://localhost:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

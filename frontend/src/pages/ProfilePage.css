@@ -15,4 +15,18 @@
 .profile-experience h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
 .profile-experience p { margin: .35rem 0; }
 .profile-experience { display: flex; justify-content: space-between; gap: 1.5rem; }
+.application-status-badge--accepted {
+  background-color: #b8f3d2;
+  color: #18753c;
+}
+
+.application-status-badge--rejected {
+  background-color: #ffe9e9;
+  color: #ce0500;
+}
+
+.application-status-badge--pending {
+  background-color: #e3e3fd;
+  color: #000091;
+}
 @media (max-width: 700px) { .profile-form-grid { grid-template-columns: 1fr; } .profile-list-item, .profile-experience { flex-direction: column; align-items: stretch; } .profile-container { width: min(100% - 1.5rem, 1100px); } }

@@ -681,12 +681,18 @@ function ProfilePage() {
                               {offer.contract_type}
                             </p>
 
-                            <p>
-                              <strong>Statut :</strong>{" "}
-                              <span className="fr-badge fr-badge--info fr-badge--sm">
-                                {application.status}
-                              </span>
-                            </p>
+                     <p>
+  <strong>Statut :</strong>{" "}
+  <span
+    className={`fr-badge fr-badge--sm application-status-badge application-status-badge--${application.status}`}
+  >
+    {application.status === "accepted"
+      ? "Acceptée"
+      : application.status === "rejected"
+        ? "Refusée"
+        : "En attente"}
+  </span>
+</p>
 
                             <p>
                               <small>

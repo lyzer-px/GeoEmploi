@@ -57,6 +57,5 @@ class AuthenticationService:
     @staticmethod
     def create_refresh_token(user_id: int):
         expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAY)
-        print(f"{expire=}, {user_id=}")
         token_payload: RefreshToken = RefreshToken(user_id=user_id, exp=expire)
         return jwt.encode(token_payload.model_dump(), SECRET_KEY, algorithm=ALGORITHM)

@@ -6,8 +6,10 @@ from app.schemas.output.applications import MyApplicationOut
 from app.api.dependencies.auth import CurrentUserDep
 from app.api.dependencies.application import ApplicationServiceDep, ApplicationDeleteDep
 from app.db.models import User
+from app.schemas.output.applications import ApplicationOut
 from app.api.dependencies.auth import require_permission, perm, Action, Resource
 from app.services import application_service
+
 
 
 applications_router = APIRouter(tags=["applications"])
@@ -20,7 +22,6 @@ def get_my_applications(
     application_service: ApplicationServiceDep, user: CurrentUserDep
 ):
     return application_service.get_application_by_user(user)
-
 
 @applications_router.get(
     "/{application_id}/resume",
@@ -66,8 +67,17 @@ def delete_application(
     application_service.delete_application(application)
 
 
-@applications_router.patch("/{application_id}", status_code=status.HTTP_200_OK, response_model= MyApplicationOut)
+@applications_router.patch(
+    "/{application_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ApplicationOut,
+)
 def update_status_application(
-    application_status: ApplicationUpdate, application_service: ApplicationServiceDep
+    application_id: int,
+    application_status: ApplicationUpdate,
+    application_service: ApplicationServiceDep,
 ):
-    application_service.update_status_application(application_status)
+    return application_service.update_status_application(
+        application_id,
+        application_status,
+    )

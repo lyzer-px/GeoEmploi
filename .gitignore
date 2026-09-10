@@ -4,6 +4,7 @@ __pycache__/
 .ruff_cache/
 .vscode/
 *.png
+node_modules
 !frontend/public/Geo_emploie_favicon.png
 !frontend/public/images/Geo_emploie_header.png
 !frontend/public/images/Geo_emploie_footer.png

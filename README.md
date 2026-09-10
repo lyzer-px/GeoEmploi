@@ -100,3 +100,4 @@ geoemploi/
 - [`INSTALLATION.md`](INSTALLATION.md) for Docker launch instructions
 - [`backend/docs/architecture.md`](backend/docs/architecture.md) for backend architecture, services, dependencies, and ownership checks
 - [`frontend/docs/INSTALLATION_FRONTEND.md`](frontend/docs/INSTALLATION_FRONTEND.md) for frontend development setup
+- [`backend/tests/README.md`](backend/tests/README.md) for K6 load and smoke tests

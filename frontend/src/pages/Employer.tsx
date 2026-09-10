@@ -8,6 +8,7 @@ import { OfferFormModal, offerFormModal } from "../components/OfferFormModal";
 import type { Applicant, ApplicationStatus, Offer, OfferFormValues, OfferApplicantsResponse, OffersPage } from "../types/offer.types";
 import MyHeader from "../Header";
 import Footer from "../Footer";
+import "../Header.css";
 
 import "../Employer.css";
 

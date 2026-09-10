@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "./routes";
+import './Header.css'
 
 type CurrentUser = {
   first_name: string;

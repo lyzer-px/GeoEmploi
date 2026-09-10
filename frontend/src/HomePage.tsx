@@ -61,6 +61,7 @@ type GeoPfResponse = {
 };
 
 function HomePage() {
+    const [jobName, setJobName] = useState("");
     const [location, setLocation] = useState("");
     const [radiusKm, setRadiusKm] = useState(25);
     const [searchArea, setSearchArea] = useState<MapSearchArea | null>(null);
@@ -149,13 +150,18 @@ function HomePage() {
         );
 
         if (search) {
-            url.searchParams.set("latitude", String(search.latitude));
-            url.searchParams.set("longitude", String(search.longitude));
-            url.searchParams.set(
-                "perimeter",
-                String(search.radiusKm * 2 * Math.PI),
-            );
-
+            if (Number.isFinite(search.latitude)) {
+                url.searchParams.set("latitude", String(search.latitude));
+            }
+            if (Number.isFinite(search.longitude)) {
+                url.searchParams.set("longitude", String(search.longitude));
+            }
+            if (Number.isFinite(search.radiusKm)) {
+                url.searchParams.set(
+                    "perimeter",
+                    String(search.radiusKm * 2 * Math.PI),
+                );
+            }
             if (search.name?.trim()) {
                 url.searchParams.set("name", search.name.trim());
             }
@@ -363,10 +369,11 @@ function HomePage() {
     async function handleSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const query = typeof location === "string" ? location.trim() : "";
+        const jobQuery = jobName.trim();
+        const locationQuery = location.trim();
 
-        if (!query) {
-            setLocationError("Saisissez une ville ou une adresse.");
+        if (!jobQuery && !locationQuery) {
+            setLocationError("Saisissez un métier ou une localisation.");
             return;
         }
 
@@ -374,6 +381,19 @@ function HomePage() {
         setLocationError(null);
 
         try {
+            // Une recherche par métier peut être effectuée sans localisation.
+            // Dans ce cas, le backend filtre directement sur le nom de l'offre.
+            if (!locationQuery) {
+                setSearchArea(null);
+                await loadOffers({
+                    latitude: Number.NaN,
+                    longitude: Number.NaN,
+                    radiusKm,
+                    name: jobQuery || undefined,
+                });
+                return;
+            }
+
             let feature = selectedLocation;
 
             if (!feature) {
@@ -381,7 +401,7 @@ function HomePage() {
                     "https://data.geopf.fr/geocodage/search",
                 );
 
-                url.searchParams.set("q", query);
+                url.searchParams.set("q", locationQuery);
                 url.searchParams.set("limit", "1");
 
                 const response = await fetch(url);
@@ -413,20 +433,20 @@ function HomePage() {
                 latitude,
                 longitude,
                 radiusKm,
-                label: getFeatureLabel(feature) ?? query,
+                label: getFeatureLabel(feature) ?? locationQuery,
             });
 
             await loadOffers({
                 latitude,
                 longitude,
                 radiusKm,
-                name: undefined,
+                name: jobQuery || undefined,
             });
         } catch (error) {
             setLocationError(
                 error instanceof Error
                     ? error.message
-                    : "La recherche de localisation a échoué.",
+                    : "La recherche a échoué.",
             );
         } finally {
             setIsSearching(false);
@@ -524,8 +544,14 @@ function HomePage() {
                 <Input
                     label="Métier, compétence ou mot-clé"
                     nativeInputProps={{
+                        type: "search",
                         placeholder:
                             "Ex : développeur, comptable...",
+                        value: jobName,
+                        onChange: (event) => {
+                            setJobName(event.target.value);
+                            setLocationError(null);
+                        },
                     }}
                 />
 

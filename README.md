@@ -1,81 +1,102 @@
-# GéoEmploi
+# GeoEmploi
 
-GéoEmploi est une application web de mise en relation entre demandeurs d'emploi et employeurs grâce à la géolocalisation.
+GeoEmploi is a web application that connects job seekers and employers through geolocation.
 
-L'objectif est de permettre aux utilisateurs de rechercher des offres d'emploi à proximité, de candidater directement depuis l'application et aux employeurs de publier et gérer leurs offres.
+The goal is to let users search for nearby job offers, apply directly from the application, and allow employers to publish and manage their offers.
 
-Le projet est réalisé dans le cadre du cahier des charges Epitech GéoEmploi.
+The project is built for the Epitech GeoEmploi specifications.
 
 ---
 
-## Fonctionnalités
+## Getting Started
 
-### 👤 Demandeurs d'emploi
+To launch the project, follow the Docker setup instructions in [`INSTALLATION.md`](INSTALLATION.md).
 
-- Création et gestion d'un profil professionnel
-- Gestion des compétences et expériences
-- Indication de la disponibilité
-- Recherche d'offres d'emploi géolocalisées
-- Consultation des offres directement sur une carte interactive
-- Candidature depuis l'application
-- Suivi des candidatures
+---
 
-### 🏢 Employeurs
+## Features
 
-- Création d'un compte employeur
-- Vérification de l'activité de l'entreprise
-- Création et publication d'offres d'emploi
-- Géolocalisation des offres
-- Définition d'un périmètre de diffusion
-- Réception des candidatures
-- Gestion du statut des candidatures
-- Tableau de bord avec statistiques
-- Notifications lors de nouvelles candidatures
+### Job Seekers
 
-### 🛡️ Administration
+- Create and manage a professional profile
+- Manage skills and experience
+- Set availability
+- Search for geolocated job offers
+- Browse offers on an interactive map
+- Apply directly from the application
+- Track applications
 
-- Modération des offres
-- Gestion des comptes utilisateurs
-- Activation / suspension de comptes
-- Consultation de métriques nationales
-- Gestion des signalements
+### Employers
 
-### 🗺️ Géolocalisation
+- Create an employer account
+- Verify company activity
+- Create and publish job offers
+- Geolocate offers
+- Define a publication radius
+- Receive applications
+- Manage application status
+- View dashboard statistics
+- Get notified when new applications arrive
 
-- Consultation des offres sans avoir besoin d'un compte
-- Carte interactive
-- Géolocalisation des offres à l'échelle de la commune ou de l'arrondissement
-- Utilisation d'OpenStreetMap
-- Affichage via Leaflet
+### Administration
+
+- Moderate offers
+- Manage user accounts
+- Activate or suspend accounts
+- View national metrics
+- Handle reports
+
+### Geolocation
+
+- Browse offers without an account
+- Use an interactive map
+- Geolocate offers at the city or district level
+- Use OpenStreetMap
+- Render maps with Leaflet
 
 ---
 
 ## Architecture
 
-Le projet est séparé en deux parties principales :
+The project is split into two main parts:
 
 ```text
 geoemploi/
-├── frontend/             # Application React
+├── frontend/             # React application
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
-│   │   ├── services/
 │   │   ├── hooks/
+│   │   ├── routes.tsx
+│   │   ├── services/
 │   │   └── ...
 │   ├── package.json
 │   └── ...
 │
-├── backend/              # API Python
+├── backend/              # Python API
 │   ├── app/
 │   │   ├── api/
-│   │   ├── models/
+│   │   │   └── dependencies/
+│   │   ├── core/
+│   │   ├── db/
+│   │   │   └── models/
 │   │   ├── schemas/
-│   │   ├── services/
-│   │   ├── database/
+│   │   │   ├── input/
+│   │   │   └── output/
+│   │   └── services/
 │   │   └── main.py
+│   ├── docs/
+│   │   └── architecture.md
 │   ├── requirements.txt
 │   └── ...
 │
+├── INSTALLATION.md
 ├── .gitignore
 └── README.md
+```
+
+## Documentation
+
+- [`INSTALLATION.md`](INSTALLATION.md) for Docker launch instructions
+- [`backend/docs/architecture.md`](backend/docs/architecture.md) for backend architecture, services, dependencies, and ownership checks
+- [`frontend/docs/INSTALLATION_FRONTEND.md`](frontend/docs/INSTALLATION_FRONTEND.md) for frontend development setup

@@ -1,0 +1,138 @@
+.geoemploi-header {
+  width: 100%;
+  background: #bfe6ea;
+  color: #0b3b42;
+  border-bottom: 1px solid #9bd3d9;
+}
+
+.geoemploi-header-main {
+  width: 100%;
+}
+
+.geoemploi-header-container {
+  width: min(1200px, calc(100% - 40px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.geoemploi-header-main .geoemploi-header-container {
+  min-height: 128px;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.geoemploi-header-home {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.geoemploi-header-logo {
+  display: block;
+  width: 250px;
+  height: auto;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.geoemploi-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.geoemploi-header-login,
+.geoemploi-header-user,
+.geoemploi-header-action {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #0b3b42;
+  font: inherit;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 4px;
+}
+
+.geoemploi-header-login {
+  font-weight: 600;
+}
+
+.geoemploi-header-login:hover,
+.geoemploi-header-user:hover,
+.geoemploi-header-action:hover {
+  background: rgba(11, 59, 66, 0.1);
+}
+
+.geoemploi-header-login:focus-visible,
+.geoemploi-header-user:focus-visible,
+.geoemploi-header-action:focus-visible,
+.geoemploi-header-nav a:focus-visible,
+.geoemploi-header-home:focus-visible {
+  outline: 2px solid #0b3b42;
+  outline-offset: 3px;
+}
+
+.geoemploi-header-nav {
+  border-top: 1px solid #9bd3d9;
+  background: rgba(11, 59, 66, 0.06);
+}
+
+.geoemploi-header-nav .geoemploi-header-container {
+  min-height: 58px;
+  justify-content: flex-start;
+  gap: 40px;
+}
+
+.geoemploi-header-nav a {
+  color: #0b3b42;
+  text-decoration: none;
+  padding: 18px 0;
+}
+
+.geoemploi-header-nav a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 767px) {
+  .geoemploi-header-container {
+    width: min(100% - 24px, 1200px);
+  }
+
+  .geoemploi-header-main .geoemploi-header-container {
+    min-height: 100px;
+    gap: 16px;
+  }
+
+  .geoemploi-header-logo {
+    width: 180px;
+    max-height: 82px;
+  }
+
+  .geoemploi-header-actions {
+    gap: 4px;
+  }
+
+  .geoemploi-header-user {
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .geoemploi-header-nav .geoemploi-header-container {
+    min-height: 52px;
+    gap: 24px;
+    overflow-x: auto;
+  }
+
+  .geoemploi-header-nav a {
+    white-space: nowrap;
+    padding: 16px 0;
+  }
+}
